@@ -181,12 +181,30 @@ int k_release_processor(void)
 		gp_current_process = p_pcb_old; // revert back to the old process
 		return RTX_ERR;
 	}
-        if ( p_pcb_old == NULL ) {
+  if ( p_pcb_old == NULL ) {
 		p_pcb_old = gp_current_process;
 	}
 	process_switch(p_pcb_old);
 	return RTX_OK;
 }
+
+int k_get_process_priority(int pid) {
+	// if pid is NULL process -> 4 ?? or whatever it is
+	// iterate through  g_proc_table to find pid
+	// return m_priority
+}
+
+int k_set_process_priority(int pid, int prio) {
+	// if prio is bad || pid is NULL process -> ERROR
+	
+	// iterate through g_proc_table to find pid
+	// if it doesn't exist -> ERROR
+	// otherwise
+	// set the proc's priority
+	// adjust gp_current_process
+	// return success or fail??
+}
+
 /*
  *===========================================================================
  *                             END OF FILE

@@ -49,6 +49,12 @@ U32 *gp_stack; /* The last allocated stack low address. 8 bytes aligned */
                /* The first stack starts at the RAM high address        */
 	           /* stack grows down. Fully decremental stack             */
 
+U32 *heap_start;
+						 
+// Pointer to the first free block in the heap
+MEM_BLK *freeList;
+PCB *blockedPCBs;
+
 /**************************************************************************//**
  * @brief: Initialize RAM as follows:
 
@@ -110,7 +116,20 @@ void memory_init(void)
 	}
   
 	/* allocate memory for heap, not implemented yet*/
-  
+  // mem block size = MEM_BLK_SIZE
+	// #mem blocks = MEM_NUM_BLKS
+	
+	MEM_BLK *mem_it; // temp iterator for the heap
+	freeList = (MEM_BLK *) p_end; // set freeList to first free block
+	heap_start = (U32*) p_end;
+	
+	// start from p_end, set value at mem_it to the memory address of next block (aka mem_it + MEM_BLK_SIZE)
+	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - MEM_BLK_SIZE; mem_it += MEM_BLK_SIZE ) {
+		mem_it->next = mem_it + MEM_BLK_SIZE;
+	}
+	
+	mem_it->next = NULL; // set end of freeList
+	blockedPCBs = NULL;
 }
 
 /**************************************************************************//**
@@ -139,9 +158,46 @@ U32 *alloc_stack(U32 size_b)
  *                            TO BE IMPLEMENTED
  *==========================================================================
  */
+
+void *k_request_memory_block_nb(void) {
+#ifdef DEBUG_0 
+	printf("k_request_memory_block: entering...\n");
+	MEM_BLK * freeBlock = freeList;
+	
+	if (freeBlock == NULL) {
+		return NULL;
+	} else {
+		freeList = freeBlock->next;
+		// could set freeBlock->next to like null or something
+		return freeBlock;
+	}
+#endif /* ! DEBUG_0 */
+	return (void *) NULL;
+}
+
 void *k_request_memory_block(void) {
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
+	// Might need to switch user modes??
+	// atomic(on) -> maybe add a safety flag? (a bit?)
+	MEM_BLK *ptr;
+	while((ptr = k_request_memory_block_nb()) == NULL) {
+		gp_current_process->m_state = BLOCKED_ON_RESOURCE; //set process state
+		
+		// add gp_current_process to the blockedPBC queue
+		PCB* it = blockedPCBs;
+		if (it == NULL) {
+			blockedPCBs = gp_current_process;
+		}
+		while(it->mp_next	!= NULL) {
+			it = it->mp_next;
+		}
+		it->mp_next = gp_current_process;
+		
+		k_release_processor();
+	}
+	// atomic(off);
+	return ptr;
 #endif /* ! DEBUG_0 */
 	return (void *) NULL;
 }
@@ -149,6 +205,23 @@ void *k_request_memory_block(void) {
 int k_release_memory_block(void *p_mem_blk) {
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
+	
+	if ((U32*) p_mem_blk < heap_start || (U32*) p_mem_blk >= gp_stack) {
+		return RTX_ERR;
+	}
+	if (blockedPCBs == NULL) { // blocked on memory resouce q is empty
+		((MEM_BLK*)p_mem_blk)->next = freeList;
+		freeList = p_mem_blk;
+	} else {
+		// dequeue a blocked-on-memory PCB
+		PCB* first = blockedPCBs;
+		blockedPCBs = first->mp_next;
+		
+		// handle_process_ready(PCB) -> set state to RDY and maybe other stuff??
+		// assign the mem_blk to the PCB -> gives control back to the proc that was blocked in k_request_memory_block
+		scheduler();
+		//process_switch();
+	}
 #endif /* ! DEBUG_0 */
 	return RTX_OK;
 }

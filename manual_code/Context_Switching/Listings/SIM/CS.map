@@ -724,20 +724,20 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-       134         26          0          0          0       1589   ae.o
-       376        136          0          0          0       2656   ae_proc.o
-        56          0          0          0          0        384   hal.o
-       184         70          0          4          0       1627   k_memory.o
-       440         24          0          8         96       7758   k_process.o
-        24          0          0          0          0        873   k_rtx_init.o
-       526        336          0          0          0      28082   main_svc.o
-       668         20          0          8          0       5728   printf.o
-        64         26        204          0        512       1064   startup_lpc17xx.o
-       320         18          0          0          0        605   system_lpc17xx.o
-       266         62          0          0          0       2845   uart_polling.o
+       134         26          0          0          0       1497   ae.o
+       376        136          0          0          0       2488   ae_proc.o
+        56          0          0          0          0        352   hal.o
+       184         70          0          4          0       1511   k_memory.o
+       440         24          0          8         96       7578   k_process.o
+        24          0          0          0          0        813   k_rtx_init.o
+       526        336          0          0          0      28062   main_svc.o
+       668         20          0          8          0       5428   printf.o
+        64         26        204          0        512       1004   startup_lpc17xx.o
+       320         18          0          0          0        577   system_lpc17xx.o
+       266         62          0          0          0       2705   uart_polling.o
 
     ----------------------------------------------------------------------
-      3070        718        252         20        608      53211   Object Totals
+      3070        718        252         20        608      52015   Object Totals
          0          0         48          0          0          0   (incl. Generated)
         12          0          0          0          0          0   (incl. Padding)
 
@@ -786,8 +786,8 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      3348        734        252         20        708      52179   Grand Totals
-      3348        734        252         20        708      52179   ELF Image Totals
+      3348        734        252         20        708      50983   Grand Totals
+      3348        734        252         20        708      50983   ELF Image Totals
       3348        734        252         20          0          0   ROM Totals
 
 ==============================================================================
