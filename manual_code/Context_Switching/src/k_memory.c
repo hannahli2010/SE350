@@ -53,7 +53,16 @@ U32 *heap_start;
 						 
 // Pointer to the first free block in the heap
 MEM_BLK *freeList;
-PCB *blockedPCBs;
+PCB *proc_blocked_queue;
+
+
+void pq_insert_blocked(PCB * proc) {
+	pq_insert(&proc_blocked_queue, proc);
+}
+
+PCB* pq_remove_by_pid_blocked(int pid) {
+	pq_remove_by_pid(&proc_blocked_queue, pid);
+}
 
 /**************************************************************************//**
  * @brief: Initialize RAM as follows:
@@ -129,7 +138,7 @@ void memory_init(void)
 	}
 	
 	mem_it->next = NULL; // set end of freeList
-	blockedPCBs = NULL;
+	proc_blocked_queue = NULL;
 }
 
 /**************************************************************************//**
@@ -185,14 +194,7 @@ void *k_request_memory_block(void) {
 		gp_current_process->m_state = BLOCKED_ON_RESOURCE; //set process state
 		
 		// add gp_current_process to the blockedPBC queue
-		PCB* it = blockedPCBs;
-		if (it == NULL) {
-			blockedPCBs = gp_current_process;
-		}
-		while(it->mp_next	!= NULL) {
-			it = it->mp_next;
-		}
-		it->mp_next = gp_current_process;
+		pq_insert(&proc_blocked_queue, gp_current_process);
 		
 		k_release_processor();
 	}
@@ -209,18 +211,19 @@ int k_release_memory_block(void *p_mem_blk) {
 	if ((U32*) p_mem_blk < heap_start || (U32*) p_mem_blk >= gp_stack) {
 		return RTX_ERR;
 	}
-	if (blockedPCBs == NULL) { // blocked on memory resouce q is empty
+	
+	// dequeue a blocked-on-memory PCB
+	PCB * first = pq_remove(&proc_blocked_queue);
+	if (first == NULL) { // blocked on memory resouce q is empty
 		((MEM_BLK*)p_mem_blk)->next = freeList;
 		freeList = p_mem_blk;
 	} else {
-		// dequeue a blocked-on-memory PCB
-		PCB* first = blockedPCBs;
-		blockedPCBs = first->mp_next;
+		first->m_state = RDY;
+		pq_insert_ready(first);
 		
-		// handle_process_ready(PCB) -> set state to RDY and maybe other stuff??
 		// assign the mem_blk to the PCB -> gives control back to the proc that was blocked in k_request_memory_block
-		scheduler();
-		//process_switch();
+		
+		return release_if_preempted();
 	}
 #endif /* ! DEBUG_0 */
 	return RTX_OK;

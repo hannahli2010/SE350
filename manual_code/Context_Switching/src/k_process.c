@@ -60,6 +60,12 @@ PCB *gp_current_process = NULL; /* always point to the current RUN process */
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
 
+PCB * proc_ready_queue;
+
+void  pq_insert_ready(PCB * proc) {
+	pq_insert(&proc_ready_queue, proc);
+}
+
 /**************************************************************************//**
  * @biref initialize all processes in the system
  * @note  We assume there are only two user processes in the system in 
@@ -80,6 +86,7 @@ void process_init(PROC_INIT *proc_info, int num)
 		g_proc_table[i].m_pid        = proc_info[i].m_pid;
 		g_proc_table[i].m_stack_size = proc_info[i].m_stack_size;
 		g_proc_table[i].mpf_start_pc = proc_info[i].mpf_start_pc;
+		g_proc_table[i].m_priority = proc_info[i].m_priority;
 	}
   
 	/* initilize exception stack frame (i.e. initial context) for each process */
@@ -95,6 +102,9 @@ void process_init(PROC_INIT *proc_info, int num)
 			*(--sp) = 0x0;
 		}
 		(gp_pcbs[i])->mp_sp = sp;
+		(gp_pcbs[i])->m_priority = (g_proc_table[i]).m_priority;
+		
+		pq_insert(&proc_ready_queue, gp_pcbs[i]);
 	}
 }
 
@@ -109,7 +119,7 @@ void process_init(PROC_INIT *proc_info, int num)
 PCB *scheduler(void)
 {
 	if (gp_current_process == NULL) {
-		gp_current_process = gp_pcbs[0]; 
+		gp_current_process = gp_pcbs[0]; // is this necessary??
 		return gp_pcbs[0];
 	}
 
@@ -120,6 +130,9 @@ PCB *scheduler(void)
 	} else {
 		return NULL;
 	}
+	// should probably change to:
+	// if proc_ready_queue == NULL, return null process? NULL? Is it a PCB? ???
+	// else return pq_remove(&proc_ready_queue);
 }
 
 /**************************************************************************//**
@@ -142,6 +155,8 @@ int process_switch(PCB *p_pcb_old)
 		if (gp_current_process != p_pcb_old && p_pcb_old->m_state != NEW) {
 			p_pcb_old->m_state = RDY;
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
+			
+			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
 		}
 		gp_current_process->m_state = RUN;
 		__set_MSP((U32) gp_current_process->mp_sp);
@@ -155,7 +170,9 @@ int process_switch(PCB *p_pcb_old)
 			p_pcb_old->m_state = RDY; 
 			p_pcb_old->mp_sp = (U32 *) __get_MSP(); // save the old process's sp
 			gp_current_process->m_state = RUN;
-			__set_MSP((U32) gp_current_process->mp_sp); //switch to the new proc's stack    
+			__set_MSP((U32) gp_current_process->mp_sp); // switch to the new proc's stack
+			
+			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
 			return RTX_ERR;
@@ -188,21 +205,88 @@ int k_release_processor(void)
 	return RTX_OK;
 }
 
-int k_get_process_priority(int pid) {
-	// if pid is NULL process -> 4 ?? or whatever it is
-	// iterate through  g_proc_table to find pid
-	// return m_priority
+// release current process if it should be preempted
+int release_if_preempted(void) {
+	PCB *p_pcb_old = gp_current_process;
+	PCB *p_pcb_next = scheduler();
+	
+	if ( p_pcb_next == NULL  ) {
+		p_pcb_next = p_pcb_old; // revert back to the old process
+		return RTX_OK; // not necessarily an error case?
+	}
+	
+	if ( p_pcb_old == NULL ) { // shouldn't ever happen
+		p_pcb_old = p_pcb_next;
+	}
+	
+	if (p_pcb_old->m_priority > p_pcb_next->m_priority) {
+		// this condition is the only difference from k_release_process
+		// only swap if there is a proc with a strictly higher priority that is ready
+		gp_current_process = p_pcb_next;
+		process_switch(p_pcb_old);
+	}
+	return RTX_OK;
 }
 
-int k_set_process_priority(int pid, int prio) {
-	// if prio is bad || pid is NULL process -> ERROR
+// get a PCB by its pid from gp_pcbs array
+PCB * get_pcb_by_pid(int pid) {
+	for(int i = 0; i < NUM_TEST_PROCS; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
+		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
+			return gp_pcbs[i];
+		}
+	}
+	return NULL;
+}
+
+// get a process's priority
+int k_get_process_priority(int pid) {
+	if (pid == PID_NULL) {
+			return PRI_NULL;
+	}
 	
-	// iterate through g_proc_table to find pid
-	// if it doesn't exist -> ERROR
-	// otherwise
-	// set the proc's priority
-	// adjust gp_current_process
-	// return success or fail??
+	PCB * proc = get_pcb_by_pid(pid);
+	
+	if (proc == NULL) {
+		return RTX_ERR;
+	}
+	return proc->m_priority;
+}
+
+// set a process's priority
+int k_set_process_priority(int pid, int prio) {
+	if (prio < HIGH || prio >= PRI_NULL || pid == PID_NULL) {
+		return RTX_ERR;
+	}
+	
+	PCB * proc = get_pcb_by_pid(pid);
+	
+	if (proc == NULL) {
+		return RTX_ERR;
+	}
+	
+	int prevPrio = proc->m_priority;
+	proc->m_priority = prio;
+	
+	if (prevPrio == prio) {
+		return RTX_OK;
+	}
+	
+	if (gp_current_process->m_pid == pid && prevPrio > prio) { 
+		return RTX_OK;
+	} else if (gp_current_process->m_pid != pid) {
+		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
+		if (found != NULL) {
+			pq_insert_ready(found);
+		}
+		
+		found = pq_remove_by_pid_blocked(pid);
+		if (found != NULL) {
+			pq_insert_blocked(found);
+			return RTX_OK;
+		}
+	}
+	
+	return release_if_preempted();
 }
 
 /*

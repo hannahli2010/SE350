@@ -61,6 +61,9 @@ extern PCB  *scheduler(void);          /* pick the pcb of the next to run proces
 extern int  process_switch(PCB *p_pcb_old);
 extern int  k_release_processor(void); /* kernel release_process function */
 
+extern int  release_if_preempted(void); // release curr proc if it should be preempted
+extern void pq_insert_ready(PCB * proc); // add an element to the ready queue
+
 #endif /* ! K_PROCESS_H_ */
 /*
  *===========================================================================

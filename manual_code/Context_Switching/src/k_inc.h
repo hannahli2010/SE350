@@ -61,8 +61,61 @@ typedef struct pcb
     struct pcb   *mp_next;  /**> next pcb, not used in this example */  
     U32          *mp_sp;    /**> stack pointer of the process       */
     U32          m_pid;     /**> process id                         */
-    PROC_STATE_E m_state;   /**> state of the process               */      
+		U32 				 m_priority;/**> priority                           */
+    PROC_STATE_E m_state;   /**> state of the process               */
 } PCB;
+
+void pq_insert(PCB** list, PCB * proc) {
+	PCB * it = *list;
+	
+	if (it == NULL) {
+		*list = proc;
+		proc->mp_next = NULL;
+	}
+	
+	while(it->mp_next && it->mp_next->m_priority <= proc->m_priority) {
+		it = it->mp_next;
+	}
+	
+	proc->mp_next = it->mp_next;
+	it->mp_next = proc;
+}
+
+PCB * pq_remove(PCB** list) {
+	if (*list == NULL) {
+		return NULL;
+	}
+	
+	PCB * proc = *list;
+	*list = proc->mp_next;
+	proc->mp_next = NULL;
+	return proc;
+}
+
+PCB * pq_remove_by_pid(PCB** list, int pid) {
+	if (*list == NULL) {
+		return NULL;
+	}
+	
+	PCB * it = *list;
+	
+	if (it->m_pid == pid) {
+		*list = it->mp_next;
+		return it;
+	}
+	
+	while(it->mp_next && it->mp_next->m_pid != pid) {
+		it = it->mp_next;
+	}
+	
+	if (it->mp_next != NULL) {
+		PCB * proc = it->mp_next;
+		it->mp_next = proc->mp_next;
+		return proc;
+	}
+	
+	return NULL;
+}
 
 /*
  *==========================================================================
