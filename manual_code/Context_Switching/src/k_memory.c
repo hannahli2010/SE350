@@ -108,11 +108,6 @@ void memory_init(void)
 	/* allocate memory for pcb pointers   */
 	gp_pcbs = (PCB **)p_end;
 	p_end += (NUM_TEST_PROCS + 1) * sizeof(PCB *);
-	
-	// for null proc
-	// p_end += sizeof(PCB *);
-	// gp_pcbs[0] = (PCB *)p_end;
-	// p_end += sizeof(PCB);
   
 	for ( i = 0; i < NUM_TEST_PROCS + 1; i++ ) {
 		gp_pcbs[i] = (PCB *)p_end;
@@ -135,7 +130,6 @@ void memory_init(void)
 		--gp_stack; 
 	}
   
-	/* allocate memory for heap, not implemented yet*/
   // mem block size = MEM_BLK_SIZE
 	// #mem blocks = MEM_NUM_BLKS
 	
@@ -143,11 +137,11 @@ void memory_init(void)
 	heap_start = (U32*) p_end;
 	
 	// start from p_end, set value at mem_it to the memory address of next block (aka mem_it + MEM_BLK_SIZE)
-	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - 1; mem_it += 1) {
+	// for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - 1; mem_it += 1) {
+	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *) p_end + 1; mem_it += 1) {
 		mem_it->next = mem_it + 1;
 	}
 	
-	MEM_BLK *debug = freeList;
 	mem_it->next = NULL; // set end of freeList
 	proc_blocked_queue = NULL;
 }
@@ -215,7 +209,9 @@ void *k_request_memory_block(void) {
 		// release processor but don't want to add ourselves to ready queue
 		PCB *p_pcb_old = gp_current_process;
 		gp_current_process = scheduler();
+		#ifdef DEBUG_0  
 		printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
+		#endif
 		process_switch(p_pcb_old);
 	}
 	
@@ -240,7 +236,9 @@ int k_release_memory_block(void *p_mem_blk) {
 	MEM_BLK* block_it = gp_current_process->m_mem_blk;
 	
 	if (block_it == NULL ){
+		#ifdef DEBUG_0 
 		printf("Pid %d does not own any blocks, could not release: 0x%x\n", gp_current_process->m_pid, mem_addr);
+		#endif
 		return RTX_ERR; // proc had no mem blocks
 	} else if (block_it->block == mem_addr) {
 		gp_current_process->m_mem_blk = block_it->next;
@@ -254,7 +252,9 @@ int k_release_memory_block(void *p_mem_blk) {
 			}
 			block_it = block_it->next;
 		}
+		#ifdef DEBUG_0 
 		printf("Pid %d tried to release a block it does not own: 0x%x\n", gp_current_process->m_pid, mem_addr);
+		#endif
 		return RTX_ERR; // did not find the block with mem_addr
 	}
 	
@@ -266,14 +266,20 @@ int k_release_memory_block(void *p_mem_blk) {
 		freeList = block_it;
 	} else  {
 		first->m_state = RDY;
-		pq_insert_ready(first);
 		
 		block_it->next = first->m_mem_blk;
 		first->m_mem_blk = block_it;
 		
-		// assign the mem_blk to the PCB -> gives control back to the proc that was blocked in k_request_memory_block
+		if(first->m_priority <= gp_current_process->m_priority){
+			PCB * p_pcb_old = gp_current_process;
+			gp_current_process = first;
+			pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue
+			process_switch(p_pcb_old);
+		} else {
+			pq_insert_ready(first);
+		}
 		
-		return release_if_preempted();
+		return k_release_processor();
 	}
 	return RTX_OK;
 }

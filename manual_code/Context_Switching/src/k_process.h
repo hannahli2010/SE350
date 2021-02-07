@@ -64,6 +64,7 @@ extern int  k_release_processor(void); /* kernel release_process function */
 
 extern int  release_if_preempted(void); // release curr proc if it should be preempted
 extern void pq_insert_ready(PCB * proc); // add an element to the ready queue
+extern void pq_insert_front_ready(PCB * proc); // insert an element to the front of the same prio for the ready queue
 extern PCB * pq_remove_by_pid_ready(int pid); // remove an element from the ready queue, might not need
 
 #endif /* ! K_PROCESS_H_ */

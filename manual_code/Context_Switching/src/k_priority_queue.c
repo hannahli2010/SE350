@@ -8,9 +8,35 @@ void pq_insert(PCB** list, PCB * proc) {
 		*list = proc;
 		proc->mp_next = NULL;
 		return;
+	} else if (it->m_priority > proc->m_priority) { // if we need to insert at the front of the queue
+		proc->mp_next = *list;
+		*list = proc;
+		return;
 	}
 	
 	while(it->mp_next && it->mp_next->m_priority <= proc->m_priority) {
+		it = it->mp_next;
+	}
+	
+	proc->mp_next = it->mp_next;
+	it->mp_next = proc;
+}
+
+// insert to the front of the same priority
+void pq_insert_front(PCB** list, PCB * proc) {
+	PCB * it = *list;
+	
+	if (it == NULL) {
+		*list = proc;
+		proc->mp_next = NULL;
+		return;
+	} else if (it->m_priority >= proc->m_priority) { // if we need to insert at the front of the queue
+		proc->mp_next = *list;
+		*list = proc;
+		return;
+	}
+	
+	while(it->mp_next && it->mp_next->m_priority < proc->m_priority) {
 		it = it->mp_next;
 	}
 	

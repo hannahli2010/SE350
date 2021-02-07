@@ -67,6 +67,10 @@ void  pq_insert_ready(PCB * proc) {
 	pq_insert(&proc_ready_queue, proc);
 }
 
+void pq_insert_front_ready(PCB * proc) {
+	pq_insert_front(&proc_ready_queue, proc);
+}
+
 PCB *pq_remove_by_pid_ready(int pid) {
 	return pq_remove_by_pid(&proc_ready_queue, pid);
 }
@@ -144,9 +148,9 @@ PCB *scheduler(void)
 {
 	// base case for start up (no process running)
 	if (gp_current_process == NULL) {
-		gp_current_process = gp_pcbs[0]; // is this necessary??
-		pq_remove_by_pid(&proc_ready_queue, PID_NULL);
-		return gp_pcbs[0];
+		PCB *front = pq_remove(&proc_ready_queue);
+		gp_current_process = front;
+		return front;
 	}
 	
 	// pq_print(&proc_ready_queue);
@@ -155,20 +159,6 @@ PCB *scheduler(void)
 	} else {
 		return proc_ready_queue;
 	}
-	
-	/*
-	if ( gp_current_process == gp_pcbs[0] ) {
-		return gp_pcbs[1];
-	} else if ( gp_current_process == gp_pcbs[1] ) {
-		return gp_pcbs[0];
-	} else {
-		return NULL;
-	}
-	*/
-	
-	// should probably change to:
-	// if proc_ready_queue == NULL, return null process? NULL? Is it a PCB? ???
-	// else return pq_remove(&proc_ready_queue);
 }
 
 /**************************************************************************//**
@@ -225,6 +215,33 @@ int process_switch(PCB *p_pcb_old)
 
 int k_release_processor(void)
 {
+	PCB *p_pcb_old = gp_current_process;
+	PCB *p_pcb_next = scheduler();
+	
+	if ( p_pcb_next == NULL  ) { // shouldn't happen since the null proc is always ready
+		return RTX_ERR;
+	}
+	
+	if (p_pcb_old == NULL) {
+		p_pcb_old = p_pcb_next; // should only happen on the initial call of this func (when gp_curr_proc was NULL)
+		process_switch(p_pcb_old);
+		return RTX_OK;
+	}
+	
+	if (p_pcb_old->m_priority >= p_pcb_next->m_priority) { // only release if there is a proc with same or greater priority
+		#ifdef DEBUG_0
+		printf("Pid %d is replaced by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+		#endif
+		gp_current_process = p_pcb_next;
+		pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
+		process_switch(p_pcb_old);
+	} else {
+		#ifdef DEBUG_0
+		printf("Did not release pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+		#endif
+	}
+	return RTX_OK;
+	/*
 	PCB *p_pcb_old = NULL;
 	
 	p_pcb_old = gp_current_process;
@@ -243,7 +260,7 @@ int k_release_processor(void)
 			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
 	}
 	process_switch(p_pcb_old);
-	return RTX_OK;
+	return RTX_OK; */
 }
 
 // release current process if it should be preempted
@@ -260,11 +277,18 @@ int release_if_preempted(void) {
 		p_pcb_old = p_pcb_next;
 	}
 	
-	if (p_pcb_old->m_priority > p_pcb_next->m_priority) {
-		// this condition is the only difference from k_release_process
-		// only swap if there is a proc with a strictly higher priority that is ready
+	if (p_pcb_old->m_priority >= p_pcb_next->m_priority) { // don't preempt if same priority
+		#ifdef DEBUG_0
+		printf("Pid %d is preempted by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+		#endif
+		
 		gp_current_process = p_pcb_next;
+		pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
 		process_switch(p_pcb_old);
+	} else {
+		#ifdef DEBUG_0
+		printf("Did not preempt pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+		#endif
 	}
 	return RTX_OK;
 }
@@ -312,7 +336,33 @@ int k_set_process_priority(int pid, int prio) {
 		return RTX_OK;
 	}
 	
-	if (gp_current_process->m_pid == pid && prevPrio > prio) { 
+	if (gp_current_process->m_pid == pid) {
+		// insert curr proc to ready queue if we changed its priority
+		pq_insert_ready(gp_current_process);
+	} else {
+		pq_insert_front_ready(gp_current_process);
+		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
+		if (found != NULL) {
+			pq_insert_ready(found);
+		}
+		found = pq_remove_by_pid_blocked(pid);
+		if (found != NULL) {
+			pq_insert_blocked(found);
+			return RTX_OK;
+		}
+	}
+	
+	PCB * p_pcb_old = gp_current_process;
+	PCB * p_pcb_next = scheduler();
+	if (p_pcb_next == p_pcb_old){
+		pq_remove(&proc_ready_queue);
+	} else {
+		gp_current_process = p_pcb_next;
+		process_switch(p_pcb_old);
+	}
+	
+	/*
+	if (gp_current_process->m_pid = pid && prevPrio > prio) {
 		return RTX_OK;
 	} else if (gp_current_process->m_pid != pid) {
 		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
@@ -326,8 +376,8 @@ int k_set_process_priority(int pid, int prio) {
 			return RTX_OK;
 		}
 	}
-	
-	return release_if_preempted();
+	return release_if_preempted(); */
+	return RTX_OK;
 }
 
 /*
