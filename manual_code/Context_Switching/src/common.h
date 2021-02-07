@@ -136,9 +136,4 @@ typedef struct msgbuf
     char mtext[1];              /**> body of the message         */
 } MSG_BUF;
 
-typedef struct mem_blk
-{
-	struct mem_blk *next;
-} MEM_BLK;
-
 #endif // COMMON_H_

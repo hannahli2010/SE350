@@ -39,6 +39,13 @@
 #define K_MEM_H_
 
 #include "k_inc.h"
+#include "k_priority_queue.h"
+
+typedef struct mem_blk
+{
+	struct mem_blk *next;
+} MEM_BLK;
+
 
 /*
  *===========================================================================
@@ -58,6 +65,7 @@
 extern unsigned int Image$$RW_IRAM1$$ZI$$Limit; 
 extern PCB          **gp_pcbs;
 extern PROC_INIT    g_proc_table[NUM_TEST_PROCS];
+
 #endif 
 
 /*

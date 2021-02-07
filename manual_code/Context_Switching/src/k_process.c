@@ -60,10 +60,19 @@ PCB *gp_current_process = NULL; /* always point to the current RUN process */
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS];
 
-PCB * proc_ready_queue;
+PCB * proc_ready_queue = NULL;
 
 void  pq_insert_ready(PCB * proc) {
 	pq_insert(&proc_ready_queue, proc);
+}
+
+void nullProc(void)
+{
+    while (1) {
+			printf("Null Proc try to release\n");
+      for (int x = 0; x < 1000; x++); // some artifical delay
+			k_release_processor();
+    }
 }
 
 /**************************************************************************//**
@@ -83,15 +92,32 @@ void process_init(PROC_INIT *proc_info, int num)
 #else
     for ( i = 0; i < num; i++ ) {
 #endif /* SE350_DEMO */
+		printf("INIT: pid: %d, priority: %d\n", proc_info[i].m_pid, proc_info[i].m_priority);
 		g_proc_table[i].m_pid        = proc_info[i].m_pid;
 		g_proc_table[i].m_stack_size = proc_info[i].m_stack_size;
 		g_proc_table[i].mpf_start_pc = proc_info[i].mpf_start_pc;
 		g_proc_table[i].m_priority = proc_info[i].m_priority;
 	}
   
-	/* initilize exception stack frame (i.e. initial context) for each process */
+	int j;
+	/* initilize exception stack frame (i.e. initial context) for each process
+	sp = alloc_stack(USR_SZ_STACK);
+	*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
+	*(--sp)  = (U32)(&nullProc); // PC contains the entry point of the process
+	for ( j = 0; j < 6; j++ ) { // R0-R3, R12 are cleared with 0
+		*(--sp) = 0x0;
+	}
+	gp_pcbs[0]->m_pid = PID_NULL;
+	gp_pcbs[0]->m_state = NEW;
+	gp_pcbs[0]->mp_sp = sp;
+	gp_pcbs[0]->m_priority = PRI_NULL;
+	pq_insert(&proc_ready_queue, gp_pcbs[0]); */
+	
+#ifdef SE350_DEMO
+	for ( i = 0; i < 2; i++ ) {
+#else
 	for ( i = 0; i < num; i++ ) {
-		int j;
+#endif /* SE350_DEMO */
 		(gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
 		(gp_pcbs[i])->m_state = NEW;
 		
@@ -106,6 +132,7 @@ void process_init(PROC_INIT *proc_info, int num)
 		
 		pq_insert(&proc_ready_queue, gp_pcbs[i]);
 	}
+	
 }
 
 /**************************************************************************//**
@@ -118,11 +145,21 @@ void process_init(PROC_INIT *proc_info, int num)
 
 PCB *scheduler(void)
 {
+	// base case for start up (no process running)
 	if (gp_current_process == NULL) {
 		gp_current_process = gp_pcbs[0]; // is this necessary??
+		pq_remove_by_pid(&proc_ready_queue, gp_current_process->m_pid);
 		return gp_pcbs[0];
 	}
-
+	
+	pq_print(&proc_ready_queue);
+	if (proc_ready_queue == NULL) {
+		return NULL; // null process
+	} else {
+		return proc_ready_queue;
+	}
+	
+	/*
 	if ( gp_current_process == gp_pcbs[0] ) {
 		return gp_pcbs[1];
 	} else if ( gp_current_process == gp_pcbs[1] ) {
@@ -130,6 +167,8 @@ PCB *scheduler(void)
 	} else {
 		return NULL;
 	}
+	*/
+	
 	// should probably change to:
 	// if proc_ready_queue == NULL, return null process? NULL? Is it a PCB? ???
 	// else return pq_remove(&proc_ready_queue);
@@ -156,7 +195,10 @@ int process_switch(PCB *p_pcb_old)
 			p_pcb_old->m_state = RDY;
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 			
+			PCB* removed = pq_remove(&proc_ready_queue);
+			printf("NEW: %d, isEqual(gp_current_proc, removed)\n", gp_current_process == removed);
 			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
+			pq_print(&proc_ready_queue);
 		}
 		gp_current_process->m_state = RUN;
 		__set_MSP((U32) gp_current_process->mp_sp);
@@ -172,6 +214,8 @@ int process_switch(PCB *p_pcb_old)
 			gp_current_process->m_state = RUN;
 			__set_MSP((U32) gp_current_process->mp_sp); // switch to the new proc's stack
 			
+			PCB* removed = pq_remove(&proc_ready_queue);
+			printf("%d, isEqual(gp_current_proc, removed)\n", gp_current_process == removed);
 			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
@@ -198,6 +242,8 @@ int k_release_processor(void)
 		gp_current_process = p_pcb_old; // revert back to the old process
 		return RTX_ERR;
 	}
+	
+	printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
   if ( p_pcb_old == NULL ) {
 		p_pcb_old = gp_current_process;
 	}

@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>DEBUG_0 SE350_DEMO SIM_TARGET K_MSG_ENV</Define>
+              <Define>DEBUG_0 SE350_DEMO_FALSE SIM_TARGET K_MSG_ENV</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -427,6 +427,11 @@
               <FileName>k_rtx_init.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_rtx_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_priority_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_priority_queue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -874,6 +879,11 @@
               <FileName>k_rtx_init.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\k_rtx_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_priority_queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_priority_queue.c</FilePath>
             </File>
           </Files>
         </Group>

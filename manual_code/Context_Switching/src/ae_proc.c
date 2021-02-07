@@ -30,7 +30,6 @@
 #include "printf.h"
 #endif /* DEBUG_0 */
 
-
 /**************************************************************************//**
  * @brief: a process that prints five uppercase letters
  *         and then yields the cpu.
@@ -40,7 +39,7 @@ void proc1(void)
     int i = 0;
     int x = 0;
     int ret_val = 10;
-    while ( 1) {
+    while (1) {
         if ( i != 0 && i%5 == 0 ) {
             uart1_put_string("\n\r");
             ret_val = release_processor();
@@ -63,7 +62,7 @@ void proc2(void)
     int i = 0;
     int x = 0;
     int ret_val = 20;
-    while ( 1) {
+    while (1) {
         if ( i != 0 && i%5 == 0 ) {
             uart1_put_string("\n\r");
             ret_val = release_processor();
@@ -79,34 +78,63 @@ void proc2(void)
 
 void proc3(void)
 {
-    
+		int x = 0;
+    int ret_val = 30;
+	
     while(1) {
-        uart1_put_string("proc3: \n\r");
-        release_processor();
+        uart1_put_string("proc3: Rob\n\r");
+        ret_val = release_processor();
+			
+#ifdef DEBUG_0
+        printf("proc3: ret_val=%d\n\r", ret_val);
+#endif /* DEBUG_0 */
+			
+        for ( x = 0; x < DELAY; x++); // some artifical delay
     }
 }
 
 void proc4(void)
 {
+		int x = 0;
+    int ret_val = 40;
     while(1) {
-        uart1_put_string("proc4: \n\r");
-        release_processor();
+        uart1_put_string("proc4: Hannah\n\r");
+        ret_val = release_processor();
+#ifdef DEBUG_0
+        printf("proc4: ret_val=%d\n\r", ret_val);
+#endif /* DEBUG_0 */
+			
+        for ( x = 0; x < DELAY; x++); // some artifical delay
     }
 }
 
 void proc5(void)
 {
+		int x = 0;
+    int ret_val = 50;
     while(1) {
-        uart1_put_string("proc5: \n\r");
-        release_processor();
+        uart1_put_string("proc5: Jackie\n\r");
+        ret_val = release_processor();
+#ifdef DEBUG_0
+        printf("proc5: ret_val=%d\n\r", ret_val);
+#endif /* DEBUG_0 */
+			
+        for ( x = 0; x < DELAY; x++); // some artifical delay
     }
 }
 
 void proc6(void)
 {
+		int x = 0;
+    int ret_val = 60;
     while(1) {
-        uart1_put_string("proc6: \n\r");
-        release_processor();
+        uart1_put_string("proc6: Ethan\n\r");
+        ret_val = release_processor();
+#ifdef DEBUG_0
+        printf("proc6: ret_val=%d\n\r", ret_val);
+#endif /* DEBUG_0 */
+			
+        for ( x = 0; x < DELAY; x++); // some artifical delay
     }
 }
 /*

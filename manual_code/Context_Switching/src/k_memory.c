@@ -61,7 +61,7 @@ void pq_insert_blocked(PCB * proc) {
 }
 
 PCB* pq_remove_by_pid_blocked(int pid) {
-	pq_remove_by_pid(&proc_blocked_queue, pid);
+	return pq_remove_by_pid(&proc_blocked_queue, pid);
 }
 
 /**************************************************************************//**
@@ -100,6 +100,7 @@ void memory_init(void)
 {
 	U8 *p_end = (U8 *)&Image$$RW_IRAM1$$ZI$$Limit;
 	int i;
+	MEM_BLK *mem_it; // temp iterator for the heap
   
 	/* 4 bytes padding */
 	p_end += 4;
@@ -107,6 +108,12 @@ void memory_init(void)
 	/* allocate memory for pcb pointers   */
 	gp_pcbs = (PCB **)p_end;
 	p_end += NUM_TEST_PROCS * sizeof(PCB *);
+	
+	// for null proc
+	/* 
+	p_end += sizeof(PCB *);
+	gp_pcbs[0] = (PCB *)p_end;
+	p_end += sizeof(PCB);*/
   
 	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
 		gp_pcbs[i] = (PCB *)p_end;
@@ -115,6 +122,11 @@ void memory_init(void)
 #ifdef DEBUG_0  
 	printf("gp_pcbs[0] = 0x%x \r\n", gp_pcbs[0]);
 	printf("gp_pcbs[1] = 0x%x \r\n", gp_pcbs[1]);
+	printf("gp_pcbs[2] = 0x%x \r\n", gp_pcbs[2]);
+	printf("gp_pcbs[3] = 0x%x \r\n", gp_pcbs[3]);
+	printf("gp_pcbs[4] = 0x%x \r\n", gp_pcbs[4]);
+	printf("gp_pcbs[5] = 0x%x \r\n", gp_pcbs[5]);
+	printf("gp_pcbs[6] = 0x%x \r\n", gp_pcbs[6]);
 #endif
 	
 	/* prepare for alloc_stack() to allocate memory for stacks */
@@ -128,7 +140,6 @@ void memory_init(void)
   // mem block size = MEM_BLK_SIZE
 	// #mem blocks = MEM_NUM_BLKS
 	
-	MEM_BLK *mem_it; // temp iterator for the heap
 	freeList = (MEM_BLK *) p_end; // set freeList to first free block
 	heap_start = (U32*) p_end;
 	
@@ -169,9 +180,10 @@ U32 *alloc_stack(U32 size_b)
  */
 
 void *k_request_memory_block_nb(void) {
+	MEM_BLK * freeBlock = freeList;
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
-	MEM_BLK * freeBlock = freeList;
+#endif /* ! DEBUG_0 */
 	
 	if (freeBlock == NULL) {
 		return NULL;
@@ -180,16 +192,15 @@ void *k_request_memory_block_nb(void) {
 		// could set freeBlock->next to like null or something
 		return freeBlock;
 	}
-#endif /* ! DEBUG_0 */
-	return (void *) NULL;
 }
 
 void *k_request_memory_block(void) {
+	MEM_BLK *ptr;
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
+#endif /* ! DEBUG_0 */
 	// Might need to switch user modes??
 	// atomic(on) -> maybe add a safety flag? (a bit?)
-	MEM_BLK *ptr;
 	while((ptr = k_request_memory_block_nb()) == NULL) {
 		gp_current_process->m_state = BLOCKED_ON_RESOURCE; //set process state
 		
@@ -200,11 +211,12 @@ void *k_request_memory_block(void) {
 	}
 	// atomic(off);
 	return ptr;
-#endif /* ! DEBUG_0 */
-	return (void *) NULL;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
+	// dequeue a blocked-on-memory PCB
+	PCB * first = pq_remove(&proc_blocked_queue);
+	
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
 	
@@ -212,8 +224,6 @@ int k_release_memory_block(void *p_mem_blk) {
 		return RTX_ERR;
 	}
 	
-	// dequeue a blocked-on-memory PCB
-	PCB * first = pq_remove(&proc_blocked_queue);
 	if (first == NULL) { // blocked on memory resouce q is empty
 		((MEM_BLK*)p_mem_blk)->next = freeList;
 		freeList = p_mem_blk;

@@ -65,57 +65,6 @@ typedef struct pcb
     PROC_STATE_E m_state;   /**> state of the process               */
 } PCB;
 
-void pq_insert(PCB** list, PCB * proc) {
-	PCB * it = *list;
-	
-	if (it == NULL) {
-		*list = proc;
-		proc->mp_next = NULL;
-	}
-	
-	while(it->mp_next && it->mp_next->m_priority <= proc->m_priority) {
-		it = it->mp_next;
-	}
-	
-	proc->mp_next = it->mp_next;
-	it->mp_next = proc;
-}
-
-PCB * pq_remove(PCB** list) {
-	if (*list == NULL) {
-		return NULL;
-	}
-	
-	PCB * proc = *list;
-	*list = proc->mp_next;
-	proc->mp_next = NULL;
-	return proc;
-}
-
-PCB * pq_remove_by_pid(PCB** list, int pid) {
-	if (*list == NULL) {
-		return NULL;
-	}
-	
-	PCB * it = *list;
-	
-	if (it->m_pid == pid) {
-		*list = it->mp_next;
-		return it;
-	}
-	
-	while(it->mp_next && it->mp_next->m_pid != pid) {
-		it = it->mp_next;
-	}
-	
-	if (it->mp_next != NULL) {
-		PCB * proc = it->mp_next;
-		it->mp_next = proc->mp_next;
-		return proc;
-	}
-	
-	return NULL;
-}
 
 /*
  *==========================================================================

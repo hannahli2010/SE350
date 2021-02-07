@@ -40,6 +40,7 @@
 #define K_PROCESS_H_
 
 #include "k_inc.h"
+#include "k_priority_queue.h"
 
 /*
  *===========================================================================
