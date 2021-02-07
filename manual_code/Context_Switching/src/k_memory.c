@@ -143,10 +143,11 @@ void memory_init(void)
 	heap_start = (U32*) p_end;
 	
 	// start from p_end, set value at mem_it to the memory address of next block (aka mem_it + MEM_BLK_SIZE)
-	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - sizeof(MEM_BLK); mem_it += sizeof(MEM_BLK)) {
-		mem_it->next = mem_it + sizeof(MEM_BLK);
+	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - 1; mem_it += 1) {
+		mem_it->next = mem_it + 1;
 	}
 	
+	MEM_BLK *debug = freeList;
 	mem_it->next = NULL; // set end of freeList
 	proc_blocked_queue = NULL;
 }
@@ -194,13 +195,18 @@ void *k_request_memory_block_nb(void) {
 }
 
 void *k_request_memory_block(void) {
-	MEM_BLK *ptr;
+	PCB * curr_proc = gp_current_process;
+	MEM_BLK *prevAddr = curr_proc->m_mem_blk;
+	
 #ifdef DEBUG_0 
 	printf("k_request_memory_block: entering...\n");
 #endif /* ! DEBUG_0 */
 	// Might need to switch user modes??
 	// atomic(on) -> maybe add a safety flag? (a bit?)
-	while((ptr = k_request_memory_block_nb()) == NULL) {
+	
+	curr_proc->m_mem_blk = k_request_memory_block_nb();
+	
+	while(curr_proc->m_mem_blk == NULL) {
 		gp_current_process->m_state = BLOCKED_ON_RESOURCE; //set process state
 		
 		// add gp_current_process to the blockedPBC queue
@@ -213,10 +219,9 @@ void *k_request_memory_block(void) {
 		process_switch(p_pcb_old);
 	}
 	
-	ptr->next = gp_current_process->m_mem_blk;
-	gp_current_process->m_mem_blk = ptr;
 	// atomic(off);
-	return ptr->block;
+	curr_proc->m_mem_blk->next = prevAddr;
+	return curr_proc->m_mem_blk->block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
@@ -232,27 +237,39 @@ int k_release_memory_block(void *p_mem_blk) {
 		return RTX_ERR;
 	}
 	
-	BOOL isOwner = FALSE;
 	MEM_BLK* block_it = gp_current_process->m_mem_blk;
-	while(block_it != NULL) {
-		if (block_it->block == mem_addr) {
-			isOwner = TRUE;
-			break;
+	
+	if (block_it == NULL ){
+		printf("Pid %d does not own any blocks, could not release: 0x%x\n", gp_current_process->m_pid, mem_addr);
+		return RTX_ERR; // proc had no mem blocks
+	} else if (block_it->block == mem_addr) {
+		gp_current_process->m_mem_blk = block_it->next;
+	} else {
+		while(block_it->next != NULL) {
+			if (block_it->next->block == mem_addr) {
+				MEM_BLK *temp = block_it->next;
+				block_it->next = temp->next;
+				block_it = temp;
+				break;
+			}
+			block_it = block_it->next;
 		}
-		block_it = block_it->next;
-	}
-	
-	// error when trying to release a block that the process does not own
-	if (isOwner == FALSE) {
 		printf("Pid %d tried to release a block it does not own: 0x%x\n", gp_current_process->m_pid, mem_addr);
-		return RTX_ERR;
+		return RTX_ERR; // did not find the block with mem_addr
 	}
 	
-	((MEM_BLK*)p_mem_blk)->next = freeList;
-	freeList = p_mem_blk;
-	if (first != NULL) {
+	// block_it should be the proc corresponding to mem_addr
+	
+	if (first == NULL) {
+		// add new blocks to the front of our freeList
+		block_it->next = freeList;
+		freeList = block_it;
+	} else  {
 		first->m_state = RDY;
 		pq_insert_ready(first);
+		
+		block_it->next = first->m_mem_blk;
+		first->m_mem_blk = block_it;
 		
 		// assign the mem_blk to the PCB -> gives control back to the proc that was blocked in k_request_memory_block
 		
