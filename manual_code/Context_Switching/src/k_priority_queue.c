@@ -39,6 +39,7 @@ PCB * pq_remove_by_pid(PCB** list, int pid) {
 	
 	if (it->m_pid == pid) {
 		*list = it->mp_next;
+		it->mp_next = NULL;
 		return it;
 	}
 	
@@ -49,6 +50,7 @@ PCB * pq_remove_by_pid(PCB** list, int pid) {
 	if (it->mp_next != NULL) {
 		PCB * proc = it->mp_next;
 		it->mp_next = proc->mp_next;
+		proc->mp_next = NULL;
 		return proc;
 	}
 	

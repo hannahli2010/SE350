@@ -47,6 +47,7 @@
  *****************************************************************************/
 
 #include "k_process.h"
+#include "nullProc.h"
 #include "k_rtx.h"
 /*
  *==========================================================================
@@ -66,13 +67,8 @@ void  pq_insert_ready(PCB * proc) {
 	pq_insert(&proc_ready_queue, proc);
 }
 
-void nullProc(void)
-{
-    while (1) {
-			printf("Null Proc try to release\n");
-      for (int x = 0; x < 1000; x++); // some artifical delay
-			k_release_processor();
-    }
+PCB *pq_remove_by_pid_ready(int pid) {
+	return pq_remove_by_pid(&proc_ready_queue, pid);
 }
 
 /**************************************************************************//**
@@ -92,7 +88,6 @@ void process_init(PROC_INIT *proc_info, int num)
 #else
     for ( i = 0; i < num; i++ ) {
 #endif /* SE350_DEMO */
-		printf("INIT: pid: %d, priority: %d\n", proc_info[i].m_pid, proc_info[i].m_priority);
 		g_proc_table[i].m_pid        = proc_info[i].m_pid;
 		g_proc_table[i].m_stack_size = proc_info[i].m_stack_size;
 		g_proc_table[i].mpf_start_pc = proc_info[i].mpf_start_pc;
@@ -100,7 +95,7 @@ void process_init(PROC_INIT *proc_info, int num)
 	}
   
 	int j;
-	/* initilize exception stack frame (i.e. initial context) for each process
+	/* initilize exception stack frame (i.e. initial context) for each process */
 	sp = alloc_stack(USR_SZ_STACK);
 	*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
 	*(--sp)  = (U32)(&nullProc); // PC contains the entry point of the process
@@ -111,24 +106,26 @@ void process_init(PROC_INIT *proc_info, int num)
 	gp_pcbs[0]->m_state = NEW;
 	gp_pcbs[0]->mp_sp = sp;
 	gp_pcbs[0]->m_priority = PRI_NULL;
-	pq_insert(&proc_ready_queue, gp_pcbs[0]); */
+	gp_pcbs[0]->m_mem_blk = NULL;
+	pq_insert(&proc_ready_queue, gp_pcbs[0]);
 	
 #ifdef SE350_DEMO
 	for ( i = 0; i < 2; i++ ) {
 #else
-	for ( i = 0; i < num; i++ ) {
+	for ( i = 1; i <= num; i++ ) {
 #endif /* SE350_DEMO */
-		(gp_pcbs[i])->m_pid = (g_proc_table[i]).m_pid;
+		(gp_pcbs[i])->m_pid = (g_proc_table[i-1]).m_pid;
 		(gp_pcbs[i])->m_state = NEW;
 		
-		sp = alloc_stack((g_proc_table[i]).m_stack_size);
+		sp = alloc_stack((g_proc_table[i-1]).m_stack_size);
 		*(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
-		*(--sp)  = (U32)((g_proc_table[i]).mpf_start_pc); // PC contains the entry point of the process
+		*(--sp)  = (U32)((g_proc_table[i-1]).mpf_start_pc); // PC contains the entry point of the process
 		for ( j = 0; j < 6; j++ ) { // R0-R3, R12 are cleared with 0
 			*(--sp) = 0x0;
 		}
 		(gp_pcbs[i])->mp_sp = sp;
-		(gp_pcbs[i])->m_priority = (g_proc_table[i]).m_priority;
+		(gp_pcbs[i])->m_priority = (g_proc_table[i-1]).m_priority;
+		(gp_pcbs[i])->m_mem_blk = NULL;
 		
 		pq_insert(&proc_ready_queue, gp_pcbs[i]);
 	}
@@ -148,11 +145,11 @@ PCB *scheduler(void)
 	// base case for start up (no process running)
 	if (gp_current_process == NULL) {
 		gp_current_process = gp_pcbs[0]; // is this necessary??
-		pq_remove_by_pid(&proc_ready_queue, gp_current_process->m_pid);
+		pq_remove_by_pid(&proc_ready_queue, PID_NULL);
 		return gp_pcbs[0];
 	}
 	
-	pq_print(&proc_ready_queue);
+	// pq_print(&proc_ready_queue);
 	if (proc_ready_queue == NULL) {
 		return NULL; // null process
 	} else {
@@ -195,10 +192,7 @@ int process_switch(PCB *p_pcb_old)
 			p_pcb_old->m_state = RDY;
 			p_pcb_old->mp_sp = (U32 *) __get_MSP();
 			
-			PCB* removed = pq_remove(&proc_ready_queue);
-			printf("NEW: %d, isEqual(gp_current_proc, removed)\n", gp_current_process == removed);
-			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
-			pq_print(&proc_ready_queue);
+			pq_remove_by_pid(&proc_ready_queue, gp_current_process->m_pid);
 		}
 		gp_current_process->m_state = RUN;
 		__set_MSP((U32) gp_current_process->mp_sp);
@@ -214,9 +208,7 @@ int process_switch(PCB *p_pcb_old)
 			gp_current_process->m_state = RUN;
 			__set_MSP((U32) gp_current_process->mp_sp); // switch to the new proc's stack
 			
-			PCB* removed = pq_remove(&proc_ready_queue);
-			printf("%d, isEqual(gp_current_proc, removed)\n", gp_current_process == removed);
-			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
+			pq_remove_by_pid(&proc_ready_queue, gp_current_process->m_pid);
 		} else {
 			gp_current_process = p_pcb_old; // revert back to the old proc on error
 			return RTX_ERR;
@@ -247,6 +239,9 @@ int k_release_processor(void)
   if ( p_pcb_old == NULL ) {
 		p_pcb_old = gp_current_process;
 	}
+	if (p_pcb_old != gp_current_process) {
+			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
+	}
 	process_switch(p_pcb_old);
 	return RTX_OK;
 }
@@ -276,7 +271,7 @@ int release_if_preempted(void) {
 
 // get a PCB by its pid from gp_pcbs array
 PCB * get_pcb_by_pid(int pid) {
-	for(int i = 0; i < NUM_TEST_PROCS; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
+	for(int i = 0; i < NUM_TEST_PROCS + 1; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
 		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
 			return gp_pcbs[i];
 		}

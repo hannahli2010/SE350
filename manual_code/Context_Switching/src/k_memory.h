@@ -41,12 +41,6 @@
 #include "k_inc.h"
 #include "k_priority_queue.h"
 
-typedef struct mem_blk
-{
-	struct mem_blk *next;
-} MEM_BLK;
-
-
 /*
  *===========================================================================
  *                             MACROS

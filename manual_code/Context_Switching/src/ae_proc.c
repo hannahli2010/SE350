@@ -82,28 +82,39 @@ void proc3(void)
     int ret_val = 30;
 	
     while(1) {
-        uart1_put_string("proc3: Rob\n\r");
-        ret_val = release_processor();
+				uart1_put_string("proc3: Rob\n\r");
+			
+				int * myVar = request_memory_block();
+				*myVar = 44;		
+				printf("myVar value: %d, location: 0x%x\n", *myVar, myVar);
+				ret_val = release_processor();
 			
 #ifdef DEBUG_0
-        printf("proc3: ret_val=%d\n\r", ret_val);
+				printf("proc3: ret_val=%d\n\r", ret_val);
 #endif /* DEBUG_0 */
 			
-        for ( x = 0; x < DELAY; x++); // some artifical delay
-    }
+				for ( x = 0; x < DELAY; x++); // some artifical delay
+		}
 }
 
 void proc4(void)
 {
+		int i = 0;
 		int x = 0;
+		int * temp;
     int ret_val = 40;
     while(1) {
+				if (i == 0){
+					temp = request_memory_block();
+				} else if (i == 2) {
+					release_memory_block(temp);
+				}
         uart1_put_string("proc4: Hannah\n\r");
         ret_val = release_processor();
 #ifdef DEBUG_0
         printf("proc4: ret_val=%d\n\r", ret_val);
 #endif /* DEBUG_0 */
-			
+				i++;
         for ( x = 0; x < DELAY; x++); // some artifical delay
     }
 }

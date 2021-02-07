@@ -49,7 +49,13 @@
 #endif /* DEBUG_0 */
 
 /* process states, note we only assume three states in this example */
-typedef enum {NEW = 0, RDY, RUN, BLOCKED_ON_RESOURCE} PROC_STATE_E;  
+typedef enum {NEW = 0, RDY, RUN, BLOCKED_ON_RESOURCE} PROC_STATE_E;
+
+typedef struct mem_blk
+{
+	struct mem_blk    *next;
+	U8 	              block[MEM_BLK_SIZE];
+} MEM_BLK;
 
 /**
  * @brief PCB data structure definition.
@@ -63,6 +69,7 @@ typedef struct pcb
     U32          m_pid;     /**> process id                         */
 		U32 				 m_priority;/**> priority                           */
     PROC_STATE_E m_state;   /**> state of the process               */
+		MEM_BLK      *m_mem_blk; /**> memory blocks                      */
 } PCB;
 
 

@@ -107,15 +107,14 @@ void memory_init(void)
 
 	/* allocate memory for pcb pointers   */
 	gp_pcbs = (PCB **)p_end;
-	p_end += NUM_TEST_PROCS * sizeof(PCB *);
+	p_end += (NUM_TEST_PROCS + 1) * sizeof(PCB *);
 	
 	// for null proc
-	/* 
-	p_end += sizeof(PCB *);
-	gp_pcbs[0] = (PCB *)p_end;
-	p_end += sizeof(PCB);*/
+	// p_end += sizeof(PCB *);
+	// gp_pcbs[0] = (PCB *)p_end;
+	// p_end += sizeof(PCB);
   
-	for ( i = 0; i < NUM_TEST_PROCS; i++ ) {
+	for ( i = 0; i < NUM_TEST_PROCS + 1; i++ ) {
 		gp_pcbs[i] = (PCB *)p_end;
 		p_end += sizeof(PCB); 
 	}
@@ -144,8 +143,8 @@ void memory_init(void)
 	heap_start = (U32*) p_end;
 	
 	// start from p_end, set value at mem_it to the memory address of next block (aka mem_it + MEM_BLK_SIZE)
-	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - MEM_BLK_SIZE; mem_it += MEM_BLK_SIZE ) {
-		mem_it->next = mem_it + MEM_BLK_SIZE;
+	for (mem_it = (MEM_BLK *) p_end; mem_it < (MEM_BLK *)gp_stack - sizeof(MEM_BLK); mem_it += sizeof(MEM_BLK)) {
+		mem_it->next = mem_it + sizeof(MEM_BLK);
 	}
 	
 	mem_it->next = NULL; // set end of freeList
@@ -182,7 +181,7 @@ U32 *alloc_stack(U32 size_b)
 void *k_request_memory_block_nb(void) {
 	MEM_BLK * freeBlock = freeList;
 #ifdef DEBUG_0 
-	printf("k_request_memory_block: entering...\n");
+	printf("k_request_memory_block_nb: entering...\n");
 #endif /* ! DEBUG_0 */
 	
 	if (freeBlock == NULL) {
@@ -207,10 +206,17 @@ void *k_request_memory_block(void) {
 		// add gp_current_process to the blockedPBC queue
 		pq_insert(&proc_blocked_queue, gp_current_process);
 		
-		k_release_processor();
+		// release processor but don't want to add ourselves to ready queue
+		PCB *p_pcb_old = gp_current_process;
+		gp_current_process = scheduler();
+		printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
+		process_switch(p_pcb_old);
 	}
+	
+	ptr->next = gp_current_process->m_mem_blk;
+	gp_current_process->m_mem_blk = ptr;
 	// atomic(off);
-	return ptr;
+	return ptr->block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
@@ -219,15 +225,32 @@ int k_release_memory_block(void *p_mem_blk) {
 	
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
+#endif /* ! DEBUG_0 */
+	U8 *mem_addr = (U8*) p_mem_blk;
 	
-	if ((U32*) p_mem_blk < heap_start || (U32*) p_mem_blk >= gp_stack) {
+	if ((U32*) mem_addr < heap_start || (U32*) mem_addr >= gp_stack) {
 		return RTX_ERR;
 	}
 	
-	if (first == NULL) { // blocked on memory resouce q is empty
-		((MEM_BLK*)p_mem_blk)->next = freeList;
-		freeList = p_mem_blk;
-	} else {
+	BOOL isOwner = FALSE;
+	MEM_BLK* block_it = gp_current_process->m_mem_blk;
+	while(block_it != NULL) {
+		if (block_it->block == mem_addr) {
+			isOwner = TRUE;
+			break;
+		}
+		block_it = block_it->next;
+	}
+	
+	// error when trying to release a block that the process does not own
+	if (isOwner == FALSE) {
+		printf("Pid %d tried to release a block it does not own: 0x%x\n", gp_current_process->m_pid, mem_addr);
+		return RTX_ERR;
+	}
+	
+	((MEM_BLK*)p_mem_blk)->next = freeList;
+	freeList = p_mem_blk;
+	if (first != NULL) {
 		first->m_state = RDY;
 		pq_insert_ready(first);
 		
@@ -235,7 +258,6 @@ int k_release_memory_block(void *p_mem_blk) {
 		
 		return release_if_preempted();
 	}
-#endif /* ! DEBUG_0 */
 	return RTX_OK;
 }
 /*
