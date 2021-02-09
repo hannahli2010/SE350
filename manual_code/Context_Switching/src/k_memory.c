@@ -129,9 +129,6 @@ void memory_init(void)
 	if ((U32)gp_stack & 0x04) { /* 8 bytes alignment */
 		--gp_stack; 
 	}
-  
-  // mem block size = MEM_BLK_SIZE
-	// #mem blocks = MEM_NUM_BLKS
 	
 	freeList = (MEM_BLK *) p_end; // set freeList to first free block
 	heap_start = (U32*) p_end;

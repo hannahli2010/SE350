@@ -63,11 +63,12 @@ void proc1(void)
                 release_processor();
             }
             if (i == 10) {
-								set_process_priority(PID_P2, MEDIUM);
+								set_process_priority(PID_P2, LOWEST);
                 ret_val = release_memory_block(p_mem_blk);
 
                 if (ret_val == 0) {
                     release_processor();
+                    break;
                 }
             }
 		}
@@ -119,8 +120,7 @@ void proc3(void)
 		}
 		if ( i != 0 && i%5 == 0 ) {
 			uart1_put_string("\n\r");
-      p_mem_blk = request_memory_block();
-			uart1_put_string("returned to proc 3\n");
+            p_mem_blk = request_memory_block();
 			release_memory_block(p_mem_blk);
 			release_processor();
 #ifdef DEBUG_0

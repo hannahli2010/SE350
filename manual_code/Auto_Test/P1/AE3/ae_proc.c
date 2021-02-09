@@ -11,7 +11,7 @@
  */
 
 /**************************************************************************//**
- * @file        ae_proc4.c
+ * @file        ae_proc3.c
  * @brief       Two auto test processes to test memory preeption and ownership
  *              
  * @version     V1.2021.01
@@ -29,8 +29,8 @@
  * 01234
  * P3P3P3P3P3
  * FGHIJ
- * P3P3P3P3P3
- * proc3: end of testing
+ * 56789
+ * proc2: end of testing
  *-------------------------------------------------------------------------------*/ 
 
 #include "rtx.h"
@@ -63,11 +63,11 @@ void proc1(void)
                 release_processor();
             }
             if (i == 10) {
-								set_process_priority(PID_P2, MEDIUM);
                 ret_val = release_memory_block(p_mem_blk);
 
                 if (ret_val == 0) {
                     release_processor();
+                    break;
                 }
             }
 		}
@@ -113,16 +113,9 @@ void proc3(void)
 	void *p_mem_blk;
 	
 	while ( 1) {
-		if (i == 10) {
-				uart1_put_string("\n\r");
-				break;
-		}
 		if ( i != 0 && i%5 == 0 ) {
 			uart1_put_string("\n\r");
-      p_mem_blk = request_memory_block();
-			uart1_put_string("returned to proc 3\n");
-			release_memory_block(p_mem_blk);
-			release_processor();
+            p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
 			printf("proc3: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
@@ -131,7 +124,9 @@ void proc3(void)
 		i++;
 	}
 	uart1_put_string("proc3: end of testing\n\r");
+	set_process_priority(PID_P2, LOWEST);
 	while ( 1 ) {
+		release_processor();
 	}
 }
 

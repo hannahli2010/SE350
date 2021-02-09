@@ -340,10 +340,10 @@ int k_set_process_priority(int pid, int prio) {
 		// insert curr proc to ready queue if we changed its priority
 		pq_insert_ready(gp_current_process);
 	} else {
-		pq_insert_front_ready(gp_current_process);
 		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
 		if (found != NULL) {
 			pq_insert_ready(found);
+			pq_insert_front_ready(gp_current_process);
 		}
 		found = pq_remove_by_pid_blocked(pid);
 		if (found != NULL) {

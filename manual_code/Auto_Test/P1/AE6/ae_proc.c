@@ -11,7 +11,7 @@
  */
 
 /**************************************************************************//**
- * @file        ae_proc4.c
+ * @file        ae_proc6.c
  * @brief       Two auto test processes to test memory preeption and ownership
  *              
  * @version     V1.2021.01
@@ -23,14 +23,16 @@
  *****************************************************************************/
 /*---------------------------------------------------------------------------- 
  * Expected COM1 Output 
- * Assume we only have TWO memory blocks in the system.
+ * Assume we only have TWO memory blocks in the system and that if you set a proc's
+ *    priority to itself, it gets moved to the end of that priority 
  * Expected UART output: (assuming memory block has ownership.):
  * ABCDE
  * 01234
  * P3P3P3P3P3
  * FGHIJ
- * P3P3P3P3P3
- * proc3: end of testing
+ * returned to proc 3
+ * 56789
+ * proc2: end of testing
  *-------------------------------------------------------------------------------*/ 
 
 #include "rtx.h"

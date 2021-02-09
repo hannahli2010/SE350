@@ -11,7 +11,7 @@
  */
 
 /**************************************************************************//**
- * @file        ae_proc4.c
+ * @file        ae_proc5.c
  * @brief       Two auto test processes to test memory preeption and ownership
  *              
  * @version     V1.2021.01
@@ -29,13 +29,16 @@
  * 01234
  * P3P3P3P3P3
  * FGHIJ
- * P3P3P3P3P3
- * proc3: end of testing
+ * proc5:
+ * proc4:
+ * proc6:
+ * (should reach null proc)
  *-------------------------------------------------------------------------------*/ 
 
 #include "rtx.h"
 #include "uart_polling.h"
 #include "ae_proc.h"
+#include "printf.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
@@ -50,26 +53,16 @@ void proc1(void)
 	int i = 0;
 	int ret_val = 20;
 	void *p_mem_blk;
-    p_mem_blk = request_memory_block();
 
+	p_mem_blk = request_memory_block();
 	while ( 1 ) {
 		if ( i != 0 && i%5 == 0 ) {
 			uart1_put_string("\n\r");
-            if (i == 5) {
-                p_mem_blk = request_memory_block();
+			p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
-                printf("proc1: received mem block: %x\n", p_mem_blk);
+			printf("proc1: received mem block: %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
-                release_processor();
-            }
-            if (i == 10) {
-								set_process_priority(PID_P2, MEDIUM);
-                ret_val = release_memory_block(p_mem_blk);
-
-                if (ret_val == 0) {
-                    release_processor();
-                }
-            }
+			release_processor();
 		}
 		uart1_put_char('A' + i%26);
 		i++;
@@ -119,10 +112,7 @@ void proc3(void)
 		}
 		if ( i != 0 && i%5 == 0 ) {
 			uart1_put_string("\n\r");
-      p_mem_blk = request_memory_block();
-			uart1_put_string("returned to proc 3\n");
-			release_memory_block(p_mem_blk);
-			release_processor();
+            p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
 			printf("proc3: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
@@ -139,6 +129,7 @@ void proc4(void)
 {
     while(1) {
         uart1_put_string("proc4: \n\r");
+        request_memory_block();
         release_processor();
     }
 }
@@ -147,6 +138,7 @@ void proc5(void)
 {
     while(1) {
         uart1_put_string("proc5: \n\r");
+        request_memory_block();
         release_processor();
     }
 }
@@ -155,6 +147,7 @@ void proc6(void)
 {
     while(1) {
         uart1_put_string("proc6: \n\r");
+        request_memory_block();
         release_processor();
     }
 }
