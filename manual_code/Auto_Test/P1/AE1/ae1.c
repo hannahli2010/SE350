@@ -34,8 +34,8 @@
  */
 
 /**************************************************************************//**
- * @brief   	ae_init
- * @return		RTX_OK on success and RTX_ERR on failure
+ * @brief       ae_init
+ * @return      RTX_OK on success and RTX_ERR on failure
  * @param[out]  proc_info proc initialization struct array AE writes to
  * @param[in]   num       length of proc_info array
  * @param[in]   cb_func   call back function entry point
@@ -56,7 +56,7 @@ int ae_init(PROC_INIT *proc_info, int num, int (*cb_func) (void *(arg)), void *a
 }
 
 /**************************************************************************//**
- * @brief   	ae_set_proc_info
+ * @brief       ae_set_proc_info
  * @param[out]  proc_info proc initialization struct array AE writes to
  * @param[in]   num       length of proc_info array
  *****************************************************************************/
@@ -70,22 +70,22 @@ void ae_set_proc_info(PROC_INIT *procs, int num) {
     }
   
     procs[0].mpf_start_pc = &proc1;
-	procs[0].m_priority   = MEDIUM;
-	
-	procs[1].mpf_start_pc = &proc2;
-	procs[1].m_priority   = LOW;
-	
-	procs[2].mpf_start_pc = &proc3;
-	procs[2].m_priority   = LOWEST;
-	
-	procs[3].mpf_start_pc = &proc4;
-	procs[3].m_priority   = LOWEST;
-	
-	procs[4].mpf_start_pc = &proc5;
-	procs[4].m_priority   = LOWEST;
-	
-	procs[5].mpf_start_pc = &proc6;
-	procs[5].m_priority   = LOWEST;
+    procs[0].m_priority   = MEDIUM;
+    
+    procs[1].mpf_start_pc = &proc2;
+    procs[1].m_priority   = LOW;
+    
+    procs[2].mpf_start_pc = &proc3;
+    procs[2].m_priority   = LOWEST;
+    
+    procs[3].mpf_start_pc = &proc4;
+    procs[3].m_priority   = LOWEST;
+    
+    procs[4].mpf_start_pc = &proc5;
+    procs[4].m_priority   = LOWEST;
+    
+    procs[5].mpf_start_pc = &proc6;
+    procs[5].m_priority   = LOWEST;
 }
 
 /*

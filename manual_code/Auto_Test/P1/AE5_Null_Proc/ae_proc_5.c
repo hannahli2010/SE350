@@ -3,8 +3,6 @@
  *
  *                  UNIVERSITY OF WATERLOO SE 350 RTOS LAB  
  *
- *                     Copyright 2020-2021 Yiqing Huang
- *
  *          This software is subject to an open source license and 
  *          may be freely redistributed under the terms of MIT License.
  ****************************************************************************
@@ -12,10 +10,13 @@
 
 /**************************************************************************//**
  * @file        ae_proc5.c
- * @brief       Two auto test processes to test memory preeption and ownership
+ * @brief       A test to verify that the null process has been initialized
+ *              properly. Proc1 will request memory until it becomes blocked,
+ *              and each subsequent proc will attempt to request memory (blocking
+ *              them as well), until the null process is reached.
  *              
  * @version     V1.2021.01
- * @authors     Yiqing Huang
+ * @authors     Group 10
  * @date        2021 JAN
  * @note        Each process is in an infinite loop. Processes never terminate.
  * @details
@@ -24,11 +25,14 @@
 /*---------------------------------------------------------------------------- 
  * Expected COM1 Output 
  * Assume we only have TWO memory blocks in the system.
- * Expected UART output: (assuming memory block has ownership.):
+ * Expected UART output (assuming memory block has ownership.):
  * ABCDE
- * 01234
- * P3P3P3P3P3
+ * (proc1: received mem block: ...)
  * FGHIJ
+ * (proc1: received mem block: ...)
+ * KLMNO
+ * proc2:
+ * proc3:
  * proc5:
  * proc4:
  * proc6:
@@ -46,83 +50,47 @@
 
 
 /**************************************************************************//**
- * @brief: a process that keeps allocating memory without freeing
+ * @brief: Continuously print five letters and then a request a memory block
  *****************************************************************************/
 void proc1(void)
 {
-	int i = 0;
-	int ret_val = 20;
-	void *p_mem_blk;
+    int i = 0;
+    int ret_val = 20;
+    void *p_mem_blk;
 
-	p_mem_blk = request_memory_block();
-	while ( 1 ) {
-		if ( i != 0 && i%5 == 0 ) {
-			uart1_put_string("\n\r");
-			p_mem_blk = request_memory_block();
+    while ( 1 ) {
+        if ( i != 0 && i % 5 == 0 ) {
+            uart1_put_string("\n\r");
+            p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
-			printf("proc1: received mem block: %x\n", p_mem_blk);
+            printf("proc1: received mem block: %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
-			release_processor();
-		}
-		uart1_put_char('A' + i%26);
-		i++;
-	}
+        }
+        uart1_put_char('A' + i%26);
+        i++;
+    }
     while( 1 ) {
-
     } 
 }
 /**************************************************************************//**
- * @brief  a process that tries to free another process's memory
+ * @brief  All the following processes simply attempt to request a memory block
  *****************************************************************************/
 void proc2(void)
 {
-	int i = 0;
-	void *p_mem_blk;
-	
-	while ( 1) {
-		if (i == 10) {
-				uart1_put_string("\n\r");
-				break;
-		}
-		if ( i != 0 && i%5 == 0 ) {
-			uart1_put_string("\n\r");
-            p_mem_blk = request_memory_block();
-#ifdef DEBUG_0
-			printf("proc2: received %x\n", p_mem_blk);
-#endif /* DEBUG_0 */
-		}
-		uart1_put_char('0' + i%10);
-		i++;
-	}
-	uart1_put_string("proc2: end of testing\n\r");
-	while ( 1 ) {
-	}
+    while(1) {
+        uart1_put_string("proc2: \n\r");
+        request_memory_block();
+        release_processor();
+    }
 }
 
 void proc3(void)
 {
-    int i = 0;
-	int ret_val = 20;
-	void *p_mem_blk;
-	
-	while ( 1) {
-		if (i == 10) {
-				uart1_put_string("\n\r");
-				break;
-		}
-		if ( i != 0 && i%5 == 0 ) {
-			uart1_put_string("\n\r");
-            p_mem_blk = request_memory_block();
-#ifdef DEBUG_0
-			printf("proc3: received %x\n", p_mem_blk);
-#endif /* DEBUG_0 */
-		}
-		uart1_put_string("P3");
-		i++;
-	}
-	uart1_put_string("proc3: end of testing\n\r");
-	while ( 1 ) {
-	}
+    while(1) {
+        uart1_put_string("proc3: \n\r");
+        request_memory_block();
+        release_processor();
+    }
 }
 
 void proc4(void)

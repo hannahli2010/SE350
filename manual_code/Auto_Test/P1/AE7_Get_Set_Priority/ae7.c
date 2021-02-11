@@ -66,26 +66,16 @@ void ae_set_proc_info(PROC_INIT *procs, int num) {
     int i;
     for( i = 0; i < num; i++ ) {
         procs[i].m_pid        = (U32)(i+1);
+        procs[i].m_priority   = MEDIUM;
         procs[i].m_stack_size = USR_SZ_STACK;
     }
   
     procs[0].mpf_start_pc = &proc1;
-	procs[0].m_priority   = MEDIUM;
-	
-	procs[1].mpf_start_pc = &proc2;
-	procs[1].m_priority   = MEDIUM;
-	
-	procs[2].mpf_start_pc = &proc3;
-	procs[2].m_priority   = MEDIUM;
-	
-	procs[3].mpf_start_pc = &proc4;
-	procs[3].m_priority   = LOW;
-	
-	procs[4].mpf_start_pc = &proc5;
-	procs[4].m_priority   = LOWEST;
-	
-	procs[5].mpf_start_pc = &proc6;
-	procs[5].m_priority   = LOWEST;
+    procs[1].mpf_start_pc = &proc2;
+    procs[2].mpf_start_pc = &proc3;
+    procs[3].mpf_start_pc = &proc4;
+    procs[4].mpf_start_pc = &proc5;
+    procs[5].mpf_start_pc = &proc6;
 }
 
 /*
