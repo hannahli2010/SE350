@@ -319,19 +319,25 @@ int k_get_process_priority(int pid) {
 
 // set a process's priority
 int k_set_process_priority(int pid, int prio) {
+	// Return error if the process pid is the null process, or if the 
+	//  process priority is invalid
 	if (prio < HIGH || prio >= PRI_NULL || pid == PID_NULL) {
 		return RTX_ERR;
 	}
 	
+	// Find the PCB associated with the pid
 	PCB * proc = get_pcb_by_pid(pid);
 	
+	// If the process doesn't exist, return error
 	if (proc == NULL) {
 		return RTX_ERR;
-	}
-	
+	}	
+
+	// Save the previous priority, update the process priority
 	int prevPrio = proc->m_priority;
 	proc->m_priority = prio;
 	
+	// If priority is unchanged, return early and leave queues unchanged
 	if (prevPrio == prio) {
 		return RTX_OK;
 	}
@@ -340,13 +346,19 @@ int k_set_process_priority(int pid, int prio) {
 		// insert curr proc to ready queue if we changed its priority
 		pq_insert_ready(gp_current_process);
 	} else {
+		// If the process exists in the ready queue, remove and reinsert it
 		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
 		if (found != NULL) {
 			pq_insert_ready(found);
+			// Insert the current process in the ready queue as well, such that
+			//   the scheduler can choose between the processes
 			pq_insert_front_ready(gp_current_process);
 		}
+
+		// If the process exists in the blocked queue, remove it and then reinsert it
 		found = pq_remove_by_pid_blocked(pid);
 		if (found != NULL) {
+			// Return early, as no premption should occur in this case
 			pq_insert_blocked(found);
 			return RTX_OK;
 		}
