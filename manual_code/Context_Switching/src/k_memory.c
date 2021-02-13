@@ -134,9 +134,12 @@ void memory_init(void)
 	heap_start = (U32*) p_end;
 	
 	// start from p_end, set value at mem_it to the memory address of next block (aka mem_it + MEM_BLK_SIZE)
-
+	
+	#ifndef TEST_2_MEM_BLK
 	const int mem_num_blks = MEM_NUM_BLKS;
-	// const int mem_num_blks = 2;
+	#else
+	const int mem_num_blks = 2;
+	#endif
 
 	int num_blocks = 1;
 	mem_it = (MEM_BLK *) p_end;
@@ -227,6 +230,7 @@ void *k_request_memory_block(void) {
 int k_release_memory_block(void *p_mem_blk) {
 	// dequeue a blocked-on-memory PCB
 	PCB * first = pq_remove(&proc_blocked_queue);
+	PCB* blockedq = proc_blocked_queue;
 	
 #ifdef DEBUG_0 
 	printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
@@ -282,8 +286,6 @@ int k_release_memory_block(void *p_mem_blk) {
 		} else {
 			pq_insert_ready(first);
 		}
-		
-		return k_release_processor();
 	}
 	return RTX_OK;
 }

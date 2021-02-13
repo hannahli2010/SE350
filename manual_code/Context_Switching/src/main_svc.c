@@ -73,8 +73,9 @@ int main()
     
     __disable_irq();
     
-    /* uart1 by polling */  
-    uart1_init();                        
+    /* uart1 by polling */
+    uart0_init();   
+    uart1_init();             
     
     /* initialize printf to use uart1 by polling */
     init_printf(NULL, putc);
