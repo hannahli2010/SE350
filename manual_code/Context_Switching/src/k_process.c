@@ -319,9 +319,12 @@ int k_get_process_priority(int pid) {
 
 // set a process's priority
 int k_set_process_priority(int pid, int prio) {
+	uint32_t ctrl = __get_CONTROL();
+	__set_CONTROL(0);
 	// Return error if the process pid is the null process, or if the 
 	//  process priority is invalid
 	if (prio < HIGH || prio >= PRI_NULL || pid == PID_NULL) {
+		__set_CONTROL(ctrl);
 		return RTX_ERR;
 	}
 	
@@ -330,6 +333,7 @@ int k_set_process_priority(int pid, int prio) {
 	
 	// If the process doesn't exist, return error
 	if (proc == NULL) {
+		__set_CONTROL(ctrl);
 		return RTX_ERR;
 	}	
 
@@ -339,6 +343,7 @@ int k_set_process_priority(int pid, int prio) {
 	
 	// If priority is unchanged, return early and leave queues unchanged
 	if (prevPrio == prio) {
+		__set_CONTROL(ctrl);
 		return RTX_OK;
 	}
 	
@@ -360,6 +365,7 @@ int k_set_process_priority(int pid, int prio) {
 		if (found != NULL) {
 			// Return early, as no premption should occur in this case
 			pq_insert_blocked(found);
+			__set_CONTROL(ctrl);
 			return RTX_OK;
 		}
 	}
@@ -389,6 +395,7 @@ int k_set_process_priority(int pid, int prio) {
 		}
 	}
 	return release_if_preempted(); */
+	__set_CONTROL(ctrl);
 	return RTX_OK;
 }
 

@@ -196,6 +196,8 @@ void *k_request_memory_block_nb(void) {
 }
 
 void *k_request_memory_block(void) {
+	uint32_t ctrl = __get_CONTROL();
+	__set_CONTROL(0);
 	PCB * curr_proc = gp_current_process;
 	MEM_BLK *prevAddr = curr_proc->m_mem_blk;
 	
@@ -224,10 +226,13 @@ void *k_request_memory_block(void) {
 	
 	// atomic(off);
 	curr_proc->m_mem_blk->next = prevAddr;
+	__set_CONTROL(ctrl);
 	return curr_proc->m_mem_blk->block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
+	uint32_t ctrl = __get_CONTROL();
+	__set_CONTROL(0);
 	// dequeue a blocked-on-memory PCB
 	PCB * first = pq_remove(&proc_blocked_queue);
 	PCB* blockedq = proc_blocked_queue;
@@ -238,6 +243,7 @@ int k_release_memory_block(void *p_mem_blk) {
 	U8 *mem_addr = (U8*) p_mem_blk;
 	
 	if ((U32*) mem_addr < heap_start || (U32*) mem_addr >= gp_stack) {
+		__set_CONTROL(ctrl);
 		return RTX_ERR;
 	}
 	
@@ -247,6 +253,7 @@ int k_release_memory_block(void *p_mem_blk) {
 		#ifdef DEBUG_0 
 		printf("Pid %d does not own any blocks, could not release: 0x%x\n", gp_current_process->m_pid, mem_addr);
 		#endif
+		__set_CONTROL(ctrl);
 		return RTX_ERR; // proc had no mem blocks
 	} else if (block_it->block == mem_addr) {
 		gp_current_process->m_mem_blk = block_it->next;
@@ -256,16 +263,18 @@ int k_release_memory_block(void *p_mem_blk) {
 				MEM_BLK *temp = block_it->next;
 				block_it->next = temp->next;
 				block_it = temp;
-				break;
+				goto FOUND;
 			}
 			block_it = block_it->next;
 		}
 		#ifdef DEBUG_0 
 		printf("Pid %d tried to release a block it does not own: 0x%x\n", gp_current_process->m_pid, mem_addr);
 		#endif
+		__set_CONTROL(ctrl);
 		return RTX_ERR; // did not find the block with mem_addr
 	}
 	
+FOUND:
 	// block_it should be the proc corresponding to mem_addr
 	
 	if (first == NULL) {
@@ -287,6 +296,7 @@ int k_release_memory_block(void *p_mem_blk) {
 			pq_insert_ready(first);
 		}
 	}
+	__set_CONTROL(ctrl);
 	return RTX_OK;
 }
 /*
