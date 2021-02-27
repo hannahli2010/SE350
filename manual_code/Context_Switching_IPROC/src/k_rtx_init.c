@@ -51,6 +51,7 @@ void k_rtx_init(PROC_INIT *proc_info, int num)
     memory_init();
     process_init(proc_info, num);
     timer_init(0);
+    __set_CONTROL(1);
 	
 	/* start the first process */
     k_release_processor();

@@ -241,26 +241,6 @@ int k_release_processor(void)
 		#endif
 	}
 	return RTX_OK;
-	/*
-	PCB *p_pcb_old = NULL;
-	
-	p_pcb_old = gp_current_process;
-	gp_current_process = scheduler();
-	
-	if ( gp_current_process == NULL  ) {
-		gp_current_process = p_pcb_old; // revert back to the old process
-		return RTX_ERR;
-	}
-	
-	printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
-  if ( p_pcb_old == NULL ) {
-		p_pcb_old = gp_current_process;
-	}
-	if (p_pcb_old != gp_current_process) {
-			pq_insert(&proc_ready_queue, p_pcb_old); // add old proc to ready queue
-	}
-	process_switch(p_pcb_old);
-	return RTX_OK; */
 }
 
 // release current process if it should be preempted

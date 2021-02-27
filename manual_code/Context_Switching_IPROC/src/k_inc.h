@@ -65,7 +65,13 @@
 
 
 /* process states, note we only assume three states in this example */
-typedef enum {NEW = 0, RDY, RUN, IPROC} PROC_STATE_E;  
+typedef enum {NEW = 0, RDY, RUN, BLOCKED_ON_RESOURCE, BLOCKED_ON_MESSAGE, IPROC} PROC_STATE_E;  
+
+typedef struct mem_blk
+{
+	struct mem_blk    *mp_next;
+	U8 	              block[MEM_BLK_SIZE];
+} MEM_BLK;
 
 /**
  * @brief PCB data structure definition.
@@ -77,7 +83,10 @@ typedef struct pcb
     struct pcb   *mp_next;  /**> next pcb, not used in this example      */  
     U32          *mp_sp;    /**> stack pointer of the process, 4B offset */
     U32          m_pid;     /**> process id, 8B offset                   */
-    PROC_STATE_E m_state;   /**> state of the process, 12B offset        */      
+    PROC_STATE_E m_state;   /**> state of the process, 12B offset        */
+    U32          m_priority; /**> priority                               */
+    MEM_BLK      *m_mem_blk; /**> memory blocks                          */
+    MSG_BUF      *m_msg_buf; /**> mailbox queue                          */
 } PCB;
 
 /*

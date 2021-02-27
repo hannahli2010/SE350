@@ -35,25 +35,83 @@
  * @date        2021 JAN
  *****************************************************************************/
 #include "k_msg.h"
+#include "k_queue.h"
 #include "k_rtx.h"
 /*
  *==========================================================================
  *                            TO BE IMPLEMENTED
  *==========================================================================
  */
-int k_send_message(int pid, void *p_msg)
-{
+int k_send_message(int pid, void *p_msg) {
+    // Ensure destination process actually exists
+    // recv_pcb← convert recv_pidto process obj/PCB reference
+    PCB* destProc = get_pcb_by_pid(pid);
+    if (destProc == NULL) {
+        // Destination process doesn't exist, rip
+        return RTX_ERR;
+    }
+
+    // set sender_pid, destination_pid fields in envelope
+    MSG_BUF* message = (MSG_BUF*) p_msg;
+    message->m_send_pid = gp_current_process->m_pid;
+    message->m_recv_pid = pid;
+
+    // Add message to the back of the destination process' mailbox
+    q_insert((MEM_BLK**) &(destProc->m_msg_buf), (MEM_BLK*) message);
+ 
+    // Transfer ownership of the memory block from the target process to the destination process
+    // Remove memory block from the sending process
+    MEM_BLK* target_blk = q_remove_by_addr(&(gp_current_process->m_mem_blk), p_msg);
+    if (target_blk == NULL) {
+        return RTX_ERR;
+    }
+    // Give envelope memory block to the target process
+    q_insert(&(destProc->m_mem_blk), target_blk);
+
+    // If the destination process is blocked on message, set it to ready and then check for preemption
+    if (destProc->m_state == BLOCKED_ON_MESSAGE) {
+        destProc->m_state = RDY;
+        
+        // If the destination process has a higher priority than the current process, preempt the current process
+        if(destProc->m_priority < gp_current_process->m_priority){
+            PCB * p_pcb_old = gp_current_process;
+            gp_current_process = destProc;
+            pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue
+            process_switch(p_pcb_old);
+        } 
+        // Otherwise, just insert the destination process into the ready queue
+        else {
+            pq_insert_ready(destProc); 
+        }
+    }
+
     return RTX_OK;
 }
 
-int k_delayed_send(int pid, void *p_msg, int delay)
-{
+// To be done after iprocess implementation
+int k_delayed_send(int pid, void *p_msg, int delay) {
     return RTX_OK;
 }
 
-void *k_receive_message(int *p_pid)
-{
-    return NULL;
+void *k_receive_message(int *p_pid) {
+    // Infinitely loop / release processor if the mailbox is empty 
+    while (gp_current_process->m_msg_buf == NULL) {
+        gp_current_process->m_state = BLOCKED_ON_MESSAGE; //set process state
+    
+        // release processor but don't add ourselves to ready queue
+        PCB *p_pcb_old = gp_current_process;
+        gp_current_process = scheduler();
+        process_switch(p_pcb_old);
+    }
+
+    MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+    
+    // If the user requested the function to set the sender id, place the sender id into the provided address
+    if (p_pid != NULL) {
+        *p_pid = message->m_send_pid;
+    }
+
+    return message;
 }
  
 /*
