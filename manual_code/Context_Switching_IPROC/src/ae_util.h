@@ -18,4 +18,6 @@ void printFraction(int, int);
 
 void printSummary(char *, int, int);
 
+void strcpy(char*, char*);
+
 #endif

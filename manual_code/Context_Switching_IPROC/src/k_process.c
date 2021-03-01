@@ -67,12 +67,14 @@ PROC_INIT g_proc_table[NUM_TEST_PROCS + 1]; /* user test procs + timer_iproc */
 PCB * proc_ready_queue = NULL;
 
 void  pq_insert_ready(PCB * proc) {
-    proc->m_state = RDY;
+    if (proc->m_state != NEW)
+		proc->m_state = RDY;
 	pq_insert(&proc_ready_queue, proc);
 }
 
 void pq_insert_front_ready(PCB * proc) {
-    proc->m_state = RDY;
+    if (proc->m_state != NEW)
+		proc->m_state = RDY;
 	pq_insert_front(&proc_ready_queue, proc);
 }
 
@@ -381,23 +383,32 @@ int k_set_process_priority(int pid, int prio) {
 			// Insert the current process in the ready queue as well, such that
 			//   the scheduler can choose between the processes
 			pq_insert_front_ready(gp_current_process);
-		}
-
-		// If the process exists in the blocked queue, remove it and then reinsert it
-		found = pq_remove_by_pid_blocked(pid);
-		if (found != NULL) {
-			// Return early, as no premption should occur in this case
-			pq_insert_blocked(found);
-			__set_CONTROL(ctrl);
-			return RTX_OK;
+		} else {
+			// If the process exists in the blocked queue, remove it and then reinsert it
+			found = pq_remove_by_pid_blocked(pid);
+			if (found != NULL) {
+				// Return early, as no premption should occur in this case
+				pq_insert_blocked(found);
+				__set_CONTROL(ctrl);
+				return RTX_OK;
+			}
 		}
 	}
 	
+	// Save the current process, and then see what the scheduler picks to determine premption
+	//  This covers the case where we set our process lower another process priority, and
+	//  the case where we set another process' priority higher than ours
 	PCB * p_pcb_old = gp_current_process;
 	PCB * p_pcb_next = scheduler();
+	// If the scheduler still chose the current process out of the ready queue,
+	//   we shouldn't preempt ourselves - reset our state to running
 	if (p_pcb_next == p_pcb_old){
+		// Remove the current process from where we inserted it in the ready queue,
+		//  and reset its state to running
 		pq_remove(&proc_ready_queue);
+		gp_current_process->m_state = RUN;
 	} else {
+		// Otherwise, switch to the new process
 		gp_current_process = p_pcb_next;
 		process_switch(p_pcb_old);
 	}

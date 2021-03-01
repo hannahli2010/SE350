@@ -29,12 +29,18 @@
  * G_10_test_6: test 3 OK
  * G_10_test_6: test 4 OK
  * G_10_test_6: test 5 OK
- * G_10_test_6: 5/5 tests OK
- * G_10_test_6: 0/5 tests FAIL
+ * G_10_test_6: test 6 OK
+ * G_10_test_6: test 7 OK
+ * G_10_test_6: test 8 OK
+ * G_10_test_6: test 9 OK
+ * G_10_test_6: 9/9 tests OK
+ * G_10_test_6: 0/9 tests FAIL
  * G_10_test_6: END
  *
  * Expected UART2 Output:
  * HELLO WORLD!
+ * 1 - MSG HEY :)
+ * 2 - MSG YO!
  * 
  *-------------------------------------------------------------------------------*/ 
 
@@ -47,7 +53,7 @@
 #include "printf.h"
 #endif /* DEBUG_0 */
 
-#define NUM_TESTS 5
+#define NUM_TESTS 9
 
 int successfulTests = 0;
 char * testName = "G_10_test_6";
@@ -66,19 +72,34 @@ void proc1(void)
     // This will block proc1 since no message has been sent yet
     int expected_process;
     MSG_BUF* message = receive_message(&expected_process);
-    
+    // Print the Hello World message we previously received
     int i = 0;
     while(message->mtext[i] != '\0' && i < 50) {
         uart1_put_char(message->mtext[i]);
         i++;
     }
     
-    successfulTests += assertTest(testName, PID_P1, nextProcess, "2");
-    successfulTests += assertTest(testName, PID_P2, expected_process, "3");
-    successfulTests += assertTest(testName, DEFAULT, message->mtype, "4");
-    successfulTests += assertTest(testName, (int)'H', (int) message->mtext[0], "5");
-    
-    printSummary(testName, successfulTests, NUM_TESTS);
+    // Assert we got the message sender, the message type, and the first message character
+    successfulTests += assertTest(testName, PID_P2, expected_process, "2");
+    successfulTests += assertTest(testName, DEFAULT, message->mtype, "3");
+    successfulTests += assertTest(testName, (int)'H', (int) message->mtext[0], "4");
+
+    // Release the block containing the message we just just recieved
+    int release_result = release_memory_block((void*) message);
+    successfulTests += assertTest(testName, RTX_OK, release_result, "5");
+
+    // Set the priority of the next processes
+    set_process_priority(PID_P3, HIGH);
+    set_process_priority(PID_P4, HIGH);
+
+    nextProcess = PID_P3;
+    release_processor();
+
+    #ifdef DEBUG_0
+        printf("Shouldn't reach here (Proc 1)!");
+    #endif /* DEBUG_0 */
+
+    while(1) {}
 }
 /**************************************************************************//**
  * @brief: a medium priority process
@@ -93,43 +114,84 @@ void proc2(void)
     MSG_BUF *msg = (MSG_BUF*) request_memory_block();
 
     msg->mtype = DEFAULT;
-    msg->mtext[0] = 'H';
-    msg->mtext[1] = 'E';
-    msg->mtext[2] = 'L';
-    msg->mtext[3] = 'L';
-    msg->mtext[4] = 'O';
-    msg->mtext[5] = ' ';
-    msg->mtext[6] = 'W';
-    msg->mtext[7] = 'O';
-    msg->mtext[8] = 'R';
-    msg->mtext[9] = 'L';
-    msg->mtext[10] = 'D';
-    msg->mtext[11] = '!';
-    msg->mtext[12] = '\0';
+    strcpy(msg->mtext, "HELLO WORLD!\n");
 
     nextProcess = PID_P1;
     // send message to proc1 which will unblock and preempt proc2
     send_message(PID_P1, msg);
 
-#ifdef DEBUG_0
-    printf("Shouldn't reach here!");
-#endif /* DEBUG_0 */
+    #ifdef DEBUG_0
+        printf("Shouldn't reach here (Proc 2)!");
+    #endif /* DEBUG_0 */
+
     while(1) {}
 }
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: a process that sends two messages
  *****************************************************************************/
 void proc3(void)
 {
+#ifdef DEBUG_0
+    printf("Start of proc3\n");
+#endif /* DEBUG_0 */
+    successfulTests += assertTest(testName, 3, nextProcess, "6");
+
+    MSG_BUF *msg1 = (MSG_BUF*) request_memory_block();
+    MSG_BUF *msg2 = (MSG_BUF*) request_memory_block();
+
+    msg1->mtype = DEFAULT;
+    msg2->mtype = DEFAULT;
+    
+    strcpy(msg1->mtext, "1 - MSG HEY :)\n");
+    strcpy(msg2->mtext, "2 - MSG YO!\n");
+
+    send_message(PID_P4, msg1);
+    send_message(PID_P4, msg2);
+
+    nextProcess = PID_P4;
+    // send message to proc1 which will unblock and preempt proc2
     release_processor();
 }
 
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: A process that recieves two messages
  *****************************************************************************/
 void proc4(void)
 {
-    release_processor();
+#ifdef DEBUG_0
+    printf("Start of proc4\n");
+#endif /* DEBUG_0 */
+    successfulTests += assertTest(testName, 4, nextProcess, "7");
+
+    // Recieve first message
+    MSG_BUF* msg1 = receive_message(NULL);   
+    // Print message contents
+    int i = 0;
+    while(msg1->mtext[i] != '\0' && i < 50) {
+        uart1_put_char(msg1->mtext[i]);
+        i++;
+    }
+    // Assert the first character of the message (ie. assert we got the right message)
+    successfulTests += assertTest(testName, (int)'1', (int) msg1->mtext[0], "8");
+
+    // Recieve second message
+    MSG_BUF* msg2 = receive_message(NULL);
+    i = 0;
+    // Print message contents
+    while(msg2->mtext[i] != '\0' && i < 50) {
+        uart1_put_char(msg2->mtext[i]);
+        i++;
+    }
+    
+    // Assert the first character of the message (ie. assert we got the right message)
+    successfulTests += assertTest(testName, (int)'2', (int) msg2->mtext[0], "9");
+
+    printSummary(testName, successfulTests, NUM_TESTS);
+#ifdef DEBUG_0
+    printf("End of Testing");
+#endif /* DEBUG_0 */
+    while(1) {
+    }
 }
 
 /**************************************************************************//**
@@ -137,7 +199,11 @@ void proc4(void)
  *****************************************************************************/
 void proc5(void)
 {
-    release_processor();
+    #ifdef DEBUG_0
+        printf("Start of proc5\n");
+    #endif /* DEBUG_0 */
+    while(1) {
+    }
 }
 
 /**************************************************************************//**
@@ -145,7 +211,11 @@ void proc5(void)
  *****************************************************************************/
 void proc6(void)
 {
-    release_processor();
+    #ifdef DEBUG_0
+        printf("Start of proc6\n");
+    #endif /* DEBUG_0 */
+    while(1) {
+    }
 }
 /*
  *===========================================================================

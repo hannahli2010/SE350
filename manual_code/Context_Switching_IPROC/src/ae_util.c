@@ -53,3 +53,9 @@ void printSummary(char * testName, int numSucceeded, int numTests) {
 
     printUart0(testName, "END");
 }
+
+void strcpy(char* d, char* s) {
+  for (int i = 0; s[i] != '\0'; i++) {
+    d[i] = s[i];
+  }
+}
