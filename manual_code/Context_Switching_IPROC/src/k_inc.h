@@ -89,6 +89,22 @@ typedef struct pcb
     MSG_BUF      *m_msg_buf; /**> mailbox queue                          */
 } PCB;
 
+
+/* cast-compatible with MSG_BUF */
+typedef struct delayed_msg_buf
+{
+#ifdef K_MSG_ENV
+    struct delayed_msg_buf *mp_next;              /**> ptr to next message received*/
+    int m_send_pid;             /**> sender pid                  */
+    int m_timer_pid;            /**> receiver pid                */
+    int m_real_recv_pid;        /**> receiver pid                */
+    int m_expiry;
+    int m_kdata[3];
+#endif
+    int mtype;                  /**> user defined message type   */
+    char mtext[1];              /**> body of the message         */
+} DELAYED_MSG_BUF;
+
 /*
  *==========================================================================
  *                   GLOBAL VARIABLES DECLARATIONS

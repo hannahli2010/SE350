@@ -35,6 +35,7 @@
  * @date        2021 JAN
  *****************************************************************************/
 #include "k_msg.h"
+#include "k_inc.h"
 #include "k_queue.h"
 #include "k_rtx.h"
 /*
@@ -90,7 +91,26 @@ int k_send_message(int pid, void *p_msg) {
 
 // To be done after iprocess implementation
 int k_delayed_send(int pid, void *p_msg, int delay) {
-    return RTX_OK;
+    DELAYED_MSG_BUF* message = (DELAYED_MSG_BUF*) p_msg;
+    message->m_expiry = delay;
+    message->m_real_recv_pid = pid;
+    return k_send_message(PID_TIMER_IPROC, p_msg);
+}
+
+void *k_receive_message_nb(int *p_pid) {
+    // Return NULL if the mailbox is empty
+    if (gp_current_process->m_msg_buf == NULL) {
+        return NULL;
+    }
+
+    MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+    
+    // If the user requested the function to set the sender id, place the sender id into the provided address
+    if (p_pid != NULL) {
+        *p_pid = message->m_send_pid;
+    }
+
+    return message;
 }
 
 void *k_receive_message(int *p_pid) {

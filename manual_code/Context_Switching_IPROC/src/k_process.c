@@ -47,7 +47,7 @@
  *****************************************************************************/
 
 #include "k_process.h"
-#include "nullProc.h"
+#include "k_sys_procs.h"
 #include "k_rtx.h"
 /*
  *==========================================================================
@@ -67,12 +67,16 @@ PROC_INIT g_proc_table[NUM_TEST_PROCS + 1]; /* user test procs + timer_iproc */
 PCB * proc_ready_queue = NULL;
 
 void  pq_insert_ready(PCB * proc) {
+	if (proc->m_state == IPROC)
+		return;
     if (proc->m_state != NEW)
 		proc->m_state = RDY;
 	pq_insert(&proc_ready_queue, proc);
 }
 
 void pq_insert_front_ready(PCB * proc) {
+	if (proc->m_state == IPROC)
+		return;
     if (proc->m_state != NEW)
 		proc->m_state = RDY;
 	pq_insert_front(&proc_ready_queue, proc);
@@ -80,6 +84,16 @@ void pq_insert_front_ready(PCB * proc) {
 
 PCB *pq_remove_by_pid_ready(int pid) {
 	return pq_remove_by_pid(&proc_ready_queue, pid);
+}
+
+// get a PCB by its pid from gp_pcbs array
+PCB * get_pcb_by_pid(int pid) {
+	for(int i = 0; i < NUM_TEST_PROCS + 1; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
+		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
+			return gp_pcbs[i];
+		}
+	}
+	return NULL;
 }
 
 /**************************************************************************//**
@@ -102,7 +116,7 @@ void process_init(PROC_INIT *proc_info, int num)
         g_proc_table[i].m_pid        = proc_info[i].m_pid;
         g_proc_table[i].m_stack_size = proc_info[i].m_stack_size;
         g_proc_table[i].mpf_start_pc = proc_info[i].mpf_start_pc;
-		g_proc_table[i].m_priority = proc_info[i].m_priority;
+		g_proc_table[i].m_priority   = proc_info[i].m_priority;
     }
     
 	int j;
@@ -267,60 +281,23 @@ int k_release_processor(void)
 		return RTX_OK;
 	}
 	
-	if (p_pcb_old->m_priority >= p_pcb_next->m_priority) { // only release if there is a proc with same or greater priority
-		#ifdef DEBUG_0
-		printf("Pid %d is replaced by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
-		#endif
-		gp_current_process = p_pcb_next;
-		pq_insert_ready(p_pcb_old); // add old proc to ready queue
-		process_switch(p_pcb_old);
-	} else {
+	// If there is no process with greater priority, AND the current process is
+	//   not an iprocess, do not context switch.
+	if (p_pcb_old->m_priority < p_pcb_next->m_priority && p_pcb_old->m_state != IPROC) {
 		#ifdef DEBUG_0
 		printf("Did not release pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
 		#endif
+		return RTX_OK;
 	}
+
+	#ifdef DEBUG_0
+	printf("Pid %d is replaced by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+	#endif
+	gp_current_process = p_pcb_next;
+	pq_insert_ready(p_pcb_old); // add old proc to ready queue (will handle when it is an iproc)
+	process_switch(p_pcb_old);
+
 	return RTX_OK;
-}
-
-
-// release current process if it should be preempted
-int release_if_preempted(void) {
-	PCB *p_pcb_old = gp_current_process;
-	PCB *p_pcb_next = scheduler();
-	
-	if ( p_pcb_next == NULL  ) {
-		p_pcb_next = p_pcb_old; // revert back to the old process
-		return RTX_OK; // not necessarily an error case?
-	}
-	
-	if ( p_pcb_old == NULL ) { // shouldn't ever happen
-		p_pcb_old = p_pcb_next;
-	}
-	
-	if (p_pcb_old->m_priority >= p_pcb_next->m_priority) { // don't preempt if same priority
-		#ifdef DEBUG_0
-		printf("Pid %d is preempted by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
-		#endif
-		
-		gp_current_process = p_pcb_next;
-		pq_insert_ready(p_pcb_old); // add old proc to ready queue
-		process_switch(p_pcb_old);
-	} else {
-		#ifdef DEBUG_0
-		printf("Did not preempt pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
-		#endif
-	}
-	return RTX_OK;
-}
-
-// get a PCB by its pid from gp_pcbs array
-PCB * get_pcb_by_pid(int pid) {
-	for(int i = 0; i < NUM_TEST_PROCS + 1; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
-		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
-			return gp_pcbs[i];
-		}
-	}
-	return NULL;
 }
 
 // get a process's priority
@@ -356,8 +333,8 @@ int k_set_process_priority(int pid, int prio) {
 	// Find the PCB associated with the pid
 	PCB * proc = get_pcb_by_pid(pid);
 	
-	// If the process doesn't exist, return error
-	if (proc == NULL) {
+	// If the process doesn't exist, or its an IPROC, return error
+	if (proc == NULL || proc->m_state == IPROC) {
 		__set_CONTROL(ctrl);
 		return RTX_ERR;
 	}	

@@ -63,7 +63,6 @@ extern PCB  *scheduler_tms(void);      /* a time slicing scheduler */
 extern int  process_switch(PCB *p_pcb_old);
 extern int  k_release_processor(void); /* kernel release_process function */
 
-extern int  release_if_preempted(void); // release curr proc if it should be preempted
 extern PCB * get_pcb_by_pid(int pid); // get a proc by its pid
 extern void pq_insert_ready(PCB * proc); // add an element to the ready queue
 extern void pq_insert_front_ready(PCB * proc); // insert an element to the front of the same prio for the ready queue

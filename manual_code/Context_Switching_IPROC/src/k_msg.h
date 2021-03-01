@@ -49,6 +49,7 @@
 extern int  k_send_message(int pid, void *p_msg);
 extern int  k_delayed_send(int pid, void *p_msg, int delay);
 extern void *k_receive_message(int *p_pid);
+extern void *k_receive_message_nb(int *p_pid);
 
   
 #endif /* K_MSG_H_ */

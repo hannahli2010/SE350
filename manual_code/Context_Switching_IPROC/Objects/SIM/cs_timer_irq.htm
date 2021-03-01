@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\SIM\cs_timer_irq.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\SIM\cs_timer_irq.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Feb 28 22:34:52 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Mar 01 00:25:17 2021
 <BR><P>
 <H3>Maximum Stack Usage =        136 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -90,7 +90,7 @@ Function Pointers
  <LI><a href="#[41]">k_send_message</a> from k_msg.o(i.k_send_message) referenced from ae_proc_06.o(i.proc2)
  <LI><a href="#[41]">k_send_message</a> from k_msg.o(i.k_send_message) referenced from ae_proc_06.o(i.proc3)
  <LI><a href="#[3e]">k_set_process_priority</a> from k_process.o(i.k_set_process_priority) referenced from ae_proc_06.o(i.proc1)
- <LI><a href="#[42]">nullProc</a> from nullproc.o(i.nullProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[42]">nullProc</a> from k_sys_procs.o(i.nullProc) referenced from k_process.o(i.process_init)
  <LI><a href="#[3a]">pre_rtx_init</a> from main_svc.o(i.pre_rtx_init) referenced from main_svc.o(i.main)
  <LI><a href="#[33]">proc1</a> from ae_proc_06.o(i.proc1) referenced from ae06.o(i.ae_set_proc_info)
  <LI><a href="#[34]">proc2</a> from ae_proc_06.o(i.proc2) referenced from ae06.o(i.ae_set_proc_info)
@@ -529,7 +529,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> ae_proc_06.o(i.proc1)
 </UL>
-<P><STRONG><a name="[3f]"></a>k_release_processor</STRONG> (Thumb, 62 bytes, Stack size 16 bytes, k_process.o(i.k_release_processor))
+<P><STRONG><a name="[3f]"></a>k_release_processor</STRONG> (Thumb, 72 bytes, Stack size 16 bytes, k_process.o(i.k_release_processor))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = k_release_processor &rArr; process_switch &rArr; pq_remove_by_pid
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scheduler
@@ -589,7 +589,7 @@ Global Symbols
 <BR>[Address Reference Count : 2]<UL><LI> ae_proc_06.o(i.proc2)
 <LI> ae_proc_06.o(i.proc3)
 </UL>
-<P><STRONG><a name="[3e]"></a>k_set_process_priority</STRONG> (Thumb, 224 bytes, Stack size 40 bytes, k_process.o(i.k_set_process_priority))
+<P><STRONG><a name="[3e]"></a>k_set_process_priority</STRONG> (Thumb, 230 bytes, Stack size 40 bytes, k_process.o(i.k_set_process_priority))
 <BR><BR>[Stack]<UL><LI>Max Depth = 64<LI>Call Chain = k_set_process_priority &rArr; process_switch &rArr; pq_remove_by_pid
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__set_CONTROL
@@ -622,7 +622,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_rtx_init
 </UL>
 
-<P><STRONG><a name="[42]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, nullproc.o(i.nullProc))
+<P><STRONG><a name="[42]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, k_sys_procs.o(i.nullProc))
 <BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
 </UL>
 <P><STRONG><a name="[65]"></a>pq_insert</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, k_priority_queue.o(i.pq_insert))
@@ -648,7 +648,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[62]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert_front_ready
 </UL>
 
-<P><STRONG><a name="[62]"></a>pq_insert_front_ready</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, k_process.o(i.pq_insert_front_ready))
+<P><STRONG><a name="[62]"></a>pq_insert_front_ready</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, k_process.o(i.pq_insert_front_ready))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = pq_insert_front_ready &rArr; pq_insert_front
 </UL>
 <BR>[Calls]<UL><LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert_front
@@ -658,7 +658,7 @@ Global Symbols
 <LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_memory_block
 </UL>
 
-<P><STRONG><a name="[63]"></a>pq_insert_ready</STRONG> (Thumb, 22 bytes, Stack size 8 bytes, k_process.o(i.pq_insert_ready))
+<P><STRONG><a name="[63]"></a>pq_insert_ready</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, k_process.o(i.pq_insert_ready))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = pq_insert_ready &rArr; pq_insert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert

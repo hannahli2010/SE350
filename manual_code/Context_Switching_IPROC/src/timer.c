@@ -131,6 +131,17 @@ uint32_t timer_init(uint8_t n_timer)
  */
 __asm void TIMER0_IRQHandler(void)
 {
+    /*
+    atomic(on)save the context of the current_process;
+    switch the current_processwith timer_i_process;
+    load the timer_i_processcontext ;
+    call the timer_i_processC function ;
+    invoke the scheduler to pick next to run process ;
+    restore the context of the newly picked process ;
+    atomic(off)
+    return
+    */
+    
     PRESERVE8
     IMPORT  timer0_iproc
     IMPORT  k_run_new_process
@@ -157,7 +168,7 @@ ITIMER_EXEC
     BL      timer0_iproc                    // execute the timer i-process
     
 ITIMER_RESTORE
-    // updae the gp_current_process to gp_pcb_interrupted
+    // update the gp_current_process to gp_pcb_interrupted
     // not implemented, you need to do it
     
     // restore the interrupted process's PCB to gp_current_process
