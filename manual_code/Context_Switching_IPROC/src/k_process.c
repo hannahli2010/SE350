@@ -88,7 +88,7 @@ PCB *pq_remove_by_pid_ready(int pid) {
 
 // get a PCB by its pid from gp_pcbs array
 PCB * get_pcb_by_pid(int pid) {
-	for(int i = 0; i < NUM_TEST_PROCS + 1; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
+	for(int i = 0; i < NUM_TEST_PROCS + 2; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
 		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
 			return gp_pcbs[i];
 		}
@@ -127,6 +127,8 @@ void process_init(PROC_INIT *proc_info, int num)
 	for ( j = 0; j < 6; j++ ) { // R0-R3, R12 are cleared with 0
 		*(--sp) = 0x0;
 	}
+
+	// Null proc initialization
 	gp_pcbs[0]->m_pid = PID_NULL;
 	gp_pcbs[0]->m_state = NEW;
 	gp_pcbs[0]->mp_sp = sp;
@@ -134,6 +136,7 @@ void process_init(PROC_INIT *proc_info, int num)
 	gp_pcbs[0]->m_mem_blk = NULL;
 	pq_insert(&proc_ready_queue, gp_pcbs[0]);
   
+	// User proc initializatons
     for ( i = 1; i <= num; i++ ) {
         int j;
         (gp_pcbs[i])->m_pid = (g_proc_table[i-1]).m_pid;
@@ -150,11 +153,11 @@ void process_init(PROC_INIT *proc_info, int num)
 		(gp_pcbs[i])->m_mem_blk = NULL;
 
 		pq_insert(&proc_ready_queue, gp_pcbs[i]);
-    }
+    }	
 
 #ifdef TIMER_IPROC
     /* Timer i-proc initialization */
-    gp_pcb_timer_iproc = gp_pcbs[i];
+    gp_pcb_timer_iproc = gp_pcbs[i]; // Save the iproc member data in the last of the gc_pcb table
     gp_pcb_timer_iproc->m_pid = PID_TIMER_IPROC;
     gp_pcb_timer_iproc->m_state = IPROC;
     gp_pcb_timer_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
@@ -411,6 +414,7 @@ int k_run_new_process(void)
     // making scheduling decision
     p_new_pcb = scheduler_tms();
     
+	// scheduler_tms will return gp_current_process when the time hasn't reached a certain duration
     if ( p_new_pcb == gp_current_process ) {
         return RTX_OK;
     }
@@ -419,8 +423,14 @@ int k_run_new_process(void)
         return RTX_ERR;
     }
     
-    gp_current_process = p_new_pcb;
-    process_switch(p_old_pcb);
+	// pre-empt if there is a process with a higher priority
+    if ( p_new_pcb->m_priority < gp_current_process->m_priority ) {
+		gp_current_process = p_new_pcb;
+		pq_insert_front_ready(p_old_pcb); // add old proc to front of its priority
+		process_switch(p_old_pcb);
+        return RTX_OK;
+    }
+    
     return RTX_OK;
 }
 /*

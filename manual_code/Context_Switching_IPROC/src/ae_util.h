@@ -10,7 +10,7 @@
 #ifndef AE_UTIL
 #define AE_UTIL
 
-void printUart0(char *, char *);
+void printUart1(char *, char *);
 
 int assertTest(char *, int, int, char*);
 

@@ -37,6 +37,7 @@
 
 #include <LPC17xx.h>
 #include "timer.h"
+#include "k_sys_procs.h"
 #include "k_rtx.h"
 #include "k_inc.h"
 
@@ -62,8 +63,11 @@ uint32_t timer_init(uint8_t n_timer)
         Enable UART0 power, this is the default setting
         done in system_LPC17xx.c under CMSIS.
         Enclose the code for your refrence
-        //LPC_SC->PCONP |= BIT(1);
-    
+        */
+
+        // LPC_SC->PCONP |= BIT(1);
+
+        /*
         -----------------------------------------------------
         Step2: Select the clock source, 
                default PCLK=CCLK/4 , where CCLK = 100MHZ.
@@ -72,9 +76,12 @@ uint32_t timer_init(uint8_t n_timer)
         Check the PLL0 configuration to see how XTAL=12.0MHZ 
         gets to CCLK=100MHZ in system_LPC17xx.c file.
         PCLK = CCLK/4, default setting in system_LPC17xx.c.
-        Enclose the code for your reference
-        //LPC_SC->PCLKSEL0 &= ~(BIT(3)|BIT(2));    
-
+        Enclose the code for your reference 
+        */
+        
+        // LPC_SC->PCLKSEL0 &= ~(BIT(3)|BIT(2));
+        
+        /*
         -----------------------------------------------------
         Step 3: Pin Ctrl Block configuration. 
                 Optional, not used in this example
@@ -157,8 +164,12 @@ ITIMER_SAVE
     LDR     R3, =__cpp(&gp_pcb_interrupted) // load &gp_pcb_interrupted to R3
     STR     R2, [R3]                        // assign gp_current_process to gp_pcb_interrupted
     
+    // GRP 10 IMPLEMENTATION
     // update gp_current_process to point to the gp_pcb_timer_iproc
-    // not implemented, you need to do it
+    LDR     R1, =__cpp(&gp_pcb_timer_iproc) // load R1 with &gp_pcb_timer_iproc
+    LDR     R2, [R1]                        // load R2 with gp_pcb_timer_iproc value
+    LDR     R3, =__cpp(&gp_current_process) // load R1 with &gp_current_process
+    STR     R2, [R3]                        // store the gp_pcb_timer_iproc value to address &gp_current_process
     
 ITIMER_EXEC    
     // update gp_current_process to the PCB of timer_i_proc 
@@ -168,8 +179,12 @@ ITIMER_EXEC
     BL      timer0_iproc                    // execute the timer i-process
     
 ITIMER_RESTORE
+    // GRP 10 IMPLEMENTATION
     // update the gp_current_process to gp_pcb_interrupted
-    // not implemented, you need to do it
+    LDR     R1, =__cpp(&gp_pcb_interrupted) // load R1 with &gp_pcb_interrupted
+    LDR     R2, [R1]                        // load R2 with gp_pcb_interrupted value
+    LDR     R3, =__cpp(&gp_current_process) // load R1 with &gp_current_process
+    STR     R2, [R3]                        // store the gp_pcb_interrupted value to address &gp_current_process
     
     // restore the interrupted process's PCB to gp_current_process
     LDR     R1, =__cpp(&gp_pcb_interrupted)
@@ -179,6 +194,7 @@ ITIMER_RESTORE
     CPSIE   I                               // enable interrupt
     POP     {r4-r11, pc}                    // restore all registers
 } 
+
 /**
  * @brief: c TIMER0 IRQ Handler is now a timer i-process with its own PCB and stack
  */
@@ -187,6 +203,8 @@ void timer0_iproc(void)
     /* ack inttrupt, see section  21.6.1 on pg 493 of LPC17XX_UM */
     LPC_TIM0->IR = BIT(0);  
     g_timer_count++ ;
+
+    timerIProc();
 }
 
 /*

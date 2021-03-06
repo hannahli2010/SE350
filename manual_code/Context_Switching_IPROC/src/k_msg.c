@@ -43,6 +43,9 @@
  *                            TO BE IMPLEMENTED
  *==========================================================================
  */
+ 
+DELAYED_MSG_BUF* delayed_msg_queue = NULL;
+
 int k_send_message(int pid, void *p_msg) {
     // Ensure destination process actually exists
     // recv_pcb← convert recv_pidto process obj/PCB reference

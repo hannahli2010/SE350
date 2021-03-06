@@ -120,6 +120,7 @@ extern PCB          *gp_pcb_interrupted;  /* interrupted process's pcb    */
 extern PROC_INIT    g_proc_table[];
                                           /* process initialization table */
 extern volatile uint32_t g_timer_count;   /* increment every 1 ms         */
+extern DELAYED_MSG_BUF *delayed_msg_queue;
 
 #endif /* ! K_INC_H_ */
 /*

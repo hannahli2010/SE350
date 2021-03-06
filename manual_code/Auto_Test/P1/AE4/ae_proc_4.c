@@ -20,7 +20,7 @@
 /*---------------------------------------------------------------------------- 
  * Assume there are 2 memory blocks
  * 
- * Expected UART1 Output:
+ * Expected UART2 Output:
  *
  * G_10_test_4: START
  * G_10_test_4: test 1 OK
@@ -36,7 +36,7 @@
  * G_10_test_4: 0/9 tests FAIL
  * G_10_test_4: END
  *
- * Expected UART2 output:
+ * Expected UART1 output:
  * 
  * get_process_priority(PID_P3) returned: 1 (expected: 1)
  * set_process_priority(PID_P3, LOWEST) returned: RTX_OK (expected: RTX_OK)
@@ -74,22 +74,22 @@
 int successfulTests = 0;
 char * testName = "G_10_test_4";
 
-void uart1_put_1digit_int(int i)
+void uart0_put_1digit_int(int i)
 {
     if (i > 9 || i < -9) {
-        uart1_put_string("invalid value");
+        uart0_put_string("invalid value");
     } else if (i < 0) {
-        uart1_put_char('-');
-        uart1_put_char('0' - i);
+        uart0_put_char('-');
+        uart0_put_char('0' - i);
     } else {
-        uart1_put_char('0' + i);
+        uart0_put_char('0' + i);
     }
 }
 
-void uart1_put_rtx_success(int i)
+void uart0_put_rtx_success(int i)
 {
-    if (i == RTX_OK) uart1_put_string("RTX_OK");
-    else uart1_put_string("RTX_ERR");
+    if (i == RTX_OK) uart0_put_string("RTX_OK");
+    else uart0_put_string("RTX_ERR");
 }
 
 /**************************************************************************//**
@@ -97,69 +97,69 @@ void uart1_put_rtx_success(int i)
  *****************************************************************************/
 void proc1(void)
 {
-    printUart0(testName, "START");
+    printUart1(testName, "START");
 
     int x = 0;
     // Test getting a process priority
     x = get_process_priority(PID_P3);
     successfulTests += assertTest(testName, x, 1, "1");
 
-    uart1_put_string("get_process_priority(PID_P3) returned: ");
-    uart1_put_1digit_int(x);
-    uart1_put_string(" (expected: 1)\n\r");
+    uart0_put_string("get_process_priority(PID_P3) returned: ");
+    uart0_put_1digit_int(x);
+    uart0_put_string(" (expected: 1)\n\r");
 
     // Test setting a process priority
     x = set_process_priority(PID_P3, LOWEST);
     successfulTests += assertTest(testName, x, RTX_OK, "2");
-    uart1_put_string("set_process_priority(PID_P3, LOWEST) returned: ");
-    uart1_put_rtx_success(x);
-    uart1_put_string(" (expected: RTX_OK)\n\r");
+    uart0_put_string("set_process_priority(PID_P3, LOWEST) returned: ");
+    uart0_put_rtx_success(x);
+    uart0_put_string(" (expected: RTX_OK)\n\r");
 
     x = get_process_priority(PID_P3);
     successfulTests += assertTest(testName, x, 3, "3");
-    uart1_put_string("get_process_priority(PID_P3) returned: ");
-    uart1_put_1digit_int(x);
-    uart1_put_string(" (expected: 3)\n\r");
+    uart0_put_string("get_process_priority(PID_P3) returned: ");
+    uart0_put_1digit_int(x);
+    uart0_put_string(" (expected: 3)\n\r");
 
     // Test setting the null process' priority (Should fail)
     x = set_process_priority(PID_NULL, MEDIUM);
     successfulTests += assertTest(testName, x, RTX_ERR, "4");
-    uart1_put_string("set_process_priority(PID_NULL, MEDIUM) returned: ");
-    uart1_put_rtx_success(x);
-    uart1_put_string(" (expected: RTX_ERR)\n\r");
+    uart0_put_string("set_process_priority(PID_NULL, MEDIUM) returned: ");
+    uart0_put_rtx_success(x);
+    uart0_put_string(" (expected: RTX_ERR)\n\r");
 
     x = get_process_priority(PID_NULL);
     successfulTests += assertTest(testName, x, 4, "5");
-    uart1_put_string("get_process_priority(PID_NULL) returned: ");
-    uart1_put_1digit_int(x);
-    uart1_put_string(" (expected: 4)\n\r");
+    uart0_put_string("get_process_priority(PID_NULL) returned: ");
+    uart0_put_1digit_int(x);
+    uart0_put_string(" (expected: 4)\n\r");
 
     // Test setting another process' priority to the null priority (Should fail)
     x = set_process_priority(PID_P3, PRI_NULL);
     successfulTests += assertTest(testName, x, RTX_ERR, "6");
-    uart1_put_string("set_process_priority(PID_P3, PRI_NULL) returned: ");
-    uart1_put_rtx_success(x);
-    uart1_put_string(" (expected: RTX_ERR)\n\r");
+    uart0_put_string("set_process_priority(PID_P3, PRI_NULL) returned: ");
+    uart0_put_rtx_success(x);
+    uart0_put_string(" (expected: RTX_ERR)\n\r");
 
     x = get_process_priority(PID_P3);
     successfulTests += assertTest(testName, x, 3, "7");
-    uart1_put_string("get_process_priority(PID_P3) returned: ");
-    uart1_put_1digit_int(x);
-    uart1_put_string(" (expected: 3)\n\r");
+    uart0_put_string("get_process_priority(PID_P3) returned: ");
+    uart0_put_1digit_int(x);
+    uart0_put_string(" (expected: 3)\n\r");
 
     // Test setting the priority of a non-existant process (Should fail)
     x = set_process_priority(-1, LOWEST);
     successfulTests += assertTest(testName, x, RTX_ERR, "8");
-    uart1_put_string("set_process_priority(-1, LOWEST) returned: ");
-    uart1_put_rtx_success(x);
-    uart1_put_string(" (expected: RTX_ERR)\n\r");
+    uart0_put_string("set_process_priority(-1, LOWEST) returned: ");
+    uart0_put_rtx_success(x);
+    uart0_put_string(" (expected: RTX_ERR)\n\r");
     
     // Test getting the priority of a non-existant process (Should fail)
     x = get_process_priority(-1);
     successfulTests += assertTest(testName, x, -1, "9");
-    uart1_put_string("get_process_priority(-1) returned: ");
-    uart1_put_1digit_int(x);
-    uart1_put_string(" (expected: -1)\n\r");
+    uart0_put_string("get_process_priority(-1) returned: ");
+    uart0_put_1digit_int(x);
+    uart0_put_string(" (expected: -1)\n\r");
     
     
     printSummary(testName, successfulTests, NUM_TESTS);
@@ -167,7 +167,7 @@ void proc1(void)
     release_processor();
 
     while(1) {
-        uart1_put_string("proc1:\n\r");
+        uart0_put_string("proc1:\n\r");
         request_memory_block();
         release_processor();                
     }
@@ -185,13 +185,13 @@ void proc2(void)
 
     while ( 1 ) {
         if (i != 0 && i % 5 == 0) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
             printf("proc2: received mem block: %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
         }
-        uart1_put_char('A' + i%26);
+        uart0_put_char('A' + i%26);
         i++;
     }
 }
@@ -202,7 +202,7 @@ void proc2(void)
 void proc3(void)
 {
     while(1) {
-        uart1_put_string("proc3:\n\r");
+        uart0_put_string("proc3:\n\r");
         request_memory_block();
         release_processor();
     }
@@ -211,7 +211,7 @@ void proc3(void)
 void proc4(void)
 {
     while(1) {
-        uart1_put_string("proc4:\n\r");
+        uart0_put_string("proc4:\n\r");
         request_memory_block();
         release_processor();
     }
@@ -220,7 +220,7 @@ void proc4(void)
 void proc5(void)
 {
     while(1) {
-        uart1_put_string("proc5:\n\r");
+        uart0_put_string("proc5:\n\r");
         request_memory_block();
         release_processor();
     }
@@ -229,7 +229,7 @@ void proc5(void)
 void proc6(void)
 {
     while(1) {
-        uart1_put_string("proc6:\n\r");
+        uart0_put_string("proc6:\n\r");
         request_memory_block();
         release_processor();
     }

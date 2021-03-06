@@ -22,7 +22,7 @@
 /*---------------------------------------------------------------------------- 
  * Assume there are 2 memory blocks
  * 
- * Expected UART1 Output:
+ * Expected UART2 Output:
  *
  * G_10_test_6: test 1 OK
  * G_10_test_6: test 2 OK
@@ -37,7 +37,7 @@
  * G_10_test_6: 0/9 tests FAIL
  * G_10_test_6: END
  *
- * Expected UART2 Output:
+ * Expected UART1 Output:
  * HELLO WORLD!
  * 1 - MSG HEY :)
  * 2 - MSG YO!
@@ -64,6 +64,7 @@ int nextProcess;
  *****************************************************************************/
 void proc1(void)
 {
+    printUart1(testName, "START");
 #ifdef DEBUG_0
     printf("Start of proc1\n");
 #endif /* DEBUG_0 */
@@ -75,7 +76,7 @@ void proc1(void)
     // Print the Hello World message we previously received
     int i = 0;
     while(message->mtext[i] != '\0' && i < 50) {
-        uart1_put_char(message->mtext[i]);
+        uart0_put_char(message->mtext[i]);
         i++;
     }
     
@@ -168,7 +169,7 @@ void proc4(void)
     // Print message contents
     int i = 0;
     while(msg1->mtext[i] != '\0' && i < 50) {
-        uart1_put_char(msg1->mtext[i]);
+        uart0_put_char(msg1->mtext[i]);
         i++;
     }
     // Assert the first character of the message (ie. assert we got the right message)
@@ -179,7 +180,7 @@ void proc4(void)
     i = 0;
     // Print message contents
     while(msg2->mtext[i] != '\0' && i < 50) {
-        uart1_put_char(msg2->mtext[i]);
+        uart0_put_char(msg2->mtext[i]);
         i++;
     }
     

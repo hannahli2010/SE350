@@ -9,7 +9,7 @@
  */
 
 /**************************************************************************//**
- * @file        ae_proc07.c
+ * @file        ae_proc08.c
  * @brief       Tests after the initial submission
  *              
  * @version     V1.2021.01
@@ -45,14 +45,14 @@
 #include "ae_proc.h"
 #include "ae_util.h"
 
-#ifdef DEBUG_0
+// #ifdef DEBUG_0
 #include "printf.h"
-#endif /* DEBUG_0 */
+// #endif /* DEBUG_0 */
 
 #define NUM_TESTS 7
 
 int successfulTests = 0;
-char * testName = "G_10_test_7";
+char * testName = "G_10_test_8";
 int nextProcess;
 
 /**************************************************************************//**
@@ -64,31 +64,27 @@ void proc1(void)
 {
     printUart1(testName, "START");
 
+    // Recieve message
+    int sender;
     nextProcess = PID_P2;
-    MSG_BUF *msg = (MSG_BUF*) request_memory_block();
-    void *temp = request_memory_block();
+    MSG_BUF* msg = receive_message(&sender);
 
-    msg->mtype = DEFAULT;
-    strcpy(msg->mtext, "YOU WERE BLOCKED :( \n");
+    successfulTests += assertTest(testName, nextProcess, PID_P1, "3");
 
-    // Release the processor to P2
-    nextProcess = PID_P2;
-    release_processor();
+    int i = 0;
+    while(msg->mtext[i] != '\0' && i < 50) {
+        uart0_put_char(msg->mtext[i]);
+        i++;
+    }
+    // Assert that we got the right message
+    successfulTests += assertTest(testName, (int)'D', (int) msg->mtext[0], "4");
 
-    // Once P2 blocks, we should return back to P1
-    successfulTests += assertTest(testName, nextProcess, PID_P1, "2");
-
-    // Set the priority of P2 to high, such that when it unblocks we immediately prempt
-    set_process_priority(PID_P2, HIGH);
-
-    // Send message to P2, which should NOT unblock P2
-    int send_result = send_message(PID_P2, msg);
-    successfulTests += assertTest(testName, send_result, RTX_OK, "3");
-    successfulTests += assertTest(testName, nextProcess, PID_P1, "4");
-
-    // Releasing the other memory block should unblock P2 and allow it to pre-empt us
-    nextProcess = PID_P2;
-    release_memory_block(temp);
+    // TODO: test this!!!
+    successfulTests += assertTest(testName, PID_P2, (int) msg->m_send_pid, "5");
+    successfulTests += assertTest(testName, PID_TIMER_IPROC, (int) msg->m_send_pid, "6"); // for some reason this one passes ??
+    successfulTests += assertTest(testName, PID_P1, (int) msg->m_send_pid, "7");
+    
+    printSummary(testName, successfulTests, NUM_TESTS);
 }
 /**************************************************************************//**
  * @brief: a medium priority process that requests a memory block (which should
@@ -98,28 +94,24 @@ void proc2(void)
 {
     successfulTests += assertTest(testName, nextProcess, PID_P2, "1");
     
+    MSG_BUF *msg = (MSG_BUF*) request_memory_block();
+
+    msg->mtype = DEFAULT;
+    strcpy(msg->mtext, "Delayed message\n");
+
+    k_delayed_send(PID_P1, msg, 5);
+    successfulTests += assertTest(testName, nextProcess, PID_P2, "2");
+
     nextProcess = PID_P1;
-    request_memory_block(); // should block on memory
 
-    // Once unblocked on memory, we should have a message waiting for us
-    successfulTests += assertTest(testName, nextProcess, PID_P2, "5");
-
-    // Recieve message
-    int sender;
-    MSG_BUF* msg = receive_message(&sender);
-    successfulTests += assertTest(testName, sender, PID_P1, "6");
-    // Print message contents
     int i = 0;
-    while(msg->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg->mtext[i]);
+    while(1) {
+        if (i != 0 && i % 5 == 0) {
+			uart0_put_string("\n\r");
+        }
+        uart0_put_char('0' + i%10);
         i++;
     }
-    // Assert that we got the right message
-    successfulTests += assertTest(testName, (int)'Y', (int) msg->mtext[0], "7");
-
-    printSummary(testName, successfulTests, NUM_TESTS);
-
-    while(1) {}
 }
 /**************************************************************************//**
  * @brief: a lowest priority process that releases the processor

@@ -57,7 +57,7 @@
 /*---------------------------------------------------------------------------- 
  * Assume there are 2 memory blocks
  * 
- * Expected UART1 Output:
+ * Expected UART2 Output:
  *
  * G_10_test_3: START
  * G_10_test_3: test 1 OK
@@ -73,7 +73,7 @@
  * G_10_test_3: 0/9 tests FAIL
  * G_10_test_3: END
  * 
- * Expected UART2 Output:
+ * Expected UART1 Output:
  *  
  * ABCDE
  * 01234
@@ -111,7 +111,7 @@ int nextProcess = PID_P1;
  *****************************************************************************/
 void proc1(void)
 {
-    printUart0(testName, "START");
+    printUart1(testName, "START");
 
     int i = 0;
     int ret_val = 20;
@@ -120,7 +120,7 @@ void proc1(void)
 
     while ( 1 ) {
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             if (i == 5) {
                 p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
@@ -152,7 +152,7 @@ void proc1(void)
                 }
             }
         }
-        uart1_put_char('A' + i%26);
+        uart0_put_char('A' + i%26);
         i++;
     }
 }
@@ -167,11 +167,11 @@ void proc2(void)
     successfulTests += assertTest(testName, nextProcess, PID_P2, "1");
     while ( 1) {
         if (i == 10) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             break;
         }
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
 
             // After the following memory request, we expect to become
             //  blocked, and so the next process to execute will be PID_P3
@@ -182,7 +182,7 @@ void proc2(void)
             printf("proc2: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
         }
-        uart1_put_char('0' + i%10);
+        uart0_put_char('0' + i%10);
         i++;
     }
 
@@ -208,11 +208,11 @@ void proc3(void)
     
     while ( 1) {
         if (i == 10) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             break;
         }
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             
             // After the following memory request, we expect to become
             //  blocked, and so the next process to execute will be PID_P1
@@ -220,7 +220,7 @@ void proc3(void)
             p_mem_blk = request_memory_block();
             successfulTests += assertTest(testName, nextProcess, PID_P3, "4");
 
-            uart1_put_string("returned to proc 3\n\r");
+            uart0_put_string("returned to proc 3\n\r");
 
             // After the following memory release, we expect P2 to become
             //  unblocked, but because P3 and P2 have the same priority, P3
@@ -237,10 +237,10 @@ void proc3(void)
             printf("proc3: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
         }
-        uart1_put_string("P3");
+        uart0_put_string("P3");
         i++;
     }
-    uart1_put_string("proc3: end of testing\n\r");
+    uart0_put_string("proc3: end of testing\n\r");
     while ( 1 ) {
     }
 }
@@ -258,7 +258,7 @@ void proc4(void)
 
     while ( 1 ) {
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             if (i == 5) {
                 p_mem_blk = request_memory_block();
 #ifdef DEBUG_0
@@ -287,7 +287,7 @@ void proc4(void)
                 }
             }
         }
-        uart1_put_string("P4");
+        uart0_put_string("P4");
         i++;
     }
     while( 1 ) {
@@ -307,11 +307,11 @@ void proc5(void)
     
     while ( 1) {
         if (i == 10) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             break;
         }
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
             
             // After the following memory request, we expect to become
             //  blocked, and so the next process to execute will be PID_P6
@@ -322,7 +322,7 @@ void proc5(void)
             printf("proc5: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
         }
-        uart1_put_string("P5");
+        uart0_put_string("P5");
         i++;
     }
     
@@ -343,7 +343,7 @@ void proc6(void)
     
     while ( 1) {
         if ( i != 0 && i%5 == 0 ) {
-            uart1_put_string("\n\r");
+            uart0_put_string("\n\r");
 
             // After the following memory request, we expect to become
             //  blocked, and so the next process to execute will be PID_P4
@@ -353,7 +353,7 @@ void proc6(void)
             printf("proc6: received %x\n", p_mem_blk);
 #endif /* DEBUG_0 */
         }
-        uart1_put_string("P6");
+        uart0_put_string("P6");
         i++;
     }
 }

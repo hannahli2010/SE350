@@ -22,7 +22,7 @@
 /*---------------------------------------------------------------------------- 
  * Assume there are 2 memory blocks
  * 
- * Expected UART1 Output:
+ * Expected UART2 Output:
  *
  * G_10_test_5: START
  * G_10_test_5: test 1 OK
@@ -62,7 +62,7 @@ int nextProcess = PID_P1;
  *****************************************************************************/
 void proc1(void)
 {
-    printUart0(testName, "START");
+    printUart1(testName, "START");
 
     int res1 = 20;
     int res2 = 20;
