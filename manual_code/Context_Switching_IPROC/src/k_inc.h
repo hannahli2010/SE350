@@ -62,6 +62,7 @@
 #define PCB_MSP_OFFSET      4       /* mp_sp is 4B offset from pcb struct starting addr.    */
 #define PCB_STATE_OFFSET    12      /* m_state is 12B offset from pcb struct starting addr. */
 #define STACK_SIZE_IPROC    0x200   /* iprocess stack size */
+#define NUM_SYS_PROC      2         /* total number of system procs
 
 
 /* process states, note we only assume three states in this example */

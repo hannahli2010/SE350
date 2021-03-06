@@ -63,6 +63,7 @@ PCB *gp_pcb_interrupted;        /* interrupted process's pcb    */
 
 /* process initialization table */
 PROC_INIT g_proc_table[NUM_TEST_PROCS + 1]; /* user test procs + timer_iproc */
+// ^ why do we need one more for timer_iproc? we never use it
 
 PCB * proc_ready_queue = NULL;
 
@@ -88,7 +89,7 @@ PCB *pq_remove_by_pid_ready(int pid) {
 
 // get a PCB by its pid from gp_pcbs array
 PCB * get_pcb_by_pid(int pid) {
-	for(int i = 0; i < NUM_TEST_PROCS + 2; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
+	for(int i = 0; i < NUM_TEST_PROCS + NUM_SYS_PROC; i++){ // might need to store num from proc_init and use that instead of NUM_TEST_PROCS
 		if (gp_pcbs[i] && gp_pcbs[i]->m_pid == pid) {
 			return gp_pcbs[i];
 		}
