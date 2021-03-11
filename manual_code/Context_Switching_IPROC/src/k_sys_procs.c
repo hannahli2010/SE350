@@ -52,6 +52,9 @@ void timerIProc(void) {
 	// Insert all the messages we just recieved into the delayed message queue
 	DELAYED_MSG_BUF* newMsg;
 	while (newMsg = (DELAYED_MSG_BUF*) k_receive_message_nb(NULL) ) {
+
+		DELAYED_MSG_BUF* temp = delayed_msg_queue;
+
 		// If the list is empty, insert at the front of the list
 		if (delayed_msg_queue == NULL) {
 			newMsg->mp_next = NULL;
@@ -67,13 +70,14 @@ void timerIProc(void) {
 		//   queue based on expiry order
 		else {
 			DELAYED_MSG_BUF* it = delayed_msg_queue;
-			while (it->mp_next != NULL && newMsg->m_expiry <= it->mp_next->m_expiry) {
-				it = it->mp_next;
+			while (it->mp_next != NULL && newMsg->m_expiry - it->m_expiry >= it->mp_next->m_expiry) {
 				// Delays are relative to the delay of the message before it
 				// Decrememt the message's expiry by the previous message's delay
 				newMsg->m_expiry -= it->m_expiry;
+				it = it->mp_next;
 			}
-
+			newMsg->m_expiry -= it->m_expiry;
+			
 			// Insert the new message into the queue
 			newMsg->mp_next = it->mp_next;
 			it->mp_next = newMsg;
@@ -84,7 +88,9 @@ void timerIProc(void) {
 		//   relative to the message we just inserted
 		if (newMsg->mp_next != NULL) {
 			newMsg->mp_next->m_expiry -= newMsg->m_expiry;
-		}	
+		}
+
+		temp = delayed_msg_queue;
 	}
 
 	// Check if message should be sent

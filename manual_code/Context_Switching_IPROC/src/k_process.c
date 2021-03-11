@@ -272,16 +272,22 @@ int process_switch(PCB *p_pcb_old)
 
 int k_release_processor(void)
 {
+	ENTER_KERNEL_FUNC();
+
 	PCB *p_pcb_old = gp_current_process;
 	PCB *p_pcb_next = scheduler();
 	
 	if ( p_pcb_next == NULL  ) { // shouldn't happen since the null proc is always ready
+		EXIT_KERNEL_FUNC();
 		return RTX_ERR;
 	}
 	
 	if (p_pcb_old == NULL) {
 		p_pcb_old = p_pcb_next; // should only happen on the initial call of this func (when gp_curr_proc was NULL)
+		
+		EXIT_KERNEL_FUNC();
 		process_switch(p_pcb_old);
+
 		return RTX_OK;
 	}
 	
@@ -291,6 +297,8 @@ int k_release_processor(void)
 		#ifdef DEBUG_0
 		printf("Did not release pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
 		#endif
+
+		EXIT_KERNEL_FUNC();
 		return RTX_OK;
 	}
 
@@ -299,6 +307,8 @@ int k_release_processor(void)
 	#endif
 	gp_current_process = p_pcb_next;
 	pq_insert_ready(p_pcb_old); // add old proc to ready queue (will handle when it is an iproc)
+	
+	EXIT_KERNEL_FUNC();
 	process_switch(p_pcb_old);
 
 	return RTX_OK;
@@ -306,31 +316,29 @@ int k_release_processor(void)
 
 // get a process's priority
 int k_get_process_priority(int pid) {
-	uint32_t ctrl = __get_CONTROL();
-	__set_CONTROL(0);
+	ENTER_KERNEL_FUNC();
 	if (pid == PID_NULL) {
-		__set_CONTROL(ctrl);
+		EXIT_KERNEL_FUNC();
         return PRI_NULL;
 	}
 	
 	PCB * proc = get_pcb_by_pid(pid);
 	
 	if (proc == NULL) {
-		__set_CONTROL(ctrl);
+		EXIT_KERNEL_FUNC();
 		return RTX_ERR;
 	}
-    __set_CONTROL(ctrl);
+	EXIT_KERNEL_FUNC();
 	return proc->m_priority;
 }
 
 // set a process's priority
 int k_set_process_priority(int pid, int prio) {
-	uint32_t ctrl = __get_CONTROL();
-	__set_CONTROL(0);
+	ENTER_KERNEL_FUNC();
 	// Return error if the process pid is the null process, or if the 
 	//  process priority is invalid
 	if (prio < HIGH || prio >= PRI_NULL || pid == PID_NULL) {
-		__set_CONTROL(ctrl);
+		EXIT_KERNEL_FUNC();
 		return RTX_ERR;
 	}
 	
@@ -339,7 +347,7 @@ int k_set_process_priority(int pid, int prio) {
 	
 	// If the process doesn't exist, or its an IPROC, return error
 	if (proc == NULL || proc->m_state == IPROC) {
-		__set_CONTROL(ctrl);
+		EXIT_KERNEL_FUNC();
 		return RTX_ERR;
 	}	
 
@@ -349,7 +357,7 @@ int k_set_process_priority(int pid, int prio) {
 	
 	// If priority is unchanged, return early and leave queues unchanged
 	if (prevPrio == prio) {
-		__set_CONTROL(ctrl);
+		EXIT_KERNEL_FUNC();
 		return RTX_OK;
 	}
 	
@@ -370,7 +378,7 @@ int k_set_process_priority(int pid, int prio) {
 			if (found != NULL) {
 				// Return early, as no premption should occur in this case
 				pq_insert_blocked(found);
-				__set_CONTROL(ctrl);
+				EXIT_KERNEL_FUNC();
 				return RTX_OK;
 			}
 		}
@@ -391,10 +399,11 @@ int k_set_process_priority(int pid, int prio) {
 	} else {
 		// Otherwise, switch to the new process
 		gp_current_process = p_pcb_next;
+		EXIT_KERNEL_FUNC();
 		process_switch(p_pcb_old);
 	}
 
-	__set_CONTROL(ctrl);
+	EXIT_KERNEL_FUNC();
 	return RTX_OK;
 }
 
@@ -411,26 +420,28 @@ int k_run_new_process(void)
     if (gp_current_process == NULL) {
         return RTX_ERR;
     }
-    
-    // making scheduling decision
-    p_new_pcb = scheduler_tms();
-    
-	// scheduler_tms will return gp_current_process when the time hasn't reached a certain duration
-    if ( p_new_pcb == gp_current_process ) {
-        return RTX_OK;
-    }
-    
-    if ( p_new_pcb == NULL) {
-        return RTX_ERR;
-    }
-    
-	// pre-empt if there is a process with a higher priority
+
+	p_new_pcb = scheduler();
+	
+	// prepare to pre-empt if there is a process with a higher priority
     if ( p_new_pcb->m_priority < gp_current_process->m_priority ) {
 		gp_current_process = p_new_pcb;
-		pq_insert_front_ready(p_old_pcb); // add old proc to front of its priority
+		pq_insert_ready(p_old_pcb); // add old proc to front of its priority
 		process_switch(p_old_pcb);
-        return RTX_OK;
+		return RTX_OK;
     }
+    
+    // making scheduling decision
+    // p_new_pcb = scheduler_tms();
+    
+	// // scheduler_tms will return gp_current_process when the time hasn't reached a certain duration
+    // if ( p_new_pcb == gp_current_process ) {
+    //     return RTX_OK;
+    // }
+    
+    // if ( p_new_pcb == NULL) {
+    //     return RTX_ERR;
+    // }
     
     return RTX_OK;
 }

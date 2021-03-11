@@ -197,8 +197,7 @@ void *k_request_memory_block_nb(void) {
 }
 
 void *k_request_memory_block(void) {
-    uint32_t ctrl = __get_CONTROL();
-    __set_CONTROL(0);
+    ENTER_KERNEL_FUNC();
     PCB * curr_proc = gp_current_process;
     MEM_BLK *prevAddr = curr_proc->m_mem_blk;
     
@@ -222,18 +221,19 @@ void *k_request_memory_block(void) {
         #ifdef DEBUG_0  
         printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
         #endif
+
+        EXIT_KERNEL_FUNC();
         process_switch(p_pcb_old);
     }
     
     // atomic(off);
     curr_proc->m_mem_blk->mp_next = prevAddr;
-    __set_CONTROL(ctrl);
+    EXIT_KERNEL_FUNC();
     return curr_proc->m_mem_blk->block;
 }
 
 int k_release_memory_block(void *p_mem_blk) {
-    uint32_t ctrl = __get_CONTROL();
-    __set_CONTROL(0);
+    ENTER_KERNEL_FUNC();
     // dequeue a blocked-on-memory PCB
     PCB * first = pq_remove(&proc_blocked_queue);
     
@@ -243,15 +243,15 @@ int k_release_memory_block(void *p_mem_blk) {
     U8 *mem_addr = (U8*) p_mem_blk;
     
     if ((U32*) mem_addr < heap_start || (U32*) mem_addr >= gp_stack) {
-        __set_CONTROL(ctrl);
+        EXIT_KERNEL_FUNC();
         return RTX_ERR;
     }
     
     MEM_BLK* target_blk = q_remove_by_addr(&(gp_current_process->m_mem_blk), mem_addr);
     
     if (target_blk == NULL) {
-            __set_CONTROL(ctrl);
-            return RTX_ERR; // did not find the block with mem_addr
+        EXIT_KERNEL_FUNC();
+        return RTX_ERR; // did not find the block with mem_addr
     }
     
     // target_blk should be the proc corresponding to mem_addr
@@ -270,12 +270,14 @@ int k_release_memory_block(void *p_mem_blk) {
             PCB * p_pcb_old = gp_current_process;
             gp_current_process = first;
             pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue
+            
+           EXIT_KERNEL_FUNC();
             process_switch(p_pcb_old);
         } else {
             pq_insert_ready(first);
         }
     }
-    __set_CONTROL(ctrl);
+    EXIT_KERNEL_FUNC();
     return RTX_OK;
 }
 /*

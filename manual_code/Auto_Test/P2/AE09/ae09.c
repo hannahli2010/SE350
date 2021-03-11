@@ -77,7 +77,7 @@ void ae_set_proc_info(PROC_INIT *procs, int num) {
     procs[2].m_priority   = LOW;
     
     procs[3].mpf_start_pc = &proc4;
-    procs[3].m_priority   = LOWEST;
+    procs[3].m_priority   = LOW;
     
     procs[4].mpf_start_pc = &proc5;
     procs[4].m_priority   = LOWEST;

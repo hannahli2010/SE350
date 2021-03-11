@@ -34,10 +34,28 @@ int assertTest(char * testName, int returned, int expected, char* testNum) {
   }
 }
 
+void printNumber(int num) {
+  char str[12];
+  int i = 0;
+  
+  if (num == 0) {
+    str[i++] = '0';
+  }
+
+  while (num > 0) {
+    str[i++] = '0' + (num % 10);
+    num /= 10;
+  }
+
+  while (i --> 0) { // lolol
+    uart1_put_char(str[i]);
+  }
+}
+
 void printFraction(int num, int denom) {
-  uart1_put_char('0' + num);
+  printNumber(num);
   uart1_put_char('/');
-  uart1_put_char('0' + denom);
+  printNumber(denom);
 }
 
 void printSummary(char * testName, int numSucceeded, int numTests) {

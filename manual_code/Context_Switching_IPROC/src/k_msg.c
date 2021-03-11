@@ -47,17 +47,20 @@
 DELAYED_MSG_BUF* delayed_msg_queue = NULL;
 
 int k_send_message(int pid, void *p_msg) {
+    ENTER_KERNEL_FUNC();
     // Ensure destination process actually exists
     // recv_pcb← convert recv_pidto process obj/PCB reference
     PCB* destProc = get_pcb_by_pid(pid);
     if (destProc == NULL) {
         // Destination process doesn't exist, rip
+        EXIT_KERNEL_FUNC();
         return RTX_ERR;
     }
 
     // set sender_pid, destination_pid fields in envelope
     MSG_BUF* message = (MSG_BUF*) p_msg;
-    message->m_send_pid = gp_current_process->m_pid;
+    if (gp_current_process->m_pid != PID_TIMER_IPROC)
+        message->m_send_pid = gp_current_process->m_pid;
     message->m_recv_pid = pid;
 
     // Add message to the back of the destination process' mailbox
@@ -67,6 +70,7 @@ int k_send_message(int pid, void *p_msg) {
     // Remove memory block from the sending process
     MEM_BLK* target_blk = q_remove_by_addr(&(gp_current_process->m_mem_blk), p_msg);
     if (target_blk == NULL) {
+        EXIT_KERNEL_FUNC();
         return RTX_ERR;
     }
     // Give envelope memory block to the target process
@@ -77,7 +81,7 @@ int k_send_message(int pid, void *p_msg) {
         destProc->m_state = RDY;
         
         // If the destination process has a higher priority than the current process, preempt the current process
-        if(destProc->m_priority < gp_current_process->m_priority){
+        if(destProc->m_priority < gp_current_process->m_priority && gp_current_process->m_pid != PID_TIMER_IPROC){
             PCB * p_pcb_old = gp_current_process;
             gp_current_process = destProc;
             pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue
@@ -89,15 +93,19 @@ int k_send_message(int pid, void *p_msg) {
         }
     }
 
+    EXIT_KERNEL_FUNC();
     return RTX_OK;
 }
 
 // To be done after iprocess implementation
 int k_delayed_send(int pid, void *p_msg, int delay) {
+    ENTER_KERNEL_FUNC();
     DELAYED_MSG_BUF* message = (DELAYED_MSG_BUF*) p_msg;
     message->m_expiry = delay;
     message->m_real_recv_pid = pid;
-    return k_send_message(PID_TIMER_IPROC, p_msg);
+    int status = k_send_message(PID_TIMER_IPROC, p_msg);
+    EXIT_KERNEL_FUNC();
+    return status;
 }
 
 void *k_receive_message_nb(int *p_pid) {

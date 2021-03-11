@@ -62,7 +62,7 @@
 #define PCB_MSP_OFFSET      4       /* mp_sp is 4B offset from pcb struct starting addr.    */
 #define PCB_STATE_OFFSET    12      /* m_state is 12B offset from pcb struct starting addr. */
 #define STACK_SIZE_IPROC    0x200   /* iprocess stack size */
-#define NUM_SYS_PROC      2         /* total number of system procs
+#define NUM_SYS_PROC        2       /* total number of system procs */
 
 
 /* process states, note we only assume three states in this example */
@@ -124,6 +124,21 @@ extern volatile uint32_t g_timer_count;   /* increment every 1 ms         */
 extern DELAYED_MSG_BUF *delayed_msg_queue;
 
 #endif /* ! K_INC_H_ */
+
+/*
+ *===========================================================================
+ *                          FUNCTIONAL MACROS
+ *===========================================================================
+ */
+#define ENTER_KERNEL_FUNC() \
+    if (gp_current_process->m_pid != PID_TIMER_IPROC) { __disable_irq(); } \
+    uint32_t ctrl = __get_CONTROL(); \
+    __set_CONTROL(0);
+
+#define EXIT_KERNEL_FUNC() \
+    __set_CONTROL(ctrl); \
+    if (gp_current_process->m_pid != PID_TIMER_IPROC) { __enable_irq(); }
+
 /*
  *===========================================================================
  *                             END OF FILE

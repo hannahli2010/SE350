@@ -20,36 +20,33 @@
  *
  *****************************************************************************/
 /*---------------------------------------------------------------------------- 
- * Assume there are 2 memory blocks
- * 
  * Expected UART2 Output:
  *
- * G_10_test_7: test 1 OK
- * G_10_test_7: test 2 OK
- * G_10_test_7: test 3 OK
- * G_10_test_7: test 4 OK
- * G_10_test_7: test 5 OK
- * G_10_test_7: test 6 OK
- * G_10_test_7: test 7 OK
- * G_10_test_7: 7/7 tests OK
- * G_10_test_7: 0/7 tests FAIL
- * G_10_test_7: END
+ * G_10_test_8: START
+ * G_10_test_8: test 1 OK
+ * G_10_test_8: test 2 OK
+ * G_10_test_8: test 3 OK
+ * G_10_test_8: test 4 OK
+ * G_10_test_8: test 5 OK
+ * G_10_test_8: test 6 OK
+ * G_10_test_8: test 7 OK
+ * G_10_test_8: test 8 OK
+ * G_10_test_8: test 9 OK
+ * G_10_test_8: test 10 OK
+ * G_10_test_8: test 11 OK
+ * G_10_test_8: test 12 OK
+ * G_10_test_8: 12/12 tests OK
+ * G_10_test_8: 0/12 tests FAIL
+ * G_10_test_8: END
  *
  * Expected UART1 Output:
  * 01234
  * 56789
- * 01234
- * 56789
- * 01234
- * 56789
- * 01234
- * 56789
- * 01234
- * 56789
- * 01234
- * 56789
- * 01234
- * 5678Delayed message
+ * 0Short message to proc 2
+ * ABCDE
+ * FGHIJ
+ * KLNew short message to proc 1
+ * 44Long message to proc 1
  * 
  *-------------------------------------------------------------------------------*/ 
 
@@ -62,7 +59,7 @@
 #include "printf.h"
 // #endif /* DEBUG_0 */
 
-#define NUM_TESTS 7
+#define NUM_TESTS 12
 
 int successfulTests = 0;
 char * testName = "G_10_test_8";
@@ -77,12 +74,12 @@ void proc1(void)
 {
     printUart1(testName, "START");
 
-    // Recieve message
-    int sender;
     nextProcess = PID_P2;
+    // Receive message
+    int sender;
     MSG_BUF* msg = receive_message(&sender);
 
-    successfulTests += assertTest(testName, nextProcess, PID_P1, "3");
+    successfulTests += assertTest(testName, nextProcess, PID_P1, "7");
 
     int i = 0;
     while(msg->mtext[i] != '\0' && i < 50) {
@@ -90,12 +87,26 @@ void proc1(void)
         i++;
     }
     // Assert that we got the right message
-    successfulTests += assertTest(testName, (int)'D', (int) msg->mtext[0], "4");
+    successfulTests += assertTest(testName, (int)'N', (int) msg->mtext[0], "8");
+    successfulTests += assertTest(testName, PID_P2, (int) msg->m_send_pid, "9");
 
-    // TODO: test this!!!
-    successfulTests += assertTest(testName, PID_P2, (int) msg->m_send_pid, "5");
-    successfulTests += assertTest(testName, PID_TIMER_IPROC, (int) msg->m_send_pid, "6"); // for some reason this one passes ??
-    successfulTests += assertTest(testName, PID_P1, (int) msg->m_send_pid, "7");
+    set_process_priority(PID_P2, LOW);
+    set_process_priority(PID_P4, MEDIUM);
+    nextProcess = PID_P4;
+
+    // Receive message
+    msg = receive_message(&sender);
+
+    successfulTests += assertTest(testName, nextProcess, PID_P1, "10");
+
+    i = 0;
+    while(msg->mtext[i] != '\0' && i < 50) {
+        uart0_put_char(msg->mtext[i]);
+        i++;
+    }
+    // Assert that we got the right message
+    successfulTests += assertTest(testName, (int)'L', (int) msg->mtext[0], "11");
+    successfulTests += assertTest(testName, PID_P3, sender, "12");
     
     printSummary(testName, successfulTests, NUM_TESTS);
 }
@@ -106,16 +117,56 @@ void proc1(void)
 void proc2(void)
 {
     successfulTests += assertTest(testName, nextProcess, PID_P2, "1");
+    // Recieve message
+    int sender;
+    nextProcess = PID_P3;
+    MSG_BUF* msg = receive_message(&sender);
     
-    MSG_BUF *msg = (MSG_BUF*) request_memory_block();
+    int i = 0;
+    while(msg->mtext[i] != '\0' && i < 50) {
+        uart0_put_char(msg->mtext[i]);
+        i++;
+    }
 
-    msg->mtype = DEFAULT;
-    strcpy(msg->mtext, "Delayed message\n");
+    successfulTests += assertTest(testName, nextProcess, PID_P2, "4");
+    successfulTests += assertTest(testName, (int)'S', (int) msg->mtext[0], "5");
+    successfulTests += assertTest(testName, sender, PID_P3, "6");
 
-    k_delayed_send(PID_P1, msg, 5);
-    successfulTests += assertTest(testName, nextProcess, PID_P2, "2");
+    strcpy(msg->mtext, "New short message to proc 1\n");
+    delayed_send(PID_P1, msg, 30);
 
     nextProcess = PID_P1;
+
+    i = 0;
+    while(1) {
+        if (i != 0 && i % 50000 == 0) {
+			uart0_put_string("\n\r");
+        }
+        if (i % 10000 == 0) {
+            uart0_put_char('A' + (i/10000) % 26);
+        }
+        i++;
+    }
+}
+/**************************************************************************//**
+ * @brief: a lowest priority process that releases the processor
+ *****************************************************************************/
+void proc3(void)
+{
+    successfulTests += assertTest(testName, nextProcess, PID_P3, "2");
+    MSG_BUF *msg1 = (MSG_BUF*) request_memory_block();
+    MSG_BUF *msg2 = (MSG_BUF*) request_memory_block();
+    // MSG_BUF *msg3 = (MSG_BUF*) request_memory_block();
+
+    msg1->mtype = DEFAULT;
+    strcpy(msg1->mtext, "Long message to proc 1\n");
+    msg2->mtype = DEFAULT;
+    strcpy(msg2->mtext, "Short message to proc 2\n");
+
+    delayed_send(PID_P1, msg1, 80);
+    delayed_send(PID_P2, msg2, 30);
+    successfulTests += assertTest(testName, nextProcess, PID_P3, "3");
+    nextProcess = PID_P2;
 
     int i = 0;
     while(1) {
@@ -128,20 +179,23 @@ void proc2(void)
         i++;
     }
 }
-/**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
- *****************************************************************************/
-void proc3(void)
-{
-    release_processor();
-}
 
 /**************************************************************************//**
  * @brief: a lowest priority process that releases the processor
  *****************************************************************************/
 void proc4(void)
 {
-    release_processor();
+    nextProcess = PID_P1;
+    int i = 0;
+    while(1) {
+        if (i != 0 && i % 50000 == 0) {
+			uart0_put_string("\n\r");
+        }
+        if (i % 10000 == 0) {
+            uart0_put_char('4');
+        }
+        i++;
+    }
 }
 
 /**************************************************************************//**
