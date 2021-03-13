@@ -130,14 +130,14 @@ extern DELAYED_MSG_BUF *delayed_msg_queue;
  *                          FUNCTIONAL MACROS
  *===========================================================================
  */
-#define ENTER_KERNEL_FUNC() \
-    if (gp_current_process->m_pid != PID_TIMER_IPROC) { __disable_irq(); } \
-    uint32_t ctrl = __get_CONTROL(); \
-    __set_CONTROL(0);
+#define ENTER_KERNEL_FUNC() ;
+    // if (gp_current_process->m_pid != PID_TIMER_IPROC) { __disable_irq(); } \
+    // uint32_t ctrl = __get_CONTROL(); \
+    // __set_CONTROL(0);
 
-#define EXIT_KERNEL_FUNC() \
-    __set_CONTROL(ctrl); \
-    if (gp_current_process->m_pid != PID_TIMER_IPROC) { __enable_irq(); }
+#define EXIT_KERNEL_FUNC() ;
+    // __set_CONTROL(ctrl); \
+    // if (gp_current_process->m_pid != PID_TIMER_IPROC) { __enable_irq(); }
 
 /*
  *===========================================================================

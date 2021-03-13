@@ -10,7 +10,13 @@
 
 /**************************************************************************//**
  * @file        ae_proc07.c
- * @brief       Tests after the initial submission
+ * @brief       The goal of this test is to ensure that processes which are
+ *              blocked on resource (memory) are still capable of recieving 
+ *              messages. In this test, proc1 steals all avaiable memory, and 
+ *              allows proc2 to become blocked. When proc1 regains execution, it
+ *              send a message to proc2, then releases memory to allow proc2 to
+ *              become unblocked. Proc2 will then attempts to recieve the message
+ *              it would have gotten while blocked.
  *              
  * @version     V1.2021.01
  * @authors     Group 10
@@ -69,7 +75,7 @@ void proc1(void)
     void *temp = request_memory_block();
 
     msg->mtype = DEFAULT;
-    strcpy(msg->mtext, "YOU WERE BLOCKED :( \n");
+    strcpy(msg->mtext, "YOU WERE BLOCKED :( \n\r");
 
     // Release the processor to P2
     nextProcess = PID_P2;
@@ -109,11 +115,8 @@ void proc2(void)
     MSG_BUF* msg = receive_message(&sender);
     successfulTests += assertTest(testName, sender, PID_P1, "6");
     // Print message contents
-    int i = 0;
-    while(msg->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg->mtext[i]);
-        i++;
-    }
+    uart0_printMsgText(msg);
+
     // Assert that we got the right message
     successfulTests += assertTest(testName, (int)'Y', (int) msg->mtext[0], "7");
 

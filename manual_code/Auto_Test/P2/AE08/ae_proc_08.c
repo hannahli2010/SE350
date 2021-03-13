@@ -21,7 +21,6 @@
  *****************************************************************************/
 /*---------------------------------------------------------------------------- 
  * Expected UART2 Output:
- *
  * G_10_test_8: START
  * G_10_test_8: test 1 OK
  * G_10_test_8: test 2 OK
@@ -43,10 +42,10 @@
  * 01234
  * 56789
  * 0Short message to proc 2
- * ABCDE
- * FGHIJ
- * KLNew short message to proc 1
- * 44Long message to proc 1
+ * 1234
+ * 56789
+ * 012New short message to proc 2
+ * ABLong message to proc 1
  * 
  *-------------------------------------------------------------------------------*/ 
 
@@ -66,44 +65,22 @@ char * testName = "G_10_test_8";
 int nextProcess;
 
 /**************************************************************************//**
- * @brief: a medium priority process that requests two memory blocks, then after
- *         releasing the processor to proc2, sets proc2's priority to HIGH,
- *         sends a message to proc2, then releases a memory block to unblock proc2
+ * @brief: a high priority process that recieves a message and prints it.
  *****************************************************************************/
 void proc1(void)
 {
     printUart1(testName, "START");
 
     nextProcess = PID_P2;
+
     // Receive message
     int sender;
     MSG_BUF* msg = receive_message(&sender);
 
-    successfulTests += assertTest(testName, nextProcess, PID_P1, "7");
-
-    int i = 0;
-    while(msg->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg->mtext[i]);
-        i++;
-    }
-    // Assert that we got the right message
-    successfulTests += assertTest(testName, (int)'N', (int) msg->mtext[0], "8");
-    successfulTests += assertTest(testName, PID_P2, (int) msg->m_send_pid, "9");
-
-    set_process_priority(PID_P2, LOW);
-    set_process_priority(PID_P4, MEDIUM);
-    nextProcess = PID_P4;
-
-    // Receive message
-    msg = receive_message(&sender);
-
     successfulTests += assertTest(testName, nextProcess, PID_P1, "10");
 
-    i = 0;
-    while(msg->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg->mtext[i]);
-        i++;
-    }
+    uart0_printMsgText(msg);
+
     // Assert that we got the right message
     successfulTests += assertTest(testName, (int)'L', (int) msg->mtext[0], "11");
     successfulTests += assertTest(testName, PID_P3, sender, "12");
@@ -111,8 +88,8 @@ void proc1(void)
     printSummary(testName, successfulTests, NUM_TESTS);
 }
 /**************************************************************************//**
- * @brief: a medium priority process that requests a memory block (which should
- *         cause it to block on memory), then tries to receive a message.
+ * @brief: a medium priority process that receives and prints a message, then
+ *         sends another delayed message to itself, then receives and prints it.
  *****************************************************************************/
 void proc2(void)
 {
@@ -122,22 +99,32 @@ void proc2(void)
     nextProcess = PID_P3;
     MSG_BUF* msg = receive_message(&sender);
     
-    int i = 0;
-    while(msg->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg->mtext[i]);
-        i++;
-    }
+    uart0_printMsgText(msg);
 
     successfulTests += assertTest(testName, nextProcess, PID_P2, "4");
+    // Assert that we got the right message
     successfulTests += assertTest(testName, (int)'S', (int) msg->mtext[0], "5");
     successfulTests += assertTest(testName, sender, PID_P3, "6");
 
-    strcpy(msg->mtext, "New short message to proc 1\n");
-    delayed_send(PID_P1, msg, 30);
+    strcpy(msg->mtext, "New short message to proc 2\n\r");
+    delayed_send(PID_P2, msg, 30);
+
+    nextProcess = PID_P2;
+
+    // Receive message
+    msg = receive_message(&sender);
+
+    successfulTests += assertTest(testName, nextProcess, PID_P2, "7");
+
+    uart0_printMsgText(msg);
+
+    // Assert that we got the right message
+    successfulTests += assertTest(testName, (int)'N', (int) msg->mtext[0], "8");
+    successfulTests += assertTest(testName, PID_P2, (int) msg->m_send_pid, "9");
 
     nextProcess = PID_P1;
 
-    i = 0;
+    int i = 0;
     while(1) {
         if (i != 0 && i % 50000 == 0) {
 			uart0_put_string("\n\r");
@@ -149,7 +136,8 @@ void proc2(void)
     }
 }
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: a low priority process that sends a message to proc1 with a long delay
+ *         and sends a message to proc2 with a short delay.
  *****************************************************************************/
 void proc3(void)
 {
@@ -159,9 +147,9 @@ void proc3(void)
     // MSG_BUF *msg3 = (MSG_BUF*) request_memory_block();
 
     msg1->mtype = DEFAULT;
-    strcpy(msg1->mtext, "Long message to proc 1\n");
+    strcpy(msg1->mtext, "Long message to proc 1\n\r");
     msg2->mtype = DEFAULT;
-    strcpy(msg2->mtext, "Short message to proc 2\n");
+    strcpy(msg2->mtext, "Short message to proc 2\n\r");
 
     delayed_send(PID_P1, msg1, 80);
     delayed_send(PID_P2, msg2, 30);
@@ -181,37 +169,27 @@ void proc3(void)
 }
 
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: a lowest priority process that does nothing
  *****************************************************************************/
 void proc4(void)
 {
-    nextProcess = PID_P1;
-    int i = 0;
-    while(1) {
-        if (i != 0 && i % 50000 == 0) {
-			uart0_put_string("\n\r");
-        }
-        if (i % 10000 == 0) {
-            uart0_put_char('4');
-        }
-        i++;
-    }
+    while (1) { }
 }
 
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: a lowest priority process that does nothing
  *****************************************************************************/
 void proc5(void)
 {
-    release_processor();
+    while (1) { }
 }
 
 /**************************************************************************//**
- * @brief: a lowest priority process that releases the processor
+ * @brief: a lowest priority process that does nothing
  *****************************************************************************/
 void proc6(void)
 {
-    release_processor();
+    while (1) { }
 }
 /*
  *===========================================================================

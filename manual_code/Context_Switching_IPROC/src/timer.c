@@ -154,9 +154,6 @@ __asm void TIMER0_IRQHandler(void)
     IMPORT  k_run_new_process
     CPSID   I                               // disable interrupt
     PUSH    {r4-r11, lr}                    // save all registers
-    MRS     R11, CONTROL
-    MOV     R1, #0
-    MSR     CONTROL, R11                    // G11 IMPL: store and set CONTROL bit
 ITIMER_SAVE
     // save the sp of the current running process into its PCB
     LDR     R1, =__cpp(&gp_current_process) // load R1 with &gp_current_process
@@ -194,7 +191,6 @@ ITIMER_RESTORE
     LDR     R2, [R1]
     LDR     SP, [R2, #PCB_MSP_OFFSET]       // load MSP with gp_current_process->mp_sp
     BL      k_run_new_process               // run a Non-IPROC 
-    MSR     CONTROL, R11                    // G11 IMPL: restore CONTROL bit
     CPSIE   I                               // enable interrupt
     POP     {r4-r11, pc}                    // restore all registers
 } 

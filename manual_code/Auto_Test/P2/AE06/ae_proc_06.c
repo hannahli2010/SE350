@@ -10,7 +10,17 @@
 
 /**************************************************************************//**
  * @file        ae_proc06.c
- * @brief       Tests after the initial submission
+ * @brief       The goal of this test is to verify that processes can get blocked
+ *              on message, can pre-empt when unblocked, and can send and receive
+ *              messages in either order.
+ *
+ *              Proc1 gets blocked on message until proc2 sends one to it. Since
+ *              proc1 is of a higher priority, it pre-empts proc2 when being
+ *              unblocked. Proc1 then raises the priorities of proc3 and proc4 to
+ *              HIGH and releases the processor.
+ *
+ *              Proc3 sends two messages to proc4 and releases the processor to
+ *              proc4. Proc4 then receives the 2 messages.
  *              
  * @version     V1.2021.01
  * @authors     Group 10
@@ -58,7 +68,11 @@ char * testName = "G_10_test_6";
 int nextProcess;
 
 /**************************************************************************//**
- * @brief: a high priority process
+ * @brief: a high priority process that tries to receive a message, resulting in
+           it getting blocked. After it receives the messge, it releases the memory
+           block (so this test also works if there's only 2 memory blocks, but it
+           is not necessary) and raises the priority levels of proc3 and proc4
+           to HIGH. It will then release_processor() to proc3.
  *****************************************************************************/
 void proc1(void)
 {
@@ -101,7 +115,7 @@ void proc1(void)
     while(1) {}
 }
 /**************************************************************************//**
- * @brief: a medium priority process
+ * @brief: a medium priority process that sends a message to proc1 and gets pre-empted
  *****************************************************************************/
 void proc2(void)
 {
@@ -113,7 +127,7 @@ void proc2(void)
     MSG_BUF *msg = (MSG_BUF*) request_memory_block();
 
     msg->mtype = DEFAULT;
-    strcpy(msg->mtext, "HELLO WORLD!\n");
+    strcpy(msg->mtext, "HELLO WORLD!\n\r");
 
     nextProcess = PID_P1;
     // send message to proc1 which will unblock and preempt proc2
@@ -126,7 +140,8 @@ void proc2(void)
     while(1) {}
 }
 /**************************************************************************//**
- * @brief: a process that sends two messages
+ * @brief: An initially lowest priority process that gets raised to HIGH.
+           It sends two messages to proc4, then releases the processor.
  *****************************************************************************/
 void proc3(void)
 {
@@ -141,8 +156,8 @@ void proc3(void)
     msg1->mtype = DEFAULT;
     msg2->mtype = DEFAULT;
     
-    strcpy(msg1->mtext, "1 - MSG HEY :)\n");
-    strcpy(msg2->mtext, "2 - MSG YO!\n");
+    strcpy(msg1->mtext, "1 - MSG HEY :)\n\r");
+    strcpy(msg2->mtext, "2 - MSG YO!\n\r");
 
     send_message(PID_P4, msg1);
     send_message(PID_P4, msg2);
@@ -153,7 +168,8 @@ void proc3(void)
 }
 
 /**************************************************************************//**
- * @brief: A process that recieves two messages
+ * @brief: An initially lowest priority process that gets raised to HIGH.
+           It receives two messages from proc3.
  *****************************************************************************/
 void proc4(void)
 {
@@ -165,22 +181,15 @@ void proc4(void)
     // Recieve first message
     MSG_BUF* msg1 = receive_message(NULL);   
     // Print message contents
-    int i = 0;
-    while(msg1->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg1->mtext[i]);
-        i++;
-    }
+    uart0_printMsgText(msg1);
+
     // Assert the first character of the message (ie. assert we got the right message)
     successfulTests += assertTest(testName, (int)'1', (int) msg1->mtext[0], "8");
 
     // Recieve second message
     MSG_BUF* msg2 = receive_message(NULL);
-    i = 0;
     // Print message contents
-    while(msg2->mtext[i] != '\0' && i < 50) {
-        uart0_put_char(msg2->mtext[i]);
-        i++;
-    }
+    uart0_printMsgText(msg2);
     
     // Assert the first character of the message (ie. assert we got the right message)
     successfulTests += assertTest(testName, (int)'2', (int) msg2->mtext[0], "9");

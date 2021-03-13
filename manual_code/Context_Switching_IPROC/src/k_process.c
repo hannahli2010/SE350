@@ -135,6 +135,7 @@ void process_init(PROC_INIT *proc_info, int num)
 	gp_pcbs[0]->mp_sp = sp;
 	gp_pcbs[0]->m_priority = PRI_NULL;
 	gp_pcbs[0]->m_mem_blk = NULL;
+	gp_pcbs[0]->m_msg_buf = NULL;
 	pq_insert(&proc_ready_queue, gp_pcbs[0]);
   
 	// User proc initializatons
@@ -152,6 +153,7 @@ void process_init(PROC_INIT *proc_info, int num)
         (gp_pcbs[i])->mp_sp = sp;
 		(gp_pcbs[i])->m_priority = (g_proc_table[i-1]).m_priority;
 		(gp_pcbs[i])->m_mem_blk = NULL;
+		(gp_pcbs[i])->m_msg_buf = NULL;
 
 		pq_insert(&proc_ready_queue, gp_pcbs[i]);
     }	
@@ -162,6 +164,8 @@ void process_init(PROC_INIT *proc_info, int num)
     gp_pcb_timer_iproc->m_pid = PID_TIMER_IPROC;
     gp_pcb_timer_iproc->m_state = IPROC;
     gp_pcb_timer_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
+	gp_pcb_timer_iproc->m_mem_blk = NULL;
+	gp_pcb_timer_iproc->m_msg_buf = NULL;
     /* NOTE we do not need to create exception stack frame for an IPROC
        since they are running in handler mode and never get into the handler
        mode from the thread mode and they never exit from the handler mode
@@ -431,7 +435,7 @@ int k_run_new_process(void)
 		return RTX_OK;
     }
     
-    // making scheduling decision
+    // making scheduling decision if processes were only allowed to run for a specific quantum
     // p_new_pcb = scheduler_tms();
     
 	// // scheduler_tms will return gp_current_process when the time hasn't reached a certain duration

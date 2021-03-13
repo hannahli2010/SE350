@@ -62,7 +62,7 @@ void timerIProc(void) {
 		}
 		// If the message should be inserted before the first element in the 
 		//   queue, insert the new message to the head of the list
-		else if (newMsg->m_expiry <= delayed_msg_queue->m_expiry) {
+		else if (newMsg->m_expiry < delayed_msg_queue->m_expiry) {
 			newMsg->mp_next = delayed_msg_queue;
 			delayed_msg_queue = newMsg;
 		}

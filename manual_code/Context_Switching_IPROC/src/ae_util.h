@@ -20,4 +20,6 @@ void printSummary(char *, int, int);
 
 void strcpy(char*, char*);
 
+void uart0_printMsgText(MSG_BUF*);
+
 #endif
