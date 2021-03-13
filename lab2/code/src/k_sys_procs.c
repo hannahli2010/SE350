@@ -52,7 +52,6 @@ void timerIProc(void) {
 	// Insert all the messages we just recieved into the delayed message queue
 	DELAYED_MSG_BUF* newMsg;
 	while (newMsg = (DELAYED_MSG_BUF*) k_receive_message_nb(NULL) ) {
-
 		// If the list is empty, insert at the front of the list
 		if (delayed_msg_queue == NULL) {
 			newMsg->mp_next = NULL;

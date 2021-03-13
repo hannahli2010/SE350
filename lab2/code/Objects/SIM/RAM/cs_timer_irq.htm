@@ -1,9 +1,9 @@
 <!doctype html public "-//w3c//dtd html 4.0 transitional//en">
 <html><head>
-<title>Static Call Graph - [.\Objects\SIM\cs_timer_irq.axf]</title></head>
+<title>Static Call Graph - [.\Objects\SIM\RAM\cs_timer_irq.axf]</title></head>
 <body><HR>
-<H1>Static Call Graph for image .\Objects\SIM\cs_timer_irq.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri Mar 12 23:34:35 2021
+<H1>Static Call Graph for image .\Objects\SIM\RAM\cs_timer_irq.axf</H1><HR>
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Fri Mar 12 23:32:14 2021
 <BR><P>
 <H3>Maximum Stack Usage =        136 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -465,8 +465,13 @@ Global Symbols
 
 <P><STRONG><a name="[a4]"></a>__use_no_semihosting_swi</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, use_no_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[a5]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size 24 bytes, indicate_semi.o(.text), UNUSED)
+<P><STRONG><a name="[a5]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
+<P><STRONG><a name="[31]"></a>SystemInit</STRONG> (Thumb, 302 bytes, Stack size 0 bytes, system_lpc17xx.o(i.SystemInit))
+<BR><BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+</UL>
+<BR>[Address Reference Count : 1]<UL><LI> startup_lpc17xx.o(.text)
+</UL>
 <P><STRONG><a name="[57]"></a>ae_init</STRONG> (Thumb, 42 bytes, Stack size 24 bytes, ae10.o(i.ae_init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = ae_init &rArr; ae_set_proc_info
 </UL>
@@ -475,25 +480,14 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[78]"></a>alloc_stack</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, k_memory.o(i.alloc_stack))
-<BR><BR>[Called By]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_init
-</UL>
-
-<P><STRONG><a name="[41]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, k_sys_procs.o(i.nullProc))
-<BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
-</UL>
-<P><STRONG><a name="[3a]"></a>pre_rtx_init</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, main_svc.o(i.pre_rtx_init))
-<BR>[Address Reference Count : 1]<UL><LI> main_svc.o(i.main)
-</UL>
-<P><STRONG><a name="[31]"></a>SystemInit</STRONG> (Thumb, 302 bytes, Stack size 0 bytes, system_lpc17xx.o(i.SystemInit))
-<BR><BR>[Called By]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-</UL>
-<BR>[Address Reference Count : 1]<UL><LI> startup_lpc17xx.o(.text)
-</UL>
 <P><STRONG><a name="[58]"></a>ae_set_proc_info</STRONG> (Thumb, 82 bytes, Stack size 8 bytes, ae10.o(i.ae_set_proc_info))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = ae_set_proc_info
 </UL>
 <BR>[Called By]<UL><LI><a href="#[57]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;ae_init
+</UL>
+
+<P><STRONG><a name="[78]"></a>alloc_stack</STRONG> (Thumb, 32 bytes, Stack size 0 bytes, k_memory.o(i.alloc_stack))
+<BR><BR>[Called By]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_init
 </UL>
 
 <P><STRONG><a name="[59]"></a>assertTest</STRONG> (Thumb, 66 bytes, Stack size 24 bytes, ae_util.o(i.assertTest))
@@ -639,6 +633,9 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_rtx_init
 </UL>
 
+<P><STRONG><a name="[41]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, k_sys_procs.o(i.nullProc))
+<BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
+</UL>
 <P><STRONG><a name="[62]"></a>pq_insert</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, k_priority_queue.o(i.pq_insert))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = pq_insert
 </UL>
@@ -703,6 +700,9 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 </UL>
 
+<P><STRONG><a name="[3a]"></a>pre_rtx_init</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, main_svc.o(i.pre_rtx_init))
+<BR>[Address Reference Count : 1]<UL><LI> main_svc.o(i.main)
+</UL>
 <P><STRONG><a name="[71]"></a>printFraction</STRONG> (Thumb, 28 bytes, Stack size 16 bytes, ae_util.o(i.printFraction))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = printFraction &rArr; printNumber
 </UL>
