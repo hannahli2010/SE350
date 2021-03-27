@@ -117,7 +117,7 @@ extern U32          *gp_stack;            /* see k_memory.c for details   */
 extern PCB          **gp_pcbs;            /* array of pcbs */
 extern PCB          *gp_current_process;  /* the current RUN process      */
 extern PCB          *gp_pcb_timer_iproc;  /* points to Timer iprocess pcb */
-extern PCB          *gp_pcb_uart_iproc;  /* points to Timer iprocess pcb */ 
+extern PCB          *gp_pcb_uart_iproc;   /* points to Timer iprocess pcb */ 
 extern PCB          *gp_pcb_interrupted;  /* interrupted process's pcb    */
 extern PROC_INIT    g_proc_table[];
                                           /* process initialization table */

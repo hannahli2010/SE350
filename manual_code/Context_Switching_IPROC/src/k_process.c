@@ -191,7 +191,7 @@ void process_init(PROC_INIT *proc_info, int num)
             *(--sp) = 0x0;
         }
         (gp_pcbs[i])->mp_sp = sp;
-		(gp_pcbs[i])->m_priority = LOWEST;
+		(gp_pcbs[i])->m_priority = HIGH;
 		(gp_pcbs[i])->m_mem_blk = NULL;
 		(gp_pcbs[i])->m_msg_buf = NULL;
 
@@ -218,7 +218,7 @@ void process_init(PROC_INIT *proc_info, int num)
 
     /* Uart i-proc initialization */
     gp_pcb_uart_iproc = gp_pcbs[i]; // Save the iproc member data in the last of the gc_pcb table
-    gp_pcb_uart_iproc->m_pid = PID_TIMER_IPROC;
+    gp_pcb_uart_iproc->m_pid = PID_UART_IPROC;
     gp_pcb_uart_iproc->m_state = IPROC;
     gp_pcb_uart_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
 	gp_pcb_uart_iproc->m_mem_blk = NULL;
@@ -350,17 +350,17 @@ int k_release_processor(void)
 	// If there is no process with greater priority, AND the current process is
 	//   not an iprocess, do not context switch.
 	if (p_pcb_old->m_priority < p_pcb_next->m_priority && p_pcb_old->m_state != IPROC) {
-		#ifdef DEBUG_0
-		printf("Did not release pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
-		#endif
+		// #ifdef DEBUG_0
+		// printf("Did not release pid %d with pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+		// #endif
 
 		EXIT_KERNEL_FUNC();
 		return RTX_OK;
 	}
 
-	#ifdef DEBUG_0
-	printf("Pid %d is replaced by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
-	#endif
+	// #ifdef DEBUG_0
+	// printf("Pid %d is replaced by pid %d\n", p_pcb_old->m_pid, p_pcb_next->m_pid);
+	// #endif
 	gp_current_process = p_pcb_next;
 	pq_insert_ready(p_pcb_old); // add old proc to ready queue (will handle when it is an iproc)
 	

@@ -183,9 +183,9 @@ U32 *alloc_stack(U32 size_b)
 
 void *k_request_memory_block_nb(void) {
     MEM_BLK * freeBlock = freeList;
-#ifdef DEBUG_0 
-    printf("k_request_memory_block_nb: entering...\n");
-#endif /* ! DEBUG_0 */
+// #ifdef DEBUG_0 
+//     printf("k_request_memory_block_nb: entering...\n");
+// #endif /* ! DEBUG_0 */
     
     if (freeBlock == NULL) {
         return NULL;
@@ -201,9 +201,9 @@ void *k_request_memory_block(void) {
     PCB * curr_proc = gp_current_process;
     MEM_BLK *prevAddr = curr_proc->m_mem_blk;
     
-#ifdef DEBUG_0 
-    printf("k_request_memory_block: entering...\n");
-#endif /* ! DEBUG_0 */
+// #ifdef DEBUG_0 
+//     printf("k_request_memory_block: entering...\n");
+// #endif /* ! DEBUG_0 */
     // Might need to switch user modes??
     // atomic(on) -> maybe add a safety flag? (a bit?)
     
@@ -218,9 +218,9 @@ void *k_request_memory_block(void) {
         // release processor but don't add ourselves to ready queue
         PCB *p_pcb_old = gp_current_process;
         gp_current_process = scheduler();
-        #ifdef DEBUG_0  
-        printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
-        #endif
+        // #ifdef DEBUG_0  
+        // printf("Scheduler returned pid: %d\n", gp_current_process->m_pid);
+        // #endif
 
         EXIT_KERNEL_FUNC();
         process_switch(p_pcb_old);
@@ -237,9 +237,9 @@ int k_release_memory_block(void *p_mem_blk) {
     // dequeue a blocked-on-memory PCB
     PCB * first = pq_remove(&proc_blocked_queue);
     
-#ifdef DEBUG_0 
-    printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
-#endif /* ! DEBUG_0 */
+// #ifdef DEBUG_0
+//     printf("k_release_memory_block: releasing block @ 0x%x\n", p_mem_blk);
+// #endif /* ! DEBUG_0 */
     U8 *mem_addr = (U8*) p_mem_blk;
     
     if ((U32*) mem_addr < heap_start || (U32*) mem_addr >= gp_stack) {
@@ -271,7 +271,7 @@ int k_release_memory_block(void *p_mem_blk) {
             gp_current_process = first;
             pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue
             
-           EXIT_KERNEL_FUNC();
+            EXIT_KERNEL_FUNC();
             process_switch(p_pcb_old);
         } else {
             pq_insert_ready(first);

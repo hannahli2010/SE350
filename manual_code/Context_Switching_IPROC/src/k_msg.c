@@ -81,7 +81,7 @@ int k_send_message(int pid, void *p_msg) {
         destProc->m_state = RDY;
         
         // If the destination process has a higher priority than the current process, preempt the current process
-        if(destProc->m_priority < gp_current_process->m_priority && gp_current_process->m_pid != PID_TIMER_IPROC){
+        if(destProc->m_priority < gp_current_process->m_priority && gp_current_process->m_pid != PID_TIMER_IPROC){ 
             PCB * p_pcb_old = gp_current_process;
             gp_current_process = destProc;
             pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue

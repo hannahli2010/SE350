@@ -2,6 +2,7 @@
 #include "k_process.h"
 #include "k_msg.h"
 #include "rtx.h"
+#include "uart_def.h"
 #include "printf.h"
 
 uint32_t time = 0;
@@ -47,14 +48,41 @@ void clockProc(void) {
 
 void KCDProc(void) {
 	while (1) {
-		release_processor();
+		MSG_BUF* msg = receive_message(NULL);
+		
+		if (msg->mtype == KEY_IN) {
+			msg->mtype = CRT_DISPLAY;
+			send_message(PID_CRT, msg);
+		}
 	}
 }
 
+/* Message Types 
+	#define DEFAULT             0
+	#define KCD_REG             1
+	#define KCD_CMD             2
+	#define CRT_DISPLAY         3
+	#define KEY_IN              4
+*/
+
 void CRTProc(void) {
-	while (1) {
-		release_processor();
-	}
+	LPC_UART_TypeDef *pUart;
+	pUart = (LPC_UART_TypeDef *) LPC_UART0;
+
+	while( 1 ) {
+		MSG_BUF* msg = receive_message(NULL);
+		__set_CONTROL(0);
+
+		if (msg->mtype == CRT_DISPLAY && msg->mtext[0] != '\0') {
+			send_message(PID_UART_IPROC, msg);
+			pUart->IER |= IER_THRE;
+		}
+		else {
+			release_memory_block(msg);
+		}
+
+		__set_CONTROL(1);
+	}	
 }
 
 void timerIProc(void) {
@@ -91,7 +119,7 @@ void timerIProc(void) {
 		delayed_msg_queue->m_expiry--;
 	}
 
-	// Insert all the messages we just recieved into the delayed message queue
+	// Insert all the messages we just received into the delayed message queue
 	DELAYED_MSG_BUF* newMsg;
 	while (newMsg = (DELAYED_MSG_BUF*) k_receive_message_nb(NULL) ) {
 
@@ -144,6 +172,90 @@ void timerIProc(void) {
 	}
 }
 
+uint8_t g_buffer[]= "You Typed a Q\n\r";
+uint8_t *gp_buffer = g_buffer;
+uint8_t g_char_in;
+uint8_t g_char_out;
+
+MSG_BUF* currMsg = NULL;
+char* msg_char_ptr;
+
 void uartIProc(void) {
-	
+	uint8_t IIR_IntId;        /* Interrupt ID from IIR */
+    LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
+		
+	#ifdef DEBUG_0
+		uart1_put_string("Entering c_UART0_IRQHandler\n\r");
+	#endif // DEBUG_0
+
+    /* Reading IIR automatically acknowledges the interrupt */
+    IIR_IntId = (pUart->IIR) >> 1 ; /* skip pending bit in IIR */ 
+    if (IIR_IntId & IIR_RDA) { /* Receive Data Avaialbe */
+        /* Read UART. Reading RBR will clear the interrupt */
+        g_char_in = pUart->RBR;
+		#ifdef DEBUG_0
+			uart1_put_string("Reading a char = ");
+			uart1_put_char(g_char_in);
+			uart1_put_string("\n\r");
+		#endif /* DEBUG_0 */
+
+        MSG_BUF* msg = k_request_memory_block();
+		msg->mtype = KEY_IN;
+		msg->mtext[0] = g_char_in;
+		msg->mtext[1] = 0;
+		if (g_char_in == '\r') {
+			msg->mtext[1] = '\n';
+			msg->mtext[2] = 0;
+		}
+		
+        k_send_message(PID_KCD, msg);
+
+    } else if (IIR_IntId & IIR_THRE) {
+        /* THRE Interrupt, transmit holding register becomes empty */
+
+		if (currMsg == NULL) {
+			currMsg = k_receive_message_nb(NULL);
+			// If we didn't actually get a message
+			if (currMsg == NULL) {
+				#ifdef DEBUG_0
+					uart1_put_string("No waiting message. Turning off IER_THRE\n\r");
+				#endif /* DEBUG_0 */
+				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
+				pUart->THR = '\r';
+				return;
+			}
+			msg_char_ptr = currMsg->mtext;
+		}
+
+		g_char_out = *msg_char_ptr;
+		#ifdef DEBUG_0
+			printf("Writing a char = %c \n\r", g_char_out);
+		#endif /* DEBUG_0 */
+		pUart->THR = g_char_out;
+		msg_char_ptr++;
+        
+		if (*msg_char_ptr == '\0' ) {
+			#ifdef DEBUG_0
+				uart1_put_string("Finish writing this message. \n\r");
+			#endif /* DEBUG_0 */
+			k_release_memory_block(currMsg);
+			
+			currMsg = k_receive_message_nb(NULL);
+			// If we didn't actually get a message
+			if (currMsg == NULL) {
+				#ifdef DEBUG_0
+					uart1_put_string("Turning off IER_THRE. \n\r");
+				#endif /* DEBUG_0 */
+				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
+				return;
+			}
+			msg_char_ptr = currMsg->mtext;
+		}
+       
+    } else {  /* not implemented yet */
+		#ifdef DEBUG_0
+			uart1_put_string("Should not get here!\n\r");
+		#endif /* DEBUG_0 */
+        return;
+    }    
 }
