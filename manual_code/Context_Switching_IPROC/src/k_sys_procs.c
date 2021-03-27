@@ -15,6 +15,48 @@ void nullProc(void)
     }
 }
 
+void aProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void bProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void cProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void setPrioProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void clockProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void KCDProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
+void CRTProc(void) {
+	while (1) {
+		release_processor();
+	}
+}
+
 void timerIProc(void) {
 	/*
 	// get pending requests
@@ -100,4 +142,8 @@ void timerIProc(void) {
 		// Sending the message to the destination process
 		k_send_message(msg->m_real_recv_pid, (void*) msg);
 	}
+}
+
+void uartIProc(void) {
+	
 }

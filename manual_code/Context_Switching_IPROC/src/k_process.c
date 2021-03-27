@@ -58,6 +58,7 @@
 PCB **gp_pcbs;                  /* array of pcbs */
 PCB *gp_current_process = NULL; /* always point to the current RUN process */
 PCB *gp_pcb_timer_iproc = NULL; /* points to Timer iprocess pcb */ 
+PCB *gp_pcb_uart_iproc = NULL;  /* points to Uart iprocess pcb */ 
 PCB *gp_pcb_interrupted;        /* interrupted process's pcb    */
 
 
@@ -129,7 +130,7 @@ void process_init(PROC_INIT *proc_info, int num)
 		*(--sp) = 0x0;
 	}
 
-	// Null proc initialization
+	// Null proc initialization: PID_NULL
 	gp_pcbs[0]->m_pid = PID_NULL;
 	gp_pcbs[0]->m_state = NEW;
 	gp_pcbs[0]->mp_sp = sp;
@@ -138,7 +139,7 @@ void process_init(PROC_INIT *proc_info, int num)
 	gp_pcbs[0]->m_msg_buf = NULL;
 	pq_insert(&proc_ready_queue, gp_pcbs[0]);
   
-	// User proc initializatons
+	// Test proc initializatons: PID_P1 - PID_P6
     for ( i = 1; i <= num; i++ ) {
         int j;
         (gp_pcbs[i])->m_pid = (g_proc_table[i-1]).m_pid;
@@ -152,6 +153,45 @@ void process_init(PROC_INIT *proc_info, int num)
         }
         (gp_pcbs[i])->mp_sp = sp;
 		(gp_pcbs[i])->m_priority = (g_proc_table[i-1]).m_priority;
+		(gp_pcbs[i])->m_mem_blk = NULL;
+		(gp_pcbs[i])->m_msg_buf = NULL;
+
+		pq_insert(&proc_ready_queue, gp_pcbs[i]);
+    }
+
+	/* 
+	Initialize the user non-test processes : 
+		PID_A               7
+		PID_B               8
+		PID_C               9
+		PID_SET_PRIO        10
+		PID_CLOCK           11
+		PID_KCD             12
+		PID_CRT             13 
+	*/
+
+	U32 other_procs[7];
+	other_procs[0] = (U32)(&aProc); // PID_A
+	other_procs[1] = (U32)(&bProc); // PID_B
+	other_procs[2] = (U32)(&cProc); // PID_C
+	other_procs[3] = (U32)(&setPrioProc); // PID_SET_PRIO
+	other_procs[4] = (U32)(&clockProc); // PID_CLOCK
+	other_procs[5] = (U32)(&KCDProc); // PID_KCD
+	other_procs[6] = (U32)(&CRTProc); // PID_CRT
+	
+ 	for ( i = 7; i <= 13; i++ ) {
+        int j;
+        (gp_pcbs[i])->m_pid = i;
+        (gp_pcbs[i])->m_state = NEW;
+        
+        sp = alloc_stack(USR_SZ_STACK);
+        *(--sp)  = INITIAL_xPSR;      // user process initial xPSR  
+        *(--sp)  = other_procs[i-7]; // PC contains the entry point of the process
+        for ( j = 0; j < 6; j++ ) { // R0-R3, R12 are cleared with 0
+            *(--sp) = 0x0;
+        }
+        (gp_pcbs[i])->mp_sp = sp;
+		(gp_pcbs[i])->m_priority = LOWEST;
 		(gp_pcbs[i])->m_mem_blk = NULL;
 		(gp_pcbs[i])->m_msg_buf = NULL;
 
@@ -172,6 +212,18 @@ void process_init(PROC_INIT *proc_info, int num)
        back to thread mode either 
     */
 #endif
+	
+	// Increment i to the next gp_pcb slot to initialize the uart iproc
+	i++;
+
+    /* Uart i-proc initialization */
+    gp_pcb_uart_iproc = gp_pcbs[i]; // Save the iproc member data in the last of the gc_pcb table
+    gp_pcb_uart_iproc->m_pid = PID_TIMER_IPROC;
+    gp_pcb_uart_iproc->m_state = IPROC;
+    gp_pcb_uart_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
+	gp_pcb_uart_iproc->m_mem_blk = NULL;
+	gp_pcb_uart_iproc->m_msg_buf = NULL;
+
 }
 
 /**************************************************************************//**

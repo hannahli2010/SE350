@@ -27,36 +27,25 @@
  
 
 /**************************************************************************//**
- * @file        k_rtx_init.c
- * @brief       kernel initialization C file 
+ * @file        uart_irq.h
+ * @brief       uart interrupt header file 
  *              
- * @version     V1.2021.02
+ * @version     V1.2021.01
  * @authors     Yiqing Huang
+ * @date        2021 JAN
  *****************************************************************************/
-/*
-#include "k_rtx_init.h"
-#include "k_memory.h"
-#include "k_process.h"
-*/
-#include "k_rtx.h"
 
-#ifdef DEBUG_0
-#include "uart_polling.h"
-#include "printf.h"
-#endif
+#ifndef UART_IRQ_H_
+#define UART_IRQ_H_
 
-void k_rtx_init(PROC_INIT *proc_info, int num)
-{
-    /* interrupt is already off when we reach here */
-    memory_init();
-    process_init(proc_info, num);
-    timer_init(0);
-    uart_irq_init(0); /* uart0 interrupt driven, for RTX console */
-    __set_CONTROL(1);
-	
-	/* start the first process */
-    k_release_processor();
-}
+/* typedefs */
+#include <stdint.h>	
+#include "uart_def.h"
+
+/* initialize the n_uart to use interrupt */
+int uart_irq_init(int n_uart);		
+
+#endif /* ! UART_IRQ_H_ */
 /*
  *===========================================================================
  *                             END OF FILE

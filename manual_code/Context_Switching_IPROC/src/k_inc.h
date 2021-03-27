@@ -62,7 +62,7 @@
 #define PCB_MSP_OFFSET      4       /* mp_sp is 4B offset from pcb struct starting addr.    */
 #define PCB_STATE_OFFSET    12      /* m_state is 12B offset from pcb struct starting addr. */
 #define STACK_SIZE_IPROC    0x200   /* iprocess stack size */
-#define NUM_SYS_PROC        2       /* total number of system procs */
+#define NUM_SYS_PROC        10       /* total number of system procs */
 
 
 /* process states, note we only assume three states in this example */
@@ -116,7 +116,8 @@ extern unsigned int Image$$RW_IRAM1$$ZI$$Limit;
 extern U32          *gp_stack;            /* see k_memory.c for details   */  
 extern PCB          **gp_pcbs;            /* array of pcbs */
 extern PCB          *gp_current_process;  /* the current RUN process      */
-extern PCB          *gp_pcb_timer_iproc;  /* points to Timer iprocess pcb */ 
+extern PCB          *gp_pcb_timer_iproc;  /* points to Timer iprocess pcb */
+extern PCB          *gp_pcb_uart_iproc;  /* points to Timer iprocess pcb */ 
 extern PCB          *gp_pcb_interrupted;  /* interrupted process's pcb    */
 extern PROC_INIT    g_proc_table[];
                                           /* process initialization table */

@@ -193,7 +193,7 @@ ITIMER_RESTORE
     BL      k_run_new_process               // run a Non-IPROC 
     CPSIE   I                               // enable interrupt
     POP     {r4-r11, pc}                    // restore all registers
-} 
+}  
 
 /**
  * @brief: c TIMER0 IRQ Handler is now a timer i-process with its own PCB and stack

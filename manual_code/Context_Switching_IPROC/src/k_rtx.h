@@ -42,6 +42,7 @@
 #include "k_process.h"
 #include "k_memory.h"
 #include "timer.h"
+#include "uart_irq.h"
 /*
  *===========================================================================
  *                            FUNCTION PROTOTYPES
