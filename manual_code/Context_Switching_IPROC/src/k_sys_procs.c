@@ -19,18 +19,21 @@ void nullProc(void)
 
 void aProc(void) {
 	while (1) {
+		set_process_priority(PID_A, LOWEST);
 		release_processor();
 	}
 }
 
 void bProc(void) {
 	while (1) {
+		set_process_priority(PID_B, LOWEST);
 		release_processor();
 	}
 }
 
 void cProc(void) {
 	while (1) {
+		set_process_priority(PID_C, LOWEST);
 		release_processor();
 	}
 }
@@ -107,6 +110,7 @@ void setPrioProc(void) {
  */
 void clockProc(void) {
 	while (1) {
+		set_process_priority(PID_CLOCK, LOWEST);
 		release_processor();
 	}
 }
