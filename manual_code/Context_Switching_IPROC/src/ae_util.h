@@ -22,4 +22,10 @@ void strcpy(char*, char*);
 
 void uart0_printMsgText(MSG_BUF*);
 
+int stringToNum(char*, int);
+
+void skipWhitespace(char**);
+
+void sendUARTMsg(char*);
+
 #endif

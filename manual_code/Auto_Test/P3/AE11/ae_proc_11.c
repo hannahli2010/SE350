@@ -73,8 +73,19 @@ int baseChar = (int) '0';
  *****************************************************************************/
 void proc1(void)
 {
+    MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = 'H';
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+
     while(1) {
-        release_processor();
+        MSG_BUF* msg = (MSG_BUF*) receive_message(NULL);
+        
+        if (msg->mtype == KCD_CMD) {
+            sendUARTMsg("Hannah got some fan mail! \r\n");
+        }
+
+        release_memory_block(msg);
     }
 }
 
@@ -83,8 +94,19 @@ void proc1(void)
  *****************************************************************************/
 void proc2(void)
 {
+    MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = 'R';
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+
     while(1) {
-        release_processor();
+        MSG_BUF* msg = (MSG_BUF*) receive_message(NULL);
+
+        if (msg->mtype == KCD_CMD) {
+            sendUARTMsg("Rob got a love letter! \r\n");
+        }
+
+        release_memory_block(msg);
     }
 }
 /**************************************************************************//**

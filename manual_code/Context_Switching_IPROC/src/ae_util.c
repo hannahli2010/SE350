@@ -85,3 +85,26 @@ void uart0_printMsgText(MSG_BUF* msg) {
         uart0_put_char(msg->mtext[i]);
     }
 }
+
+int stringToNum(char* numberStr, int numDigits) {
+    int result = 0;
+
+    for (int i = 0; i < numDigits; i++) {
+        int digit = *numberStr - (int) '0';
+        result = result*10 + digit;
+        numberStr++;
+    }
+    
+    return result;
+}
+
+void skipWhitespace(char** ptr) {
+    for (;**ptr == ' ' || **ptr == '\t'; (*ptr)++);
+}
+
+void sendUARTMsg(char* errText) {
+    MSG_BUF* error_msg = (MSG_BUF*) request_memory_block();
+    error_msg->mtype = CRT_DISPLAY;
+    strcpy(error_msg->mtext, errText);
+    send_message(PID_CRT, error_msg);
+}

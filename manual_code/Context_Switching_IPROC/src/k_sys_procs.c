@@ -4,6 +4,7 @@
 #include "rtx.h"
 #include "uart_def.h"
 #include "printf.h"
+#include "ae_util.h"
 
 uint32_t time = 0;
 
@@ -34,25 +35,176 @@ void cProc(void) {
 	}
 }
 
+// Registers to 'C'
+// Command: %C <process_id> <new_priority>
 void setPrioProc(void) {
+	MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = 'C';
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+	
+	int procId;
+
 	while (1) {
-		release_processor();
+		MSG_BUF* msg = receive_message(NULL);
+
+		if (msg->mtype == KCD_CMD) {
+			char* charPtr = msg->mtext;
+			
+			// Ditch all the white space until we get to a number char
+			skipWhitespace(&charPtr);
+		
+			int numDigits = 0;
+			for (;*charPtr >= '0' && *charPtr <= '9'; charPtr++) {
+				numDigits++;
+			}
+
+			if (numDigits != 0) {
+				procId = stringToNum(charPtr-numDigits, numDigits);	
+			} else {
+				sendUARTMsg("Set priority failed - invalid process ID!\r\n");
+				release_memory_block(msg);
+				continue;
+			}
+
+			skipWhitespace(&charPtr);
+			numDigits = 0; // 3A
+			for (;*charPtr >= '0' && *charPtr <= '9'; charPtr++) {
+				numDigits++;
+			}
+
+			// Error if there is extra data after the expected parameters,
+			// eg. '%C 5 4X' OR '%C 5 4 X'
+			skipWhitespace(&charPtr);
+			if (*charPtr != '\0') {
+				goto SET_PRIO_ERROR;
+			}
+
+			if (numDigits != 0) {
+				int res = set_process_priority(procId, stringToNum(charPtr-numDigits, numDigits));
+				if (res == RTX_OK) {
+					release_memory_block(msg);
+					sendUARTMsg("Successfully set process priority!\r\n");
+					continue;
+				}
+			}
+			
+			SET_PRIO_ERROR:
+			sendUARTMsg("Set priority failed - invalid process priority!\r\n");
+			release_memory_block(msg);
+		} else {
+			// this proc isn't expecting other message types
+			release_memory_block(msg);
+		}
 	}
 }
 
+/* Registers to 'W'
+ * Commands:
+ * 		%WR			 			- sets clock time to 00:00:00
+ * 		%WS hh:mm:ss 	- sets current wall clock time to hh:mm:ss
+ * 		%WT			 			- terminates wall clock
+ */
 void clockProc(void) {
 	while (1) {
 		release_processor();
 	}
 }
 
+int charMap(char c) {
+	if (c >= 'A' && c <= 'Z') return (int) c - (int) 'A';
+	if (c >= 'a' && c <= 'z') return (int) c - (int) 'a' + 26;
+	return -1;
+}
+
+char registrationTable[52][16];
+char msgBuf[64];
+
 void KCDProc(void) {
+
+	for (int i = 0; i < 52; i++) {
+		for (int j = 0; j < 16; j++) {
+			registrationTable[i][j] = FALSE;
+		}
+	}
+
+	// Waiting for the user to input a %
+	char isWaitingForCommand = FALSE;
+	
+	// Most recent command that has been entered
+	char currCommand = NULL;
+
+	// Variables relating to the current message we're building up
+	// MSG_BUF* command_msg_buf = NULL;
+	char* msg_char_ptr = NULL;
+	// Lets see if we can do this today... (:D)>-|-<
+	
 	while (1) {
-		MSG_BUF* msg = receive_message(NULL);
+		// MSG_BUF* fullcommand = receive_message(NULL);
+		int senderPtr;
+		MSG_BUF* msg = receive_message(&senderPtr);
+		char inputChar = msg->mtext[0];
 		
 		if (msg->mtype == KEY_IN) {
-			msg->mtype = CRT_DISPLAY;
+ 			msg->mtype = CRT_DISPLAY;
 			send_message(PID_CRT, msg);
+			
+			// Implement backspace
+			if (inputChar == '\b') {
+				if (isWaitingForCommand == TRUE) {
+					isWaitingForCommand = FALSE;
+				} else if (currCommand != NULL && msg_char_ptr == msgBuf) {
+					currCommand = NULL;
+					isWaitingForCommand = TRUE;
+				} else if (currCommand != NULL) {
+					msg_char_ptr--;
+				}
+			}
+			// If a command has been chosen, add the new character to the message buff until new line
+			else if (currCommand != NULL && inputChar != '\r') {
+				*msg_char_ptr = inputChar;
+				msg_char_ptr++;
+			} 
+			// If the user is waiting for a command
+			else if (isWaitingForCommand && inputChar != '\r') {
+				// validate character input
+				if ((inputChar >= 'A' && inputChar <= 'Z')  ||  (inputChar >= 'a' && inputChar <= 'z')) {
+					currCommand = inputChar;
+					isWaitingForCommand = FALSE;
+				} else {
+					// Send an error message and have the user reenter the %
+					isWaitingForCommand = FALSE;
+					sendUARTMsg("\r\nInvalid command. Only alphabetic commands allowed \r\n");
+				}				
+
+			// start collecting the characters in a message buf
+			} else if (inputChar == '%') {
+				isWaitingForCommand = TRUE;
+				msg_char_ptr = msgBuf;
+				
+			} else if (inputChar == '\r') {
+				// Determinate the message we have been building and send it to all registered processes
+				if (currCommand != NULL) {
+					*msg_char_ptr = '\0';
+					int charInteger = charMap(currCommand);
+					for (int i = 0; i < 16; i++) {
+						if (registrationTable[charInteger][i] == TRUE) {
+							MSG_BUF* command_msg_buf = (MSG_BUF*) request_memory_block();
+							command_msg_buf->mtype = KCD_CMD;
+							strcpy(command_msg_buf->mtext, msgBuf);
+							send_message(i, command_msg_buf);
+						} 
+					}
+					currCommand = NULL;
+				}
+			}
+		}
+		else if (msg->mtype == KCD_REG) {
+			char regChar = msg->mtext[0];
+			if ((regChar >= 'A' && regChar <= 'Z')  ||  (regChar >= 'a' && regChar <= 'z')) {
+				registrationTable[charMap(regChar)][senderPtr] = TRUE;
+			}
+			release_memory_block(msg);
 		}
 	}
 }
@@ -172,8 +324,6 @@ void timerIProc(void) {
 	}
 }
 
-uint8_t g_buffer[]= "You Typed a Q\n\r";
-uint8_t *gp_buffer = g_buffer;
 uint8_t g_char_in;
 uint8_t g_char_out;
 

@@ -425,9 +425,6 @@ int k_set_process_priority(int pid, int prio) {
 		PCB * found = pq_remove_by_pid(&proc_ready_queue, pid);
 		if (found != NULL) {
 			pq_insert_ready(found);
-			// Insert the current process in the ready queue as well, such that
-			//   the scheduler can choose between the processes
-			pq_insert_front_ready(gp_current_process);
 		} else {
 			// If the process exists in the blocked queue, remove it and then reinsert it
 			found = pq_remove_by_pid_blocked(pid);
@@ -438,6 +435,9 @@ int k_set_process_priority(int pid, int prio) {
 				return RTX_OK;
 			}
 		}
+		// Insert the current process in the ready queue as well, such that
+		//   the scheduler can choose between the processes
+		pq_insert_front_ready(gp_current_process);
 	}
 	
 	// Save the current process, and then see what the scheduler picks to determine premption
