@@ -56,6 +56,7 @@ U32 *heap_start;
 MEM_BLK *freeList;
 PCB *proc_blocked_queue;
 
+U32 num_free_mem_blks;
 
 void pq_insert_blocked(PCB * proc) {
     pq_insert(&proc_blocked_queue, proc);
@@ -149,6 +150,8 @@ void memory_init(void)
         mem_it++;
         num_blocks++;
     }
+
+    num_free_mem_blks = num_blocks;
     
     mem_it->mp_next = NULL; // set end of freeList
     proc_blocked_queue = NULL;
@@ -190,6 +193,9 @@ void *k_request_memory_block_nb(void) {
     if (freeBlock == NULL) {
         return NULL;
     } else {
+        // Decrement the number of free memory blocks
+        num_free_mem_blks--;
+
         freeList = freeBlock->mp_next;
         // could set freeBlock->mp_next to like null or something
         return freeBlock;
@@ -257,6 +263,9 @@ int k_release_memory_block(void *p_mem_blk) {
     // target_blk should be the proc corresponding to mem_addr
     
     if (first == NULL) {
+        // Increment the number of free blocks
+        num_free_mem_blks++;
+        
         // add new blocks to the front of our freeList
         target_blk->mp_next = freeList;
         freeList = target_blk;

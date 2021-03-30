@@ -119,8 +119,12 @@ extern PCB          *gp_current_process;  /* the current RUN process      */
 extern PCB          *gp_pcb_timer_iproc;  /* points to Timer iprocess pcb */
 extern PCB          *gp_pcb_uart_iproc;   /* points to Timer iprocess pcb */ 
 extern PCB          *gp_pcb_interrupted;  /* interrupted process's pcb    */
-extern PROC_INIT    g_proc_table[];
-                                          /* process initialization table */
+extern PROC_INIT    g_proc_table[];       /* process initialization table */
+
+extern PCB          *proc_ready_queue;    /* ready processes              */
+extern PCB          *proc_blocked_queue;  /* processes blocked on memory  */
+extern U32          num_free_mem_blks;    /* number of free memory blocks */
+
 extern volatile uint32_t g_timer_count;   /* increment every 1 ms         */
 extern DELAYED_MSG_BUF *delayed_msg_queue;
 

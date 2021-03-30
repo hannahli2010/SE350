@@ -6,6 +6,10 @@
 #include "printf.h"
 #include "ae_util.h"
 
+#ifdef DEBUG_0
+#include "uart_polling.h"
+#endif /* DEBUG_0 */
+
 uint32_t time = 0;
 
 void nullProc(void) {
@@ -17,6 +21,19 @@ void nullProc(void) {
 }
 
 void aProc(void) {
+	/*
+	Register %Z command with the KCD
+	Wait till %Z command is received
+	num = 0
+	loop forever
+		get a message envelope
+		set message_type field of to count_report
+		set message_textfield of to num
+		send the message to process B
+		num = num + 1
+		release_processor()
+	endloop
+	*/
 	while (1) {
 		set_process_priority(PID_A, LOWEST);
 		release_processor();
@@ -24,6 +41,12 @@ void aProc(void) {
 }
 
 void bProc(void) {
+	/*
+	loop forever
+		receive a message
+		send the message to process C
+	endloop
+	*/
 	while (1) {
 		set_process_priority(PID_B, LOWEST);
 		release_processor();
@@ -31,6 +54,40 @@ void bProc(void) {
 }
 
 void cProc(void) {
+	/*
+	create a local message queue
+	loop forever
+		if (local message queue is empty) then
+			p <-receive a message
+		else
+			p <-dequeue the first message from the local message queue
+		endif
+		
+		if msg_typeof p == count_report then
+			if message_text% 20 == 0 then
+				send "Process C" to CRT with msg envelope p
+				hibernatefor 10 sec
+			endif
+		endif
+		deallocate message envelope p
+		release_processor()
+	endloop
+
+
+hibernate:
+	q <-request_memory_block()
+	use q to delayed_sendto itself with 10 sec delay and msg_type=wakeup10
+	loop forever
+		// block and let other process execute
+		p <-receive a message
+		if (msg_typeof p == wakeup10) then
+			exit this loop
+		else
+			put message (p) on the local message queue
+			for later processing
+		endif
+	endloop
+	*/
 	while (1) {
 		set_process_priority(PID_C, LOWEST);
 		release_processor();
@@ -114,112 +171,6 @@ void clockProc(void) {
 	}
 }
 
-int charMap(char c) {
-	if (c >= 'A' && c <= 'Z') return (int) c - (int) 'A';
-	if (c >= 'a' && c <= 'z') return (int) c - (int) 'a' + 26;
-	return -1;
-}
-
-char registrationTable[52][16];
-char msgBuf[64];
-
-void KCDProc(void) {
-
-	for (int i = 0; i < 52; i++) {
-		for (int j = 0; j < 16; j++) {
-			registrationTable[i][j] = FALSE;
-		}
-	}
-
-	// Waiting for the user to input a %
-	char isWaitingForCommand = FALSE;
-	
-	// Most recent command that has been entered
-	char currCommand = NULL;
-
-	// Variables relating to the current message we're building up
-	// MSG_BUF* command_msg_buf = NULL;
-	char* msg_char_ptr = NULL;
-	// Lets see if we can do this today... (:D)>-|-<
-	
-	while (1) {
-		// MSG_BUF* fullcommand = receive_message(NULL);
-		int senderPtr;
-		MSG_BUF* msg = receive_message(&senderPtr);
-		char inputChar = msg->mtext[0];
-		
-		if (msg->mtype == KEY_IN) {
- 			msg->mtype = CRT_DISPLAY;
-			send_message(PID_CRT, msg);
-			
-			// Implement backspace
-			if (inputChar == '\b') {
-				if (isWaitingForCommand == TRUE) {
-					isWaitingForCommand = FALSE;
-				} else if (currCommand != NULL && msg_char_ptr == msgBuf) {
-					currCommand = NULL;
-					isWaitingForCommand = TRUE;
-				} else if (currCommand != NULL) {
-					msg_char_ptr--;
-				}
-			}
-			// If a command has been chosen, add the new character to the message buff until new line
-			else if (currCommand != NULL && inputChar != '\r') {
-				*msg_char_ptr = inputChar;
-				msg_char_ptr++;
-			} 
-			// If the user is waiting for a command
-			else if (isWaitingForCommand && inputChar != '\r') {
-				// validate character input
-				if ((inputChar >= 'A' && inputChar <= 'Z')  ||  (inputChar >= 'a' && inputChar <= 'z')) {
-					currCommand = inputChar;
-					isWaitingForCommand = FALSE;
-				} else {
-					// Send an error message and have the user reenter the %
-					isWaitingForCommand = FALSE;
-					sendUARTMsg("\r\nInvalid command. Only alphabetic commands allowed \r\n");
-				}				
-
-			// start collecting the characters in a message buf
-			} else if (inputChar == '%') {
-				isWaitingForCommand = TRUE;
-				msg_char_ptr = msgBuf;
-				
-			} else if (inputChar == '\r') {
-				// Determinate the message we have been building and send it to all registered processes
-				if (currCommand != NULL) {
-					*msg_char_ptr = '\0';
-					int charInteger = charMap(currCommand);
-					for (int i = 0; i < 16; i++) {
-						if (registrationTable[charInteger][i] == TRUE) {
-							MSG_BUF* command_msg_buf = (MSG_BUF*) request_memory_block();
-							command_msg_buf->mtype = KCD_CMD;
-							strcpy(command_msg_buf->mtext, msgBuf);
-							send_message(i, command_msg_buf);
-						} 
-					}
-					currCommand = NULL;
-				}
-			}
-		}
-		else if (msg->mtype == KCD_REG) {
-			char regChar = msg->mtext[0];
-			if ((regChar >= 'A' && regChar <= 'Z')  ||  (regChar >= 'a' && regChar <= 'z')) {
-				registrationTable[charMap(regChar)][senderPtr] = TRUE;
-			}
-			release_memory_block(msg);
-		}
-	}
-}
-
-/* Message Types 
-	#define DEFAULT             0
-	#define KCD_REG             1
-	#define KCD_CMD             2
-	#define CRT_DISPLAY         3
-	#define KEY_IN              4
-*/
-
 void CRTProc(void) {
 	LPC_UART_TypeDef *pUart;
 	pUart = (LPC_UART_TypeDef *) LPC_UART0;
@@ -241,34 +192,6 @@ void CRTProc(void) {
 }
 
 void timerIProc(void) {
-	/*
-	// get pending requests
-	
-	while( pending messages to i-process ) {
-		insert envelope into the timeout queue ;
-	}
-	while( first message in queue timeout expired ) {
-		env ← dequeue( timeout_queue) ;
-		target_pid ← destination_pid from env;
-		// forward msg to destination
-		k_send_message ( target_pid , env ) ;
-	}
-	*/
-
-	/*
-	Example demonstrating how sending messages modifies queue values
-		// Initial queue status
-		50 ticks (send at time 50)
-		50 ticks (send at time 100)
-		50 ticks (send at time 150)
-
-		// State after requesting to send a message with delay 60
-		50 ticks (send at time 50) <- message precedeing message is unchanged
-		10 ticks (send at time 60) <- new message is relative to previous message
-		40 ticks (send at time 100) <- message following inserted message is relative to new message
-		50 ticks (send at time 150) <- all following messages are unchanged
-	*/
-
 	// Decrement the timer of the first message in the queue, if it exists
 	if (delayed_msg_queue != NULL) {
 		delayed_msg_queue->m_expiry--;

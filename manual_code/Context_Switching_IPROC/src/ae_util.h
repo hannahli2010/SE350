@@ -14,6 +14,8 @@ void printUart1(char *, char *);
 
 int assertTest(char *, int, int, char*);
 
+void printNumber(int);
+
 void printFraction(int, int);
 
 void printSummary(char *, int, int);

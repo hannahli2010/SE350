@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>SE350_DEMO_FALSE K_MSG_ENV DEBUG_01 SIM_TARGET TIMER_IPROC TEST_2_MEM_BLK_0</Define>
+              <Define>SE350_DEMO_FALSE K_MSG_ENV DEBUG_01 SIM_TARGET TIMER_IPROC TEST_2_MEM_BLK_0 _DEBUG_HOTKEYS</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -457,6 +457,11 @@
               <FileName>uart_irq.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\uart_irq.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_sys_proc_kcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_sys_proc_kcd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2592,6 +2597,11 @@
               <FileName>uart_irq.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\uart_irq.c</FilePath>
+            </File>
+            <File>
+              <FileName>k_sys_proc_kcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\k_sys_proc_kcd.c</FilePath>
             </File>
           </Files>
         </Group>

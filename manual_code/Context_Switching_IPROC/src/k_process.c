@@ -66,7 +66,7 @@ PCB *gp_pcb_interrupted;        /* interrupted process's pcb    */
 PROC_INIT g_proc_table[NUM_TEST_PROCS + 1]; /* user test procs + timer_iproc */
 // ^ why do we need one more for timer_iproc? we never use it
 
-PCB * proc_ready_queue = NULL;
+PCB *proc_ready_queue = NULL;
 
 void  pq_insert_ready(PCB * proc) {
 	if (proc->m_state == IPROC)
