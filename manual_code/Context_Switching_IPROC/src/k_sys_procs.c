@@ -8,8 +8,7 @@
 
 uint32_t time = 0;
 
-void nullProc(void)
-{
+void nullProc(void) {
 	#ifdef DEBUG_0
 		printf("Null Proc\n");
 	#endif

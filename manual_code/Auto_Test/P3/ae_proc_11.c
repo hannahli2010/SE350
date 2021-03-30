@@ -63,10 +63,37 @@
 #define NUM_TESTS 6
 
 int successfulTests = 0;
-char * testName = "G_10_test_10";
+char * testName = "G_11_test_11";
 int nextProcess;
 
 int baseChar = (int) '0';
+
+void set_test_procs(PROC_INIT *procs, int num) {
+
+    int i;
+    for( i = 0; i < num; i++ ) {
+        procs[i].m_pid        = (U32)(i+1);
+        procs[i].m_stack_size = USR_SZ_STACK;
+    }
+  
+    procs[0].mpf_start_pc = &proc1;
+    procs[0].m_priority   = HIGH;
+    
+    procs[1].mpf_start_pc = &proc2;
+    procs[1].m_priority   = LOW;
+    
+    procs[2].mpf_start_pc = &proc3;
+    procs[2].m_priority   = LOW;
+    
+    procs[3].mpf_start_pc = &proc4;
+    procs[3].m_priority   = LOW;
+    
+    procs[4].mpf_start_pc = &proc5;
+    procs[4].m_priority   = LOW;
+    
+    procs[5].mpf_start_pc = &proc6;
+    procs[5].m_priority   = LOW;
+}
 
 /**************************************************************************//**
  * @brief: a medium priority process that recieves and prints two messages
