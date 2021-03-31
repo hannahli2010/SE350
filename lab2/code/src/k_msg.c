@@ -46,7 +46,7 @@
  
 DELAYED_MSG_BUF* delayed_msg_queue = NULL;
 
-int k_send_message(int pid, void *p_msg) {
+int k_send_message_actual(int pid, void *p_msg) {
     ENTER_KERNEL_FUNC();
     // Ensure destination process actually exists
     // recv_pcb← convert recv_pidto process obj/PCB reference
@@ -73,8 +73,6 @@ int k_send_message(int pid, void *p_msg) {
         EXIT_KERNEL_FUNC();
         return RTX_ERR;
     }
-    // Give envelope memory block to the target process
-    q_insert(&(destProc->m_mem_blk), target_blk);
 
     // If the destination process is blocked on message, set it to ready and then check for preemption
     if (destProc->m_state == BLOCKED_ON_MESSAGE) {
@@ -97,13 +95,19 @@ int k_send_message(int pid, void *p_msg) {
     return RTX_OK;
 }
 
+int k_send_message(int pid, void *p_msg) {
+    if (pid == PID_TIMER_IPROC) return RTX_ERR;
+    return k_send_message_actual(pid, p_msg);
+}
+
 // To be done after iprocess implementation
 int k_delayed_send(int pid, void *p_msg, int delay) {
     ENTER_KERNEL_FUNC();
+    if (pid == PID_TIMER_IPROC) return RTX_ERR;
     DELAYED_MSG_BUF* message = (DELAYED_MSG_BUF*) p_msg;
     message->m_expiry = delay;
     message->m_real_recv_pid = pid;
-    int status = k_send_message(PID_TIMER_IPROC, p_msg);
+    int status = k_send_message_actual(PID_TIMER_IPROC, p_msg);
     EXIT_KERNEL_FUNC();
     return status;
 }
@@ -115,6 +119,8 @@ void *k_receive_message_nb(int *p_pid) {
     }
 
     MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+    // Give envelope memory block to the target process
+    q_insert(&(gp_current_process->m_mem_blk), (MEM_BLK*) ((int *) message - 1));
     
     // If the user requested the function to set the sender id, place the sender id into the provided address
     if (p_pid != NULL) {
@@ -136,6 +142,8 @@ void *k_receive_message(int *p_pid) {
     }
 
     MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+    // Give envelope memory block to the target process
+    q_insert(&(gp_current_process->m_mem_blk), (MEM_BLK*) ((int *) message - 1));
     
     // If the user requested the function to set the sender id, place the sender id into the provided address
     if (p_pid != NULL) {
