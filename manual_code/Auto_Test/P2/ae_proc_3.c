@@ -40,11 +40,16 @@ proc4: received b
 proc4: received a
 */
 
-
 #include "rtx.h"
 #include "ae_proc.h"
+#include "ae_util.h"
 #include "uart_polling.h"
 #include "printf.h"
+
+#define NUM_TESTS 23
+int successfulTests = 0;
+char * testName = "G_10_ae_3";
+int nextProcess;
 
 int g_iterations;
 /* initialization table item */
@@ -89,6 +94,7 @@ void proc1(void)
     void    *p_blk;
     MSG_BUF *p_msg;
     char    *ptr;
+    int ret = -1;
     
     uart1_put_string("proc1: requesting a mem_blk...\n\r");
     p_blk = request_memory_block();
@@ -101,7 +107,8 @@ void proc1(void)
     *ptr++ = '\0';
     
     uart1_put_string("proc1: send messages to proc2...\n\r");
-    send_message(PID_P2, p_blk);
+    ret = send_message(PID_P2, p_blk);
+    successfulTests += assertTest(testName, ret, RTX_OK, "2");
     
     while (1) {
         if ( i != 0 && i%5 == 0 ) {
@@ -116,7 +123,8 @@ void proc1(void)
             *ptr++ = '\r';
             *ptr++ = '\0';
             uart1_put_string("proc1: send a message to proc2...\n\r");
-            send_message(PID_P2, p_blk);
+            ret = send_message(PID_P2, p_blk);
+            successfulTests += assertTest(testName, ret, RTX_OK, "2");
         }
         if ( j == g_iterations ) {
             break;
@@ -141,14 +149,16 @@ void proc2(void)
     int     j = 0;
     MSG_BUF *p_msg;
     void    *p_blk;
-    
+    int ret = -1;
+
     uart1_put_string("proc2: receiving messages ...\n\r");
     p_blk = receive_message(NULL);
     p_msg = p_blk;
 
     uart1_put_string("proc2: got a message - ");
     uart1_put_string(p_msg->mtext);
-    release_memory_block(p_blk);
+    ret = release_memory_block(p_blk);
+    successfulTests += assertTest(testName, ret, RTX_OK, "2");
     
     while (1) {
         if ( i != 0 && i%5 == 0 ) {
@@ -157,7 +167,8 @@ void proc2(void)
             p_msg = p_blk;
             uart1_put_string("proc2: got a message - ");
             uart1_put_string(p_msg->mtext);
-            release_memory_block(p_blk);
+            ret = release_memory_block(p_blk);
+            successfulTests += assertTest(testName, ret, RTX_OK, "2");
             j++;
         }
         if ( j == g_iterations ) {
@@ -166,7 +177,8 @@ void proc2(void)
         uart1_put_char('a' + i%26);
         i++;
     }
-    set_process_priority(PID_P2, LOW);
+    ret = set_process_priority(PID_P2, LOW);
+    successfulTests += assertTest(testName, ret, RTX_OK, "2");
     while(1) {
         release_processor();
     }
@@ -184,7 +196,7 @@ void proc3(void)
     int num_msgs = 5;
     MSG_BUF *p_msg;
     void *p_blk;
-    
+    int ret = -1;
 
     uart1_put_string("proc3: entering..., starting delay_send\n\r");    
     while( i < num_msgs ) {
@@ -203,7 +215,8 @@ void proc3(void)
 #ifdef DEBUG_0
         uart1_put_string("proc3: delayed_send to proc4...\n\r");
 #endif // DEBUG_0
-        delayed_send(PID_P4, p_blk, delay[i++]); 
+        ret = delayed_send(PID_P4, p_blk, delay[i++]);
+        successfulTests += assertTest(testName, ret, RTX_OK, "2");
     }
     uart1_put_string("proc3: done with delay_send\n\r");
     
@@ -221,14 +234,21 @@ void proc4(void)
     MSG_BUF *p_msg;
     void    *p_blk;
     int     send_id;
-    
+    int ret = -1;
+    int i = 0;
+
     uart1_put_string("proc4: entering...\n\r");
     while(1) {
         p_blk = receive_message(&send_id);
         p_msg = p_blk;
         uart1_put_string("proc4: received ");
         uart1_put_string(p_msg->mtext);
-        release_memory_block(p_blk);
+        ret = release_memory_block(p_blk);
+        successfulTests += assertTest(testName, ret, RTX_OK, "2");
+        i++;
+        if (i == 5) {
+            printSummary(testName, successfulTests, NUM_TESTS);
+        }
     }
 }
 
