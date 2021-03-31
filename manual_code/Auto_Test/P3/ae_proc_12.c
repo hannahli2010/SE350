@@ -63,7 +63,7 @@
 #define NUM_TESTS 6
 
 int successfulTests = 0;
-char * testName = "G_11_test_11";
+char * testName = "G_10_test_12";
 int nextProcess;
 
 int baseChar = (int) '0';

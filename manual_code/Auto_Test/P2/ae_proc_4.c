@@ -117,9 +117,9 @@ void proc1(void)
         ae_get_tick_diff(&tm, &tk1, &tk2);
         printf("proc1: tm.sec = %d, tm.nsec = %d\n\r", tm.sec, tm.nsec);
         if ( tm.nsec > (AE_10M_NSEC - AE_1M_NSEC) && tm.nsec < (AE_10M_NSEC + AE_1M_NSEC) ) {
-            uart1_put_string("proc1: public test 4: dealyed_send with 10ms PASSED.\n\r");
+            uart1_put_string("proc1: public test 4: delayed_send with 10ms PASSED.\n\r");
         } else {
-            uart1_put_string("proc1: public test 4: dealyed_send with 10ms FAILED.\n\r");
+            uart1_put_string("proc1: public test 4: delayed_send with 10ms FAILED.\n\r");
         }
     } else {
         printf("proc1: ERR - got RST_NO %d from sender PID %d, dropping \n\r", req_no, sender_id );
