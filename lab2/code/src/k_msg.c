@@ -119,6 +119,7 @@ void *k_receive_message_nb(int *p_pid) {
     }
 
     MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+
     // Give envelope memory block to the target process
     q_insert(&(gp_current_process->m_mem_blk), (MEM_BLK*) ((int *) message - 1));
     
@@ -142,6 +143,7 @@ void *k_receive_message(int *p_pid) {
     }
 
     MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
+
     // Give envelope memory block to the target process
     q_insert(&(gp_current_process->m_mem_blk), (MEM_BLK*) ((int *) message - 1));
     

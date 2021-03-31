@@ -2,7 +2,6 @@
 #define K_SYS_PROCS_H
 
 void nullProc(void);
-void timerIProc(void);
 
 void aProc(void);
 void bProc(void);
@@ -11,5 +10,8 @@ void setPrioProc(void);
 void clockProc(void);
 void KCDProc(void);
 void CRTProc(void);
+
+void timerIProc(void);
+void uartIProc(void);
 
 #endif
