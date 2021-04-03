@@ -48,6 +48,7 @@ DELAYED_MSG_BUF* delayed_msg_queue = NULL;
 
 int k_send_message_actual(int pid, void *p_msg) {
     ENTER_KERNEL_FUNC();
+    if (pid == NULL || p_msg == NULL) return RTX_ERR;
     // Ensure destination process actually exists
     // recv_pcb← convert recv_pidto process obj/PCB reference
     PCB* destProc = get_pcb_by_pid(pid);
@@ -103,10 +104,19 @@ int k_send_message(int pid, void *p_msg) {
 // To be done after iprocess implementation
 int k_delayed_send(int pid, void *p_msg, int delay) {
     ENTER_KERNEL_FUNC();
-    if (pid == PID_TIMER_IPROC) return RTX_ERR;
+    if (pid == PID_TIMER_IPROC || pid == NULL || delay < 0) return RTX_ERR;
     DELAYED_MSG_BUF* message = (DELAYED_MSG_BUF*) p_msg;
     message->m_expiry = delay;
     message->m_real_recv_pid = pid;
+
+    // need to validate this before doing the delay send
+    PCB* destProc = get_pcb_by_pid(pid);
+    if (destProc == NULL) {
+        // Destination process doesn't exist, rip
+        EXIT_KERNEL_FUNC();
+        return RTX_ERR;
+    }
+
     int status = k_send_message_actual(PID_TIMER_IPROC, p_msg);
     EXIT_KERNEL_FUNC();
     return status;
