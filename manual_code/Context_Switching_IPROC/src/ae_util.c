@@ -34,6 +34,31 @@ int assertTest(char * testName, int returned, int expected, char* testNum) {
     }
 }
 
+void numToString(int num, char* buf) {
+    int i = 0;
+    
+    if (num == 0) {
+        buf[i++] = '0';
+    }
+
+    while (num > 0) {
+        buf[i++] = '0' + (num % 10);
+        num /= 10;
+    }
+    buf[i--] = '\0';
+    
+    // Reverse the order of the numbers in the buffer
+    int j = 0;
+    char temp;
+    while(j < i) {
+        temp = buf[j];
+        buf[j] = buf[i];
+        buf[i] = temp;
+        j++;
+        i--;
+    }
+}
+
 void printNumber(int num) {
     char str[12];
     int i = 0;
@@ -47,7 +72,7 @@ void printNumber(int num) {
         num /= 10;
     }
 
-    while (i --> 0) { // lolol
+    while (i --> 0) { // lolol https://stackoverflow.com/questions/1642028/what-is-the-operator-in-c-c
         uart1_put_char(str[i]);
     }
 }
@@ -84,6 +109,14 @@ void uart0_printMsgText(MSG_BUF* msg) {
     for (int i = 0; msg->mtext[i] && i < 50; i++) {
         uart0_put_char(msg->mtext[i]);
     }
+}
+
+int stringToNumAndCount(char* numberStr) {
+    int numDigits = 0;
+    for (char* charPtr = numberStr; *charPtr >= '0' && *charPtr <= '9'; charPtr++) {
+        numDigits++;
+    }
+    return stringToNum(numberStr, numDigits);
 }
 
 int stringToNum(char* numberStr, int numDigits) {

@@ -65,6 +65,9 @@ int k_send_message_actual(int pid, void *p_msg) {
     message->m_recv_pid = pid;
 
     // Add message to the back of the destination process' mailbox
+    // Bad practice warning:
+    // Both MEM_BLK and MSG_BUF have a mp_next pointer as the first field so it works
+    // But technically with this cast, the data fields are misaligned
     q_insert((MEM_BLK**) &(destProc->m_msg_buf), (MEM_BLK*) message);
  
     // Transfer ownership of the memory block from the target process to the destination process

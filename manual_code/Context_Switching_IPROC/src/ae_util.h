@@ -16,6 +16,8 @@ int assertTest(char *, int, int, char*);
 
 void printNumber(int);
 
+void numToString(int, char*);
+
 void printFraction(int, int);
 
 void printSummary(char *, int, int);
@@ -23,6 +25,8 @@ void printSummary(char *, int, int);
 void strcpy(char*, char*);
 
 void uart0_printMsgText(MSG_BUF*);
+
+int stringToNumAndCount(char*);
 
 int stringToNum(char*, int);
 

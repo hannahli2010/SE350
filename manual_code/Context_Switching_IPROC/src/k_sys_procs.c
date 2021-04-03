@@ -3,14 +3,21 @@
 #include "k_msg.h"
 #include "rtx.h"
 #include "uart_def.h"
-#include "printf.h"
 #include "ae_util.h"
-
-#ifdef DEBUG_0
+#include "printf.h"
 #include "uart_polling.h"
-#endif /* DEBUG_0 */
+#include "k_queue.h"
+
+// #ifdef DEBUG_0
+// #endif /* DEBUG_0 */
 
 uint32_t time = 0;
+
+#ifdef SIM_TARGET
+#define CLOCK_DELAY 20     // delay for 1 second on the simulator <- NOT CORRECT YET
+#else
+#define CLOCK_DELAY 1000   // delay for 1 second on the board <- NOT CORRECT YET
+#endif
 
 void nullProc(void) {
 	#ifdef DEBUG_0
@@ -20,7 +27,37 @@ void nullProc(void) {
     }
 }
 
+void registerCommand(char c) {
+	MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = c;
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+}
+
 void aProc(void) {
+	registerCommand('Z');
+	int num = 0;
+	MSG_BUF* msg;
+	
+	// Wait until %Z command is recieved
+	while (1) {
+		msg = receive_message(NULL);
+		if (msg->mtype == KCD_CMD) {
+			release_memory_block(msg);
+			break;
+		}
+		release_memory_block(msg);
+	}
+
+	while(1) {
+		msg = (MSG_BUF*) request_memory_block();
+		msg->mtype = COUNT_REPORT;
+		numToString(num, msg->mtext);
+		send_message(PID_B, msg);
+		num++;
+		release_processor();
+	}
+
 	/*
 	Register %Z command with the KCD
 	Wait till %Z command is received
@@ -34,22 +71,16 @@ void aProc(void) {
 		release_processor()
 	endloop
 	*/
-	while (1) {
-		set_process_priority(PID_A, LOWEST);
-		release_processor();
-	}
 }
 
 void bProc(void) {
-	/*
-	loop forever
-		receive a message
-		send the message to process C
-	endloop
-	*/
 	while (1) {
-		set_process_priority(PID_B, LOWEST);
-		release_processor();
+		MSG_BUF* msg = receive_message(NULL);
+		if (msg->mtype == COUNT_REPORT) {
+			send_message(PID_C, msg);
+		} else {
+			release_memory_block(msg);
+		}
 	}
 }
 
@@ -72,8 +103,50 @@ void cProc(void) {
 		deallocate message envelope p
 		release_processor()
 	endloop
+*/
+	MSG_BUF* localQ = NULL;
+	MSG_BUF* msg;
 
+	while(1) {
+		if (localQ == NULL) {
+			msg = receive_message(NULL);
+		} else {
+			msg = localQ;
+			localQ = msg->mp_next;
+		}
 
+		if (msg->mtype == COUNT_REPORT) {
+			int num = stringToNumAndCount(msg->mtext);
+			if (num % 2 == 0) {
+				strcpy(msg->mtext, "Process C\n\r");
+				msg->mtype = CRT_DISPLAY;
+				send_message(PID_CRT, msg);
+				
+				// START OF HIBERNATE
+				MSG_BUF *q = (MSG_BUF*) request_memory_block();
+				q->mtype = WAKEUP_10;
+				delayed_send(PID_C, q, CLOCK_DELAY*10); // 10 second delay
+
+				while (1) {
+					msg = receive_message(NULL);
+					if (msg->mtype == WAKEUP_10) {
+						release_memory_block(msg);
+						break;
+					} else {
+						// Bad practice warning:
+						// Both MEM_BLK and MSG_BUF have a mp_next pointer as the first field so it works
+						// But technically with this cast, the data fields are misaligned
+						q_insert((MEM_BLK**) &localQ, (MEM_BLK*) msg);
+					}
+				}
+				// END OF HIBERNATE
+			}
+		}
+
+		release_memory_block(msg);
+	}
+
+/*
 hibernate:
 	q <-request_memory_block()
 	use q to delayed_sendto itself with 10 sec delay and msg_type=wakeup10
@@ -88,19 +161,12 @@ hibernate:
 		endif
 	endloop
 	*/
-	while (1) {
-		set_process_priority(PID_C, LOWEST);
-		release_processor();
-	}
 }
 
 // Registers to 'C'
 // Command: %C <process_id> <new_priority>
 void setPrioProc(void) {
-	MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
-	regMsg->mtext[0] = 'C';
-	regMsg->mtype = KCD_REG;
-	send_message(PID_KCD, regMsg);
+	registerCommand('C');
 	
 	int procId;
 
@@ -158,16 +224,158 @@ void setPrioProc(void) {
 	}
 }
 
+int isNum(char c) {
+	if (c >= '0' && c <= '9') return TRUE;
+	return FALSE;
+}
+
 /* Registers to 'W'
  * Commands:
  * 		%WR			 			- sets clock time to 00:00:00
  * 		%WS hh:mm:ss 	- sets current wall clock time to hh:mm:ss
  * 		%WT			 			- terminates wall clock
  */
+
+char invalidCommandMsg[] = "%W_ is not a valid clock command!\r\n";
+
 void clockProc(void) {
+	registerCommand('W');
+
+	MSG_BUF* msg;
+	char* charPtr;
+
+	int time; // seconds since 00:00:00
+
+	int isClockActive = FALSE;
+
 	while (1) {
-		set_process_priority(PID_CLOCK, LOWEST);
-		release_processor();
+		msg = receive_message(NULL);
+		charPtr = msg->mtext;
+		// printf("Message: '%s' of type %d\n", msg->mtext, msg->mtype);
+
+		if (msg->mtype == KCD_CMD) {
+			char clockCommand = *(charPtr++);
+			skipWhitespace(&charPtr);
+			// Terminate - terminates wall clock
+			if (clockCommand == 'T') {
+				if (*charPtr == '\0') {
+					// Terminate clock
+					isClockActive = FALSE;	
+				} else {
+					// error, was not expecting anything
+					sendUARTMsg("%WT clock command expects no arguments\r\n");
+				}
+			// Reset - Set clock to 00:00:00
+			} else if (clockCommand == 'R') {
+				if (*charPtr == '\0') {
+					time = 0; // :)
+					
+					// Clock Tick
+					if (isClockActive == FALSE) {
+						isClockActive = TRUE;
+						msg->mtype = CLOCK_TICK;
+						delayed_send(PID_CLOCK, msg, CLOCK_DELAY);
+						continue;
+					}
+				} else {
+					// error, was not expecting any parameters
+					sendUARTMsg("%WS clock command expects no arguments\r\n");
+				}
+			}
+			// Set hh:mm:ss - sets current wall clock time to hh:mm:ss
+			else if (clockCommand == 'S') {
+				if (*charPtr == '\0') {
+					// was supposed to have stuff
+				} else if (
+					!(
+						isNum(charPtr[0]) &&
+						isNum(charPtr[1]) &&
+						charPtr[2] == ':' &&
+						isNum(charPtr[3]) &&
+						isNum(charPtr[4]) &&
+						charPtr[5] == ':' &&
+						isNum(charPtr[6]) &&
+						isNum(charPtr[7])
+					))
+				{
+					sendUARTMsg("The provided time format was incorrect!\r\n");
+					goto DONEZO;
+				} else {
+					time = 0;
+					// parse hh:mm:ss
+
+					// get hours
+					int parsedTime = stringToNum(charPtr, 2);
+					if (parsedTime > 24) {
+						sendUARTMsg("Provided aninvalid hours parameter - Hours must be less than 24 \r\n");
+						goto DONEZO;
+					}
+					time += parsedTime*60*60;
+					charPtr += 3;
+
+					// get minutes
+					parsedTime = stringToNum(charPtr, 2);
+					if (parsedTime > 59 && parsedTime) {
+						sendUARTMsg("Provided an invalid minutes parameter - Minutes must be less than 60 \r\n");
+						goto DONEZO;
+					}
+					time += parsedTime*60;
+					charPtr += 3;
+
+					// get seconds
+					parsedTime = stringToNum(charPtr, 2);
+					if (parsedTime > 59) {
+						sendUARTMsg("Provided an invalid seconds parameter - Seconds must be less than 60 \r\n");
+						goto DONEZO;
+					}
+					time += parsedTime;
+					charPtr += 2;
+
+					skipWhitespace(&charPtr);
+					if (*charPtr != '\0') {
+						sendUARTMsg("No arguments should follow time in the WS command\r\n");
+						goto DONEZO;
+					}
+
+					// now that we have hour, minute, second
+					if (isClockActive == FALSE) {
+						isClockActive = TRUE;
+						msg->mtype = CLOCK_TICK;
+						delayed_send(PID_CLOCK, msg, CLOCK_DELAY);
+						continue;
+					}
+				}
+			} else {
+				invalidCommandMsg[2] = clockCommand;
+				sendUARTMsg(invalidCommandMsg);
+			}
+		} else if (msg->mtype == CLOCK_TICK) {
+			if (isClockActive == FALSE) {
+				release_memory_block(msg);
+			} else {
+				time++;
+				time %= 24*60*60;
+
+				char timeStr[8];
+				sprintf(timeStr, "%02d:%02d:%02d", (time/60/60) % 24, (time/60) % 60, time % 60);
+
+#ifdef SIM_TARGET
+				// The ANSI escape sequence magicks to keep the clock in the top right corner doesn't work in keil uvision :'(
+				uart1_put_string(timeStr);
+				uart1_put_string("\n");
+#else
+				uart0_put_string("\x1B[s\x1B[;72f"); // save the current cursor position, then move it to row 1, col 72
+				uart0_put_string(timeStr); // print the time
+				uart0_put_string("\x1B[u"); // restore the cursor position saved above
+#endif
+
+				delayed_send(PID_CLOCK, msg, CLOCK_DELAY);
+				continue;
+			}
+		}
+
+DONEZO:
+		release_memory_block(msg);
 	}
 }
 
@@ -189,149 +397,4 @@ void CRTProc(void) {
 
 		__set_CONTROL(1);
 	}	
-}
-
-void timerIProc(void) {
-	// Decrement the timer of the first message in the queue, if it exists
-	if (delayed_msg_queue != NULL) {
-		delayed_msg_queue->m_expiry--;
-	}
-
-	// Insert all the messages we just received into the delayed message queue
-	DELAYED_MSG_BUF* newMsg;
-	while (newMsg = (DELAYED_MSG_BUF*) k_receive_message_nb(NULL) ) {
-
-		// If the list is empty, insert at the front of the list
-		if (delayed_msg_queue == NULL) {
-			newMsg->mp_next = NULL;
-			delayed_msg_queue = newMsg;
-		}
-		// If the message should be inserted before the first element in the 
-		//   queue, insert the new message to the head of the list
-		else if (newMsg->m_expiry < delayed_msg_queue->m_expiry) {
-			newMsg->mp_next = delayed_msg_queue;
-			delayed_msg_queue = newMsg;
-		}
-		// Otherwise, insert the message to the correct placement in the 
-		//   queue based on expiry order
-		else {
-			DELAYED_MSG_BUF* it = delayed_msg_queue;
-			while (it->mp_next != NULL && newMsg->m_expiry - it->m_expiry >= it->mp_next->m_expiry) {
-				// Delays are relative to the delay of the message before it
-				// Decrememt the message's expiry by the previous message's delay
-				newMsg->m_expiry -= it->m_expiry;
-				it = it->mp_next;
-			}
-			newMsg->m_expiry -= it->m_expiry;
-			
-			// Insert the new message into the queue
-			newMsg->mp_next = it->mp_next;
-			it->mp_next = newMsg;
-		}
-
-		// If the message is the last message in the queue, we don't need to do anything
-		//   Otherwise, we need to modify the delay of the proceeding message to be
-		//   relative to the message we just inserted
-		if (newMsg->mp_next != NULL) {
-			newMsg->mp_next->m_expiry -= newMsg->m_expiry;
-		}
-	}
-
-	// Check if message should be sent
-	while (delayed_msg_queue != NULL && delayed_msg_queue->m_expiry == 0) {
-		// Get the first message from the queue
-		DELAYED_MSG_BUF* msg = delayed_msg_queue;
-
-		// Remove from the queue the message we are sending
-		delayed_msg_queue = delayed_msg_queue->mp_next;
-		
-		// Sending the message to the destination process
-		k_send_message(msg->m_real_recv_pid, (void*) msg);
-	}
-}
-
-uint8_t g_char_in;
-uint8_t g_char_out;
-
-MSG_BUF* currMsg = NULL;
-char* msg_char_ptr;
-
-void uartIProc(void) {
-	uint8_t IIR_IntId;        /* Interrupt ID from IIR */
-    LPC_UART_TypeDef *pUart = (LPC_UART_TypeDef *)LPC_UART0;
-		
-	#ifdef DEBUG_0
-		uart1_put_string("Entering c_UART0_IRQHandler\n\r");
-	#endif // DEBUG_0
-
-    /* Reading IIR automatically acknowledges the interrupt */
-    IIR_IntId = (pUart->IIR) >> 1 ; /* skip pending bit in IIR */ 
-    if (IIR_IntId & IIR_RDA) { /* Receive Data Avaialbe */
-        /* Read UART. Reading RBR will clear the interrupt */
-        g_char_in = pUart->RBR;
-		#ifdef DEBUG_0
-			uart1_put_string("Reading a char = ");
-			uart1_put_char(g_char_in);
-			uart1_put_string("\n\r");
-		#endif /* DEBUG_0 */
-
-        MSG_BUF* msg = k_request_memory_block();
-		msg->mtype = KEY_IN;
-		msg->mtext[0] = g_char_in;
-		msg->mtext[1] = 0;
-		if (g_char_in == '\r') {
-			msg->mtext[1] = '\n';
-			msg->mtext[2] = 0;
-		}
-		
-        k_send_message(PID_KCD, msg);
-
-    } else if (IIR_IntId & IIR_THRE) {
-        /* THRE Interrupt, transmit holding register becomes empty */
-
-		if (currMsg == NULL) {
-			currMsg = k_receive_message_nb(NULL);
-			// If we didn't actually get a message
-			if (currMsg == NULL) {
-				#ifdef DEBUG_0
-					uart1_put_string("No waiting message. Turning off IER_THRE\n\r");
-				#endif /* DEBUG_0 */
-				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
-				pUart->THR = '\r';
-				return;
-			}
-			msg_char_ptr = currMsg->mtext;
-		}
-
-		g_char_out = *msg_char_ptr;
-		#ifdef DEBUG_0
-			printf("Writing a char = %c \n\r", g_char_out);
-		#endif /* DEBUG_0 */
-		pUart->THR = g_char_out;
-		msg_char_ptr++;
-        
-		if (*msg_char_ptr == '\0' ) {
-			#ifdef DEBUG_0
-				uart1_put_string("Finish writing this message. \n\r");
-			#endif /* DEBUG_0 */
-			k_release_memory_block(currMsg);
-			
-			currMsg = k_receive_message_nb(NULL);
-			// If we didn't actually get a message
-			if (currMsg == NULL) {
-				#ifdef DEBUG_0
-					uart1_put_string("Turning off IER_THRE. \n\r");
-				#endif /* DEBUG_0 */
-				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
-				return;
-			}
-			msg_char_ptr = currMsg->mtext;
-		}
-       
-    } else {  /* not implemented yet */
-		#ifdef DEBUG_0
-			uart1_put_string("Should not get here!\n\r");
-		#endif /* DEBUG_0 */
-        return;
-    }    
 }
