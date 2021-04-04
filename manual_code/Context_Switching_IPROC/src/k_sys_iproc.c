@@ -1,6 +1,8 @@
 #include "k_sys_procs.h"
 #include "k_process.h"
+#include "k_memory.h"
 #include "k_msg.h"
+#include "k_queue.h"
 #include "rtx.h"
 #include "uart_def.h"
 #include "ae_util.h"
@@ -84,14 +86,19 @@ void uartIProc(void) {
 	#endif // DEBUG_0
 
     /* Reading IIR automatically acknowledges the interrupt */
-    IIR_IntId = (pUart->IIR) >> 1 ; /* skip pending bit in IIR */ 
+    IIR_IntId = (pUart->IIR) >> 1 ; /* skip pending bit in IIR */
+
+	#ifdef DEBUG_0
+	printf("IIR_IntId is: 0x%X\n\r", IIR_IntId);
+	#endif // DEBUG_0
+
     if (IIR_IntId & IIR_RDA) { /* Receive Data Avaialbe */
         /* Read UART. Reading RBR will clear the interrupt */
         g_char_in = pUart->RBR;
 		#ifdef DEBUG_0
-			uart1_put_string("Reading a char = ");
+			uart1_put_string("Reading a char = '");
 			uart1_put_char(g_char_in);
-			uart1_put_string("\n\r");
+			uart1_put_string("'\n\r");
 		#endif /* DEBUG_0 */
 
         MEM_BLK* blk = (MEM_BLK*) k_request_memory_block_nb();
@@ -121,7 +128,7 @@ void uartIProc(void) {
 				#ifdef DEBUG_0
 					uart1_put_string("No waiting message. Turning off IER_THRE\n\r");
 				#endif /* DEBUG_0 */
-				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
+				pUart->IER &= ~IER_THRE; // turn the IER_THRE bit off
 				pUart->THR = '\r';
 				return;
 			}
@@ -130,7 +137,7 @@ void uartIProc(void) {
 
 		g_char_out = *msg_char_ptr;
 		#ifdef DEBUG_0
-			printf("Writing a char = %c \n\r", g_char_out);
+			printf("Writing a char = '%c' \n\r", g_char_out);
 		#endif /* DEBUG_0 */
 		pUart->THR = g_char_out;
 		msg_char_ptr++;
@@ -147,7 +154,7 @@ void uartIProc(void) {
 				#ifdef DEBUG_0
 					uart1_put_string("Turning off IER_THRE. \n\r");
 				#endif /* DEBUG_0 */
-				pUart->IER ^= IER_THRE; // toggle the IER_THRE bit
+				pUart->IER &= ~IER_THRE; // turn the IER_THRE bit off
 				return;
 			}
 			msg_char_ptr = currMsg->mtext;

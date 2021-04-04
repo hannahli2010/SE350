@@ -13,6 +13,8 @@
 
 uint32_t time = 0;
 
+#define IS_NUM(c) (c >= '0' && c <= '9')
+
 #ifdef SIM_TARGET
 #define CLOCK_DELAY 20     // delay for 1 second on the simulator <- NOT CORRECT YET
 #else
@@ -224,11 +226,6 @@ void setPrioProc(void) {
 	}
 }
 
-int isNum(char c) {
-	if (c >= '0' && c <= '9') return TRUE;
-	return FALSE;
-}
-
 /* Registers to 'W'
  * Commands:
  * 		%WR			 			- sets clock time to 00:00:00
@@ -288,29 +285,29 @@ void clockProc(void) {
 					// was supposed to have stuff
 				} else if (
 					!(
-						isNum(charPtr[0]) &&
-						isNum(charPtr[1]) &&
-						charPtr[2] == ':' &&
-						isNum(charPtr[3]) &&
-						isNum(charPtr[4]) &&
-						charPtr[5] == ':' &&
-						isNum(charPtr[6]) &&
-						isNum(charPtr[7])
+						IS_NUM(charPtr[0]) &&
+						IS_NUM(charPtr[1]) &&
+						charPtr[2] == ':'  &&
+						IS_NUM(charPtr[3]) &&
+						IS_NUM(charPtr[4]) &&
+						charPtr[5] == ':'  &&
+						IS_NUM(charPtr[6]) &&
+						IS_NUM(charPtr[7])
 					))
 				{
 					sendUARTMsg("The provided time format was incorrect!\r\n");
 					goto DONEZO;
 				} else {
-					time = 0;
+					int newTime = 0;
 					// parse hh:mm:ss
 
 					// get hours
 					int parsedTime = stringToNum(charPtr, 2);
-					if (parsedTime > 24) {
-						sendUARTMsg("Provided aninvalid hours parameter - Hours must be less than 24 \r\n");
+					if (parsedTime > 23) {
+						sendUARTMsg("Provided an invalid hours parameter - Hours must be less than 24 \r\n");
 						goto DONEZO;
 					}
-					time += parsedTime*60*60;
+					newTime += parsedTime*60*60;
 					charPtr += 3;
 
 					// get minutes
@@ -319,7 +316,7 @@ void clockProc(void) {
 						sendUARTMsg("Provided an invalid minutes parameter - Minutes must be less than 60 \r\n");
 						goto DONEZO;
 					}
-					time += parsedTime*60;
+					newTime += parsedTime*60;
 					charPtr += 3;
 
 					// get seconds
@@ -328,7 +325,7 @@ void clockProc(void) {
 						sendUARTMsg("Provided an invalid seconds parameter - Seconds must be less than 60 \r\n");
 						goto DONEZO;
 					}
-					time += parsedTime;
+					newTime += parsedTime;
 					charPtr += 2;
 
 					skipWhitespace(&charPtr);
@@ -336,6 +333,8 @@ void clockProc(void) {
 						sendUARTMsg("No arguments should follow time in the WS command\r\n");
 						goto DONEZO;
 					}
+
+					time = newTime;
 
 					// now that we have hour, minute, second
 					if (isClockActive == FALSE) {
@@ -389,7 +388,7 @@ void CRTProc(void) {
 
 		if (msg->mtype == CRT_DISPLAY && msg->mtext[0] != '\0') {
 			send_message(PID_UART_IPROC, msg);
-			pUart->IER |= IER_THRE;
+			pUart->IER |= IER_THRE; // turn the IER_THRE bit on
 		}
 		else {
 			release_memory_block(msg);

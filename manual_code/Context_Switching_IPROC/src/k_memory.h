@@ -68,6 +68,7 @@ extern PROC_INIT    g_proc_table[NUM_TEST_PROCS];
 extern void memory_init(void);
 extern U32  *alloc_stack(U32 size_b);
 extern void *k_request_memory_block(void);
+extern void *k_request_memory_block_nb(void);
 extern int  k_release_memory_block(void *);
 extern void pq_insert_blocked(PCB *);
 extern PCB* pq_remove_by_pid_blocked(int);

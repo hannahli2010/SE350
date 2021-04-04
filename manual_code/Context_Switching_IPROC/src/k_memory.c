@@ -275,7 +275,7 @@ int k_release_memory_block(void *p_mem_blk) {
         target_blk->mp_next = first->m_mem_blk;
         first->m_mem_blk = target_blk;
         
-        if(first->m_priority < gp_current_process->m_priority){
+        if(first->m_priority < gp_current_process->m_priority && gp_current_process->m_state != IPROC){
             PCB * p_pcb_old = gp_current_process;
             gp_current_process = first;
             pq_insert_front_ready(p_pcb_old); //insert p_pcb_old to front of that prio in the queue

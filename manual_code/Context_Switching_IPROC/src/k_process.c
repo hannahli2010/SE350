@@ -206,6 +206,7 @@ void process_init(PROC_INIT *proc_info, int num)
     gp_pcb_timer_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
 	gp_pcb_timer_iproc->m_mem_blk = NULL;
 	gp_pcb_timer_iproc->m_msg_buf = NULL;
+	gp_pcb_timer_iproc->m_priority = HIGH;
     /* NOTE we do not need to create exception stack frame for an IPROC
        since they are running in handler mode and never get into the handler
        mode from the thread mode and they never exit from the handler mode
@@ -223,6 +224,7 @@ void process_init(PROC_INIT *proc_info, int num)
     gp_pcb_uart_iproc->mp_sp = alloc_stack(STACK_SIZE_IPROC);
 	gp_pcb_uart_iproc->m_mem_blk = NULL;
 	gp_pcb_uart_iproc->m_msg_buf = NULL;
+	gp_pcb_uart_iproc->m_priority = HIGH;
 
 }
 
