@@ -38,13 +38,33 @@
 #include "k_inc.h"
 #include "k_queue.h"
 #include "k_rtx.h"
-/*
- *==========================================================================
- *                            TO BE IMPLEMENTED
- *==========================================================================
- */
- 
+#include "ae_util.h"
+
 DELAYED_MSG_BUF* delayed_msg_queue = NULL;
+
+#ifdef _DEBUG_HOTKEYS
+MSG_RECORD sent_msgs[10];
+MSG_RECORD received_msgs[10];
+int sent_msgs_start = 0;
+int received_msgs_start = 0;
+int sent_msgs_size = 0;
+int received_msgs_size = 0;
+
+void emplace_msg_record(MSG_RECORD* arr, int* start, int* size, MSG_BUF* msg) {
+    int i = (*start + *size) % 10;
+    arr[i].m_send_pid = msg->m_send_pid;
+    arr[i].m_recv_pid = msg->m_recv_pid;
+    arr[i].m_timestamp = g_timer_count;
+    arr[i].mtype = msg->mtype;
+    strncpy(arr[i].mtext, msg->mtext, 16);
+
+    if (*size < 10) {
+        (*size)++;
+    } else {
+        *start = (*start + 1) % 10;
+    }
+}
+#endif
 
 int k_send_message_actual(int pid, void *p_msg) {
     ENTER_KERNEL_FUNC();
@@ -77,6 +97,10 @@ int k_send_message_actual(int pid, void *p_msg) {
         EXIT_KERNEL_FUNC();
         return RTX_ERR;
     }
+
+#ifdef _DEBUG_HOTKEYS
+    emplace_msg_record(sent_msgs, &sent_msgs_start, &sent_msgs_size, message);
+#endif
 
     // If the destination process is blocked on message, set it to ready and then check for preemption
     if (destProc->m_state == BLOCKED_ON_MESSAGE) {
@@ -125,12 +149,7 @@ int k_delayed_send(int pid, void *p_msg, int delay) {
     return status;
 }
 
-void *k_receive_message_nb(int *p_pid) {
-    // Return NULL if the mailbox is empty
-    if (gp_current_process->m_msg_buf == NULL) {
-        return NULL;
-    }
-
+void *k_receive_message_actual(int *p_pid) {
     MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
 
     // Give envelope memory block to the target process
@@ -141,7 +160,20 @@ void *k_receive_message_nb(int *p_pid) {
         *p_pid = message->m_send_pid;
     }
 
+#ifdef _DEBUG_HOTKEYS
+    emplace_msg_record(received_msgs, &received_msgs_start, &received_msgs_size, message);
+#endif
+
     return message;
+}
+
+void *k_receive_message_nb(int *p_pid) {
+    // Return NULL if the mailbox is empty
+    if (gp_current_process->m_msg_buf == NULL) {
+        return NULL;
+    }
+
+    return k_receive_message_actual(p_pid);
 }
 
 void *k_receive_message(int *p_pid) {
@@ -155,17 +187,7 @@ void *k_receive_message(int *p_pid) {
         process_switch(p_pcb_old);
     }
 
-    MSG_BUF* message = (MSG_BUF*) q_remove((MEM_BLK **) &(gp_current_process->m_msg_buf));
-
-    // Give envelope memory block to the target process
-    q_insert(&(gp_current_process->m_mem_blk), (MEM_BLK*) ((int *) message - 1));
-    
-    // If the user requested the function to set the sender id, place the sender id into the provided address
-    if (p_pid != NULL) {
-        *p_pid = message->m_send_pid;
-    }
-
-    return message;
+    return k_receive_message_actual(p_pid);
 }
  
 /*

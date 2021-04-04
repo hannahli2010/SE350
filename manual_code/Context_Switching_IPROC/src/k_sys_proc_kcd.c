@@ -41,6 +41,41 @@ void printProcState(PCB* p) {
 	}
 }
 
+void printMessageType(int type) {
+	uart1_put_string("\t Message Type: ");
+	switch (type) {
+		case DEFAULT: 
+			uart1_put_string("DEFAULT"); break;
+		case KCD_REG: 
+			uart1_put_string("KCD_REG"); break;
+		case KCD_CMD: 
+			uart1_put_string("KCD_CMD"); break;
+		case CRT_DISPLAY: 
+			uart1_put_string("CRT_DISPLAY"); break;
+		case KEY_IN: 
+			uart1_put_string("KEY_IN"); break;
+		case CLOCK_TICK: 
+			uart1_put_string("CLOCK_TICK"); break;
+		case COUNT_REPORT: 
+			uart1_put_string("COUNT_REPORT"); break;
+		case WAKEUP_10: 
+			uart1_put_string("WAKEUP_10"); break;
+	}
+}
+
+void printMessageRecord(MSG_RECORD msgRecord) {
+	uart1_put_string("  Sender: ");
+	printNumber(msgRecord.m_send_pid);
+	uart1_put_string("\tReceiver: ");
+	printNumber(msgRecord.m_recv_pid);
+	uart1_put_string("\tTimestamp: ");
+	printNumber(msgRecord.m_timestamp);
+	printMessageType(msgRecord.mtype);
+	uart1_put_string("\r\n    Message: '");
+	printStringEscaped(msgRecord.mtext, 16);
+	uart1_put_string("'\r\n");
+}
+
 int hotKeyDecoder(char hotkey) {
 	PCB* it;
 	switch(hotkey) {
@@ -85,7 +120,15 @@ int hotKeyDecoder(char hotkey) {
 			uart1_put_string("\r\n");
 			break;
 		case '^':
-
+			uart1_put_string("\r\nSent Messages: \r\n");
+			for (int i = 0; i < sent_msgs_size; i++) {
+				printMessageRecord(sent_msgs[(i + sent_msgs_start) % 10]);
+			}
+			
+			uart1_put_string("\r\nReceived Messages:\r\n");
+			for (int i = 0; i < received_msgs_size; i++) {
+				printMessageRecord(received_msgs[(i + received_msgs_start) % 10]);
+			}
 			
 			break;
 		default:

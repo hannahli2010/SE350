@@ -4,12 +4,12 @@
 #include "rtx.h"
 #include "uart_def.h"
 #include "ae_util.h"
-#include "printf.h"
-#include "uart_polling.h"
 #include "k_queue.h"
 
-// #ifdef DEBUG_0
-// #endif /* DEBUG_0 */
+#ifdef DEBUG_0
+#include "printf.h"
+#include "uart_polling.h"
+#endif /* DEBUG_0 */
 
 uint32_t time = 0;
 
@@ -235,6 +235,14 @@ void setPrioProc(void) {
 
 char invalidCommandMsg[] = "%W_ is not a valid clock command!\r\n";
 
+#ifdef SIM_TARGET
+char timeStr[] = "00:00:00";
+#define TIMESTR_OFFSET 0
+#else
+char timeStr[] = "\x1B[s\x1B[;72f00:00:00\x1B[u";
+#define TIMESTR_OFFSET 9
+#endif
+
 void clockProc(void) {
 	registerCommand('W');
 
@@ -355,17 +363,25 @@ void clockProc(void) {
 				time++;
 				time %= 24*60*60;
 
-				char timeStr[8];
-				sprintf(timeStr, "%02d:%02d:%02d", (time/60/60) % 24, (time/60) % 60, time % 60);
+				// char timeStr[8];
+				// sprintf(timeStr, "%02d:%02d:%02d", (time/60/60) % 24, (time/60) % 60, time % 60);
+
+				int tempTime = time;
+				timeStr[7+TIMESTR_OFFSET] = '0' + ((tempTime % 60) % 10);
+				timeStr[6+TIMESTR_OFFSET] = '0' + ((tempTime % 60) / 10);
+				tempTime /= 60;
+				timeStr[4+TIMESTR_OFFSET] = '0' + ((tempTime % 60) % 10);
+				timeStr[3+TIMESTR_OFFSET] = '0' + ((tempTime % 60) / 10);
+				tempTime /= 60;
+				timeStr[1+TIMESTR_OFFSET] = '0' + ((tempTime % 24) % 10);
+				timeStr[0+TIMESTR_OFFSET] = '0' + ((tempTime % 24) / 10);
 
 #ifdef SIM_TARGET
 				// The ANSI escape sequence magicks to keep the clock in the top right corner doesn't work in keil uvision :'(
 				uart1_put_string(timeStr);
 				uart1_put_string("\n");
 #else
-				uart0_put_string("\x1B[s\x1B[;72f"); // save the current cursor position, then move it to row 1, col 72
-				uart0_put_string(timeStr); // print the time
-				uart0_put_string("\x1B[u"); // restore the cursor position saved above
+				sendUARTMsg(timeStr);
 #endif
 
 				delayed_send(PID_CLOCK, msg, CLOCK_DELAY);

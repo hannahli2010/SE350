@@ -106,6 +106,14 @@ typedef struct delayed_msg_buf
     char mtext[1];              /**> body of the message         */
 } DELAYED_MSG_BUF;
 
+typedef struct {
+    int m_send_pid;             /**> sender pid                  */
+    int m_recv_pid;             /**> receiver pid                */
+    int m_timestamp;            /**> timestamp of send/receive   */
+    int mtype;                  /**> user defined message type   */
+    char mtext[16];             /**> body of the message         */
+} MSG_RECORD;
+
 /*
  *==========================================================================
  *                   GLOBAL VARIABLES DECLARATIONS
@@ -128,6 +136,15 @@ extern U32          num_free_mem_blks;    /* number of free memory blocks */
 extern volatile uint32_t g_timer_count;   /* increment every 1 ms         */
 extern DELAYED_MSG_BUF *delayed_msg_queue;
 
+#ifdef _DEBUG_HOTKEYS
+extern MSG_RECORD sent_msgs[10];
+extern MSG_RECORD received_msgs[10];
+extern int sent_msgs_start;
+extern int received_msgs_start;
+extern int sent_msgs_size;
+extern int received_msgs_size;
+#endif
+
 #endif /* ! K_INC_H_ */
 
 /*
@@ -146,7 +163,7 @@ extern DELAYED_MSG_BUF *delayed_msg_queue;
 
 /*
  *===========================================================================
- *                          FUNCTIONAL MACROS
+ *                          CUSTOM MESSAGE TYPES
  *===========================================================================
  */
 

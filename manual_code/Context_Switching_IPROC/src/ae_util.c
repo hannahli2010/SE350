@@ -105,6 +105,36 @@ void strcpy(char* d, char* s) {
     d[i] = '\0';
 }
 
+void strncpy(char* d, char* s, int len) {
+    int i;
+    for (i = 0; s[i] != '\0' && i < len; i++) {
+        d[i] = s[i];
+    }
+    if (i == len) {
+        d[len-1] = '\0';
+    } else {
+        d[i] = '\0';
+    }
+}
+
+void printStringEscaped(char* s, int limit) {
+    for (int i = 0; s[i] && i < limit; i++) {
+        switch (s[i]) {
+            case '\b':
+                uart1_put_string("\\b");
+                break;
+            case '\r':
+                uart1_put_string("\\r");
+                break;
+            case '\n':
+                uart1_put_string("\\n");
+                break;
+            default:
+                uart1_put_char(s[i]);
+        }
+    }
+}
+
 void uart0_printMsgText(MSG_BUF* msg) {
     for (int i = 0; msg->mtext[i] && i < 50; i++) {
         uart0_put_char(msg->mtext[i]);

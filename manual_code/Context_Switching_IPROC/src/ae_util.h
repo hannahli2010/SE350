@@ -24,6 +24,10 @@ void printSummary(char *, int, int);
 
 void strcpy(char*, char*);
 
+void strncpy(char*, char*, int);
+
+void printStringEscaped(char*, int);
+
 void uart0_printMsgText(MSG_BUF*);
 
 int stringToNumAndCount(char*);

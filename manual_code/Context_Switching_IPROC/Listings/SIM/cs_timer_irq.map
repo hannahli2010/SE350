@@ -7,7 +7,7 @@ Section Cross References
     main_svc.o(i.main) refers to system_lpc17xx.o(i.SystemInit) for SystemInit
     main_svc.o(i.main) refers to uart_polling.o(i.uart_init) for uart_init
     main_svc.o(i.main) refers to printf.o(i.init_printf) for init_printf
-    main_svc.o(i.main) refers to ae_2.o(i.ae_init) for ae_init
+    main_svc.o(i.main) refers to ae10.o(i.ae_init) for ae_init
     main_svc.o(i.main) refers to uart_polling.o(i.putc) for putc
     main_svc.o(i.main) refers to main_svc.o(i.pre_rtx_init) for pre_rtx_init
     main_svc.o(i.main) refers to k_rtx_init.o(i.k_rtx_init) for k_rtx_init
@@ -47,24 +47,33 @@ Section Cross References
     k_memory.o(i.pq_insert_blocked) refers to k_memory.o(.data) for proc_blocked_queue
     k_memory.o(i.pq_remove_by_pid_blocked) refers to k_priority_queue.o(i.pq_remove_by_pid) for pq_remove_by_pid
     k_memory.o(i.pq_remove_by_pid_blocked) refers to k_memory.o(.data) for proc_blocked_queue
+    k_msg.o(i.emplace_msg_record) refers to ae_util_1.o(i.strncpy) for strncpy
+    k_msg.o(i.emplace_msg_record) refers to timer.o(.data) for g_timer_count
     k_msg.o(i.k_delayed_send) refers to k_process.o(i.get_pcb_by_pid) for get_pcb_by_pid
     k_msg.o(i.k_delayed_send) refers to k_msg.o(i.k_send_message_actual) for k_send_message_actual
     k_msg.o(i.k_receive_message) refers to k_process.o(i.scheduler) for scheduler
     k_msg.o(i.k_receive_message) refers to k_process.o(i.process_switch) for process_switch
-    k_msg.o(i.k_receive_message) refers to k_queue.o(i.q_remove) for q_remove
-    k_msg.o(i.k_receive_message) refers to k_queue.o(i.q_insert) for q_insert
+    k_msg.o(i.k_receive_message) refers to k_msg.o(i.k_receive_message_actual) for k_receive_message_actual
     k_msg.o(i.k_receive_message) refers to k_process.o(.data) for gp_current_process
-    k_msg.o(i.k_receive_message_nb) refers to k_queue.o(i.q_remove) for q_remove
-    k_msg.o(i.k_receive_message_nb) refers to k_queue.o(i.q_insert) for q_insert
+    k_msg.o(i.k_receive_message_actual) refers to k_queue.o(i.q_remove) for q_remove
+    k_msg.o(i.k_receive_message_actual) refers to k_queue.o(i.q_insert) for q_insert
+    k_msg.o(i.k_receive_message_actual) refers to k_msg.o(i.emplace_msg_record) for emplace_msg_record
+    k_msg.o(i.k_receive_message_actual) refers to k_process.o(.data) for gp_current_process
+    k_msg.o(i.k_receive_message_actual) refers to k_msg.o(.data) for received_msgs_size
+    k_msg.o(i.k_receive_message_actual) refers to k_msg.o(.bss) for received_msgs
+    k_msg.o(i.k_receive_message_nb) refers to k_msg.o(i.k_receive_message_actual) for k_receive_message_actual
     k_msg.o(i.k_receive_message_nb) refers to k_process.o(.data) for gp_current_process
     k_msg.o(i.k_send_message) refers to k_msg.o(i.k_send_message_actual) for k_send_message_actual
     k_msg.o(i.k_send_message_actual) refers to k_process.o(i.get_pcb_by_pid) for get_pcb_by_pid
     k_msg.o(i.k_send_message_actual) refers to k_queue.o(i.q_insert) for q_insert
     k_msg.o(i.k_send_message_actual) refers to k_queue.o(i.q_remove_by_addr) for q_remove_by_addr
+    k_msg.o(i.k_send_message_actual) refers to k_msg.o(i.emplace_msg_record) for emplace_msg_record
     k_msg.o(i.k_send_message_actual) refers to k_process.o(i.pq_insert_front_ready) for pq_insert_front_ready
     k_msg.o(i.k_send_message_actual) refers to k_process.o(i.process_switch) for process_switch
     k_msg.o(i.k_send_message_actual) refers to k_process.o(i.pq_insert_ready) for pq_insert_ready
     k_msg.o(i.k_send_message_actual) refers to k_process.o(.data) for gp_current_process
+    k_msg.o(i.k_send_message_actual) refers to k_msg.o(.data) for sent_msgs_size
+    k_msg.o(i.k_send_message_actual) refers to k_msg.o(.bss) for sent_msgs
     k_process.o(i.get_pcb_by_pid) refers to k_process.o(.data) for gp_pcbs
     k_process.o(i.k_get_process_priority) refers to k_process.o(i.get_pcb_by_pid) for get_pcb_by_pid
     k_process.o(i.k_release_processor) refers to k_process.o(i.scheduler) for scheduler
@@ -155,7 +164,6 @@ Section Cross References
     k_sys_procs.o(i.clockProc) refers to ae_util_1.o(i.skipWhitespace) for skipWhitespace
     k_sys_procs.o(i.clockProc) refers to ae_util_1.o(i.sendUARTMsg) for sendUARTMsg
     k_sys_procs.o(i.clockProc) refers to ae_util_1.o(i.stringToNum) for stringToNum
-    k_sys_procs.o(i.clockProc) refers to printf.o(i.tfp_sprintf) for tfp_sprintf
     k_sys_procs.o(i.clockProc) refers to uart_polling.o(i.uart_put_string) for uart_put_string
     k_sys_procs.o(i.clockProc) refers to k_msg.o(i.k_receive_message) for k_receive_message
     k_sys_procs.o(i.clockProc) refers to k_msg.o(i.k_delayed_send) for k_delayed_send
@@ -185,8 +193,17 @@ Section Cross References
     k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_sys_proc_kcd.o(i.printProcAndPrio) for printProcAndPrio
     k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_sys_proc_kcd.o(i.printProcState) for printProcState
     k_sys_proc_kcd.o(i.hotKeyDecoder) refers to ae_util_1.o(i.printNumber) for printNumber
+    k_sys_proc_kcd.o(i.hotKeyDecoder) refers to rt_memcpy_w.o(.text) for __aeabi_memcpy4
+    k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_sys_proc_kcd.o(i.printMessageRecord) for printMessageRecord
     k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_process.o(.data) for proc_ready_queue
     k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_memory.o(.data) for proc_blocked_queue
+    k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_msg.o(.data) for sent_msgs_start
+    k_sys_proc_kcd.o(i.hotKeyDecoder) refers to k_msg.o(.bss) for sent_msgs
+    k_sys_proc_kcd.o(i.printMessageRecord) refers to uart_polling.o(i.uart_put_string) for uart_put_string
+    k_sys_proc_kcd.o(i.printMessageRecord) refers to ae_util_1.o(i.printNumber) for printNumber
+    k_sys_proc_kcd.o(i.printMessageRecord) refers to k_sys_proc_kcd.o(i.printMessageType) for printMessageType
+    k_sys_proc_kcd.o(i.printMessageRecord) refers to ae_util_1.o(i.printStringEscaped) for printStringEscaped
+    k_sys_proc_kcd.o(i.printMessageType) refers to uart_polling.o(i.uart_put_string) for uart_put_string
     k_sys_proc_kcd.o(i.printProcAndPrio) refers to uart_polling.o(i.uart_put_string) for uart_put_string
     k_sys_proc_kcd.o(i.printProcAndPrio) refers to ae_util_1.o(i.printNumber) for printNumber
     k_sys_proc_kcd.o(i.printProcState) refers to uart_polling.o(i.uart_put_string) for uart_put_string
@@ -200,34 +217,49 @@ Section Cross References
     timer.o(i.timer0_iproc) refers to k_sys_iproc.o(i.timerIProc) for timerIProc
     timer.o(i.timer0_iproc) refers to timer.o(.data) for g_timer_count
     timer.o(i.timer_init) refers to timer.o(.data) for g_timer_count
-    ae_proc_12.o(i.proc1) refers to ae_util_1.o(i.sendUARTMsg) for sendUARTMsg
-    ae_proc_12.o(i.proc1) refers to k_memory.o(i.k_request_memory_block) for k_request_memory_block
-    ae_proc_12.o(i.proc1) refers to k_msg.o(i.k_send_message) for k_send_message
-    ae_proc_12.o(i.proc1) refers to k_msg.o(i.k_receive_message) for k_receive_message
-    ae_proc_12.o(i.proc1) refers to k_memory.o(i.k_release_memory_block) for k_release_memory_block
-    ae_proc_12.o(i.proc2) refers to ae_util_1.o(i.sendUARTMsg) for sendUARTMsg
-    ae_proc_12.o(i.proc2) refers to k_memory.o(i.k_request_memory_block) for k_request_memory_block
-    ae_proc_12.o(i.proc2) refers to k_msg.o(i.k_send_message) for k_send_message
-    ae_proc_12.o(i.proc2) refers to k_msg.o(i.k_receive_message) for k_receive_message
-    ae_proc_12.o(i.proc2) refers to k_memory.o(i.k_release_memory_block) for k_release_memory_block
-    ae_proc_12.o(i.proc3) refers to k_process.o(i.k_release_processor) for k_release_processor
-    ae_proc_12.o(i.proc4) refers to k_process.o(i.k_release_processor) for k_release_processor
-    ae_proc_12.o(i.proc5) refers to k_process.o(i.k_release_processor) for k_release_processor
-    ae_proc_12.o(i.proc6) refers to k_process.o(i.k_release_processor) for k_release_processor
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc1) for proc1
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc2) for proc2
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc3) for proc3
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc4) for proc4
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc5) for proc5
-    ae_proc_12.o(i.set_test_procs) refers to ae_proc_12.o(i.proc6) for proc6
-    ae_proc_12.o(.data) refers to ae_proc_12.o(.conststring) for .conststring
-    ae_2.o(i.ae_init) refers to ae_timer_2.o(i.ae_timer_init_100MHZ) for ae_timer_init_100MHZ
-    ae_2.o(i.ae_init) refers to ae_2.o(i.ae_set_proc_info) for ae_set_proc_info
-    ae_2.o(i.ae_set_proc_info) refers to ae_proc_12.o(i.set_test_procs) for set_test_procs
+    ae_proc_10.o(i.proc1) refers to ae_util_1.o(i.printUart1) for printUart1
+    ae_proc_10.o(i.proc1) refers to ae_util_1.o(i.uart0_printMsgText) for uart0_printMsgText
+    ae_proc_10.o(i.proc1) refers to ae_util_1.o(i.assertTest) for assertTest
+    ae_proc_10.o(i.proc1) refers to ae_proc_10.o(.data) for testName
+    ae_proc_10.o(i.proc1) refers to k_msg.o(i.k_receive_message) for k_receive_message
+    ae_proc_10.o(i.proc1) refers to k_process.o(i.k_set_process_priority) for k_set_process_priority
+    ae_proc_10.o(i.proc2) refers to ae_util_1.o(i.uart0_printMsgText) for uart0_printMsgText
+    ae_proc_10.o(i.proc2) refers to ae_util_1.o(i.assertTest) for assertTest
+    ae_proc_10.o(i.proc2) refers to k_msg.o(i.k_receive_message) for k_receive_message
+    ae_proc_10.o(i.proc2) refers to ae_proc_10.o(.data) for testName
+    ae_proc_10.o(i.proc2) refers to k_process.o(i.k_set_process_priority) for k_set_process_priority
+    ae_proc_10.o(i.proc3) refers to ae_util_1.o(i.uart0_printMsgText) for uart0_printMsgText
+    ae_proc_10.o(i.proc3) refers to ae_util_1.o(i.assertTest) for assertTest
+    ae_proc_10.o(i.proc3) refers to k_msg.o(i.k_receive_message) for k_receive_message
+    ae_proc_10.o(i.proc3) refers to ae_proc_10.o(.data) for testName
+    ae_proc_10.o(i.proc3) refers to k_process.o(i.k_set_process_priority) for k_set_process_priority
+    ae_proc_10.o(i.proc4) refers to ae_util_1.o(i.strcpy) for strcpy
+    ae_proc_10.o(i.proc4) refers to k_memory.o(i.k_request_memory_block) for k_request_memory_block
+    ae_proc_10.o(i.proc4) refers to k_msg.o(i.k_delayed_send) for k_delayed_send
+    ae_proc_10.o(i.proc4) refers to k_process.o(i.k_release_processor) for k_release_processor
+    ae_proc_10.o(i.proc5) refers to ae_util_1.o(i.uart0_printMsgText) for uart0_printMsgText
+    ae_proc_10.o(i.proc5) refers to ae_util_1.o(i.assertTest) for assertTest
+    ae_proc_10.o(i.proc5) refers to ae_util_1.o(i.printSummary) for printSummary
+    ae_proc_10.o(i.proc5) refers to k_msg.o(i.k_receive_message) for k_receive_message
+    ae_proc_10.o(i.proc5) refers to ae_proc_10.o(.data) for testName
+    ae_proc_10.o(i.proc6) refers to ae_util_1.o(i.strcpy) for strcpy
+    ae_proc_10.o(i.proc6) refers to k_memory.o(i.k_request_memory_block) for k_request_memory_block
+    ae_proc_10.o(i.proc6) refers to k_msg.o(i.k_delayed_send) for k_delayed_send
+    ae_proc_10.o(i.proc6) refers to k_process.o(i.k_release_processor) for k_release_processor
+    ae_proc_10.o(.data) refers to ae_proc_10.o(.conststring) for .conststring
+    ae10.o(i.ae_init) refers to ae10.o(i.ae_set_proc_info) for ae_set_proc_info
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc1) for proc1
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc2) for proc2
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc3) for proc3
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc4) for proc4
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc5) for proc5
+    ae10.o(i.ae_set_proc_info) refers to ae_proc_10.o(i.proc6) for proc6
     ae_util_1.o(i.assertTest) refers to uart_polling.o(i.uart_put_string) for uart_put_string
     ae_util_1.o(i.printFraction) refers to ae_util_1.o(i.printNumber) for printNumber
     ae_util_1.o(i.printFraction) refers to uart_polling.o(i.uart_put_char) for uart_put_char
     ae_util_1.o(i.printNumber) refers to uart_polling.o(i.uart_put_char) for uart_put_char
+    ae_util_1.o(i.printStringEscaped) refers to uart_polling.o(i.uart_put_string) for uart_put_string
+    ae_util_1.o(i.printStringEscaped) refers to uart_polling.o(i.uart_put_char) for uart_put_char
     ae_util_1.o(i.printSummary) refers to uart_polling.o(i.uart_put_string) for uart_put_string
     ae_util_1.o(i.printSummary) refers to ae_util_1.o(i.printFraction) for printFraction
     ae_util_1.o(i.printSummary) refers to ae_util_1.o(i.printUart1) for printUart1
@@ -366,6 +398,8 @@ Removing Unused input sections from the image.
     Removing main_svc.o(.rev16_text), (4 bytes).
     Removing main_svc.o(.revsh_text), (4 bytes).
     Removing main_svc.o(.rrx_text), (6 bytes).
+    Removing printf.o(i.putcp), (10 bytes).
+    Removing printf.o(i.tfp_sprintf), (44 bytes).
     Removing uart_polling.o(.rev16_text), (4 bytes).
     Removing uart_polling.o(.revsh_text), (4 bytes).
     Removing uart_polling.o(.rrx_text), (6 bytes).
@@ -407,31 +441,25 @@ Removing Unused input sections from the image.
     Removing timer.o(.rev16_text), (4 bytes).
     Removing timer.o(.revsh_text), (4 bytes).
     Removing timer.o(.rrx_text), (6 bytes).
-    Removing ae_proc_12.o(.rev16_text), (4 bytes).
-    Removing ae_proc_12.o(.revsh_text), (4 bytes).
-    Removing ae_proc_12.o(.rrx_text), (6 bytes).
-    Removing ae_proc_12.o(.conststring), (13 bytes).
-    Removing ae_proc_12.o(.data), (16 bytes).
-    Removing ae_2.o(.rev16_text), (4 bytes).
-    Removing ae_2.o(.revsh_text), (4 bytes).
-    Removing ae_2.o(.rrx_text), (6 bytes).
+    Removing ae_proc_10.o(.rev16_text), (4 bytes).
+    Removing ae_proc_10.o(.revsh_text), (4 bytes).
+    Removing ae_proc_10.o(.rrx_text), (6 bytes).
+    Removing ae10.o(.rev16_text), (4 bytes).
+    Removing ae10.o(.revsh_text), (4 bytes).
+    Removing ae10.o(.rrx_text), (6 bytes).
     Removing ae_timer_2.o(.rev16_text), (4 bytes).
     Removing ae_timer_2.o(.revsh_text), (4 bytes).
     Removing ae_timer_2.o(.rrx_text), (6 bytes).
     Removing ae_timer_2.o(i.ae_get_tick), (32 bytes).
     Removing ae_timer_2.o(i.ae_get_tick_diff), (92 bytes).
-    Removing ae_util_1.o(i.assertTest), (92 bytes).
-    Removing ae_util_1.o(i.printFraction), (28 bytes).
-    Removing ae_util_1.o(i.printSummary), (120 bytes).
-    Removing ae_util_1.o(i.printUart1), (48 bytes).
-    Removing ae_util_1.o(i.uart0_printMsgText), (36 bytes).
+    Removing ae_timer_2.o(i.ae_timer_init_100MHZ), (92 bytes).
     Removing system_lpc17xx.o(.rev16_text), (4 bytes).
     Removing system_lpc17xx.o(.revsh_text), (4 bytes).
     Removing system_lpc17xx.o(.rrx_text), (6 bytes).
     Removing system_lpc17xx.o(i.SystemCoreClockUpdate), (424 bytes).
     Removing system_lpc17xx.o(.data), (4 bytes).
 
-67 unused section(s) (total 1381 bytes) removed from the image.
+63 unused section(s) (total 1174 bytes) removed from the image.
 
 ==============================================================================
 
@@ -442,64 +470,65 @@ Image Symbol Table
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
     RESET                                    0x00000000   Section      204  startup_lpc17xx.o(RESET)
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
-    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0_sigfpe.o ABSOLUTE
-    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_div0.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
+    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0.o ABSOLUTE
+    ../clib/angel/rt.s                       0x00000000   Number         0  aeabi_ldiv0_sigfpe.o ABSOLUTE
     ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
-    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
+    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
+    ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
+    ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  no_argv.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
-    ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
-    ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
     ../clib/longlong.s                       0x00000000   Number         0  lludivv7m.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
+    ../clib/memcpset.s                       0x00000000   Number         0  rt_memcpy_w.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_formal.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_outer.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
     ../clib/signal.s                         0x00000000   Number         0  defsig.o ABSOLUTE
     ../clib/stdlib.c                         0x00000000   Number         0  exit.o ABSOLUTE
     ../fplib/fpinit.s                        0x00000000   Number         0  fpinit.o ABSOLUTE
-    ..\Auto_Test\P2\ae.c                     0x00000000   Number         0  ae_2.o ABSOLUTE
-    ..\Auto_Test\P3\ae_proc_12.c             0x00000000   Number         0  ae_proc_12.o ABSOLUTE
-    ..\\Auto_Test\\P2\\ae.c                  0x00000000   Number         0  ae_2.o ABSOLUTE
-    ..\\Auto_Test\\P3\\ae_proc_12.c          0x00000000   Number         0  ae_proc_12.o ABSOLUTE
+    ..\Auto_Test\P2\AE10\ae10.c              0x00000000   Number         0  ae10.o ABSOLUTE
+    ..\Auto_Test\P2\AE10\ae_proc_10.c        0x00000000   Number         0  ae_proc_10.o ABSOLUTE
+    ..\\Auto_Test\\P2\\AE10\\ae10.c          0x00000000   Number         0  ae10.o ABSOLUTE
+    ..\\Auto_Test\\P2\\AE10\\ae_proc_10.c    0x00000000   Number         0  ae_proc_10.o ABSOLUTE
     RTE\Device\LPC1768\startup_LPC17xx.s     0x00000000   Number         0  startup_lpc17xx.o ABSOLUTE
     RTE\Device\LPC1768\system_LPC17xx.c      0x00000000   Number         0  system_lpc17xx.o ABSOLUTE
     RTE\\Device\\LPC1768\\system_LPC17xx.c   0x00000000   Number         0  system_lpc17xx.o ABSOLUTE
@@ -585,122 +614,132 @@ Image Symbol Table
     .emb_text                                0x0000019c   Section       72  uart_irq.o(.emb_text)
     .emb_text                                0x000001e4   Section       76  timer.o(.emb_text)
     .text                                    0x00000230   Section       60  startup_lpc17xx.o(.text)
-    .text                                    0x0000026c   Section        0  heapauxi.o(.text)
-    .text                                    0x00000272   Section       74  sys_stackheap_outer.o(.text)
-    .text                                    0x000002bc   Section        0  exit.o(.text)
-    .text                                    0x000002d0   Section        8  libspace.o(.text)
-    .text                                    0x000002d8   Section        0  sys_exit.o(.text)
-    .text                                    0x000002e4   Section        2  use_no_semi.o(.text)
-    .text                                    0x000002e6   Section        0  indicate_semi.o(.text)
-    i.ae_set_proc_info                       0x000002e6   Section        0  ae_2.o(i.ae_set_proc_info)
-    i.pre_rtx_init                           0x000002f6   Section        0  main_svc.o(i.pre_rtx_init)
+    .text                                    0x0000026c   Section      100  rt_memcpy_w.o(.text)
+    .text                                    0x000002d0   Section        0  heapauxi.o(.text)
+    .text                                    0x000002d6   Section        0  exit.o(.text)
+    .text                                    0x000002e8   Section        8  libspace.o(.text)
+    .text                                    0x000002f0   Section        0  sys_exit.o(.text)
     .ARM.__at_0x02FC                         0x000002fc   Section        4  startup_lpc17xx.o(.ARM.__at_0x02FC)
-    i.CRTProc                                0x00000300   Section        0  k_sys_procs.o(i.CRTProc)
-    i.KCDProc                                0x0000035c   Section        0  k_sys_proc_kcd.o(i.KCDProc)
-    i.SystemInit                             0x0000050c   Section        0  system_lpc17xx.o(i.SystemInit)
-    i.__NVIC_EnableIRQ                       0x0000064c   Section        0  uart_irq.o(i.__NVIC_EnableIRQ)
-    __NVIC_EnableIRQ                         0x0000064d   Thumb Code    34  uart_irq.o(i.__NVIC_EnableIRQ)
-    i.a2d                                    0x0000066e   Section        0  printf.o(i.a2d)
-    a2d                                      0x0000066f   Thumb Code    50  printf.o(i.a2d)
-    i.a2i                                    0x000006a0   Section        0  printf.o(i.a2i)
-    a2i                                      0x000006a1   Thumb Code    58  printf.o(i.a2i)
-    i.aProc                                  0x000006dc   Section        0  k_sys_procs.o(i.aProc)
-    i.ae_init                                0x0000074c   Section        0  ae_2.o(i.ae_init)
-    i.ae_timer_init_100MHZ                   0x0000077c   Section        0  ae_timer_2.o(i.ae_timer_init_100MHZ)
-    i.alloc_stack                            0x000007d8   Section        0  k_memory.o(i.alloc_stack)
-    i.bProc                                  0x000007fc   Section        0  k_sys_procs.o(i.bProc)
-    i.cProc                                  0x00000834   Section        0  k_sys_procs.o(i.cProc)
-    i.c_UART0_IRQHandler                     0x000008f8   Section        0  uart_irq.o(i.c_UART0_IRQHandler)
-    i.charMap                                0x00000900   Section        0  k_sys_proc_kcd.o(i.charMap)
-    i.clockProc                              0x00000924   Section        0  k_sys_procs.o(i.clockProc)
-    i.get_pcb_by_pid                         0x00000c48   Section        0  k_process.o(i.get_pcb_by_pid)
-    i.hotKeyDecoder                          0x00000c80   Section        0  k_sys_proc_kcd.o(i.hotKeyDecoder)
-    i.i2a                                    0x00000e28   Section        0  printf.o(i.i2a)
-    i2a                                      0x00000e29   Thumb Code    32  printf.o(i.i2a)
-    i.init_printf                            0x00000e48   Section        0  printf.o(i.init_printf)
-    i.k_delayed_send                         0x00000e5c   Section        0  k_msg.o(i.k_delayed_send)
-    i.k_receive_message                      0x00000ea0   Section        0  k_msg.o(i.k_receive_message)
-    i.k_receive_message_nb                   0x00000efc   Section        0  k_msg.o(i.k_receive_message_nb)
-    i.k_release_memory_block                 0x00000f34   Section        0  k_memory.o(i.k_release_memory_block)
-    i.k_release_processor                    0x00000fe4   Section        0  k_process.o(i.k_release_processor)
-    i.k_request_memory_block                 0x00001030   Section        0  k_memory.o(i.k_request_memory_block)
-    i.k_request_memory_block_nb              0x00001080   Section        0  k_memory.o(i.k_request_memory_block_nb)
-    i.k_rtx_init                             0x000010a8   Section        0  k_rtx_init.o(i.k_rtx_init)
-    i.k_run_new_process                      0x000010d4   Section        0  k_process.o(i.k_run_new_process)
-    i.k_send_message                         0x00001114   Section        0  k_msg.o(i.k_send_message)
-    i.k_send_message_actual                  0x00001130   Section        0  k_msg.o(i.k_send_message_actual)
-    i.k_set_process_priority                 0x000011d4   Section        0  k_process.o(i.k_set_process_priority)
-    i.main                                   0x00001298   Section        0  main_svc.o(i.main)
-    i.memory_init                            0x000012e0   Section        0  k_memory.o(i.memory_init)
-    i.nullProc                               0x00001470   Section        0  k_sys_procs.o(i.nullProc)
-    i.numToString                            0x00001488   Section        0  ae_util_1.o(i.numToString)
-    i.pq_insert                              0x000014d6   Section        0  k_priority_queue.o(i.pq_insert)
-    i.pq_insert_blocked                      0x00001514   Section        0  k_memory.o(i.pq_insert_blocked)
-    i.pq_insert_front                        0x00001528   Section        0  k_priority_queue.o(i.pq_insert_front)
-    i.pq_insert_front_ready                  0x00001564   Section        0  k_process.o(i.pq_insert_front_ready)
-    i.pq_insert_ready                        0x00001588   Section        0  k_process.o(i.pq_insert_ready)
-    i.pq_remove                              0x000015ac   Section        0  k_priority_queue.o(i.pq_remove)
-    i.pq_remove_by_pid                       0x000015c2   Section        0  k_priority_queue.o(i.pq_remove_by_pid)
-    i.pq_remove_by_pid_blocked               0x00001608   Section        0  k_memory.o(i.pq_remove_by_pid_blocked)
-    i.printNumber                            0x0000161c   Section        0  ae_util_1.o(i.printNumber)
-    i.printProcAndPrio                       0x00001668   Section        0  k_sys_proc_kcd.o(i.printProcAndPrio)
-    i.printProcState                         0x000016a0   Section        0  k_sys_proc_kcd.o(i.printProcState)
-    i.proc1                                  0x00001744   Section        0  ae_proc_12.o(i.proc1)
-    i.proc2                                  0x000017b4   Section        0  ae_proc_12.o(i.proc2)
-    i.proc3                                  0x00001820   Section        0  ae_proc_12.o(i.proc3)
-    i.proc4                                  0x00001830   Section        0  ae_proc_12.o(i.proc4)
-    i.proc5                                  0x00001840   Section        0  ae_proc_12.o(i.proc5)
-    i.proc6                                  0x00001850   Section        0  ae_proc_12.o(i.proc6)
-    i.process_init                           0x00001860   Section        0  k_process.o(i.process_init)
-    i.process_switch                         0x00001b30   Section        0  k_process.o(i.process_switch)
-    i.putc                                   0x00001bc0   Section        0  uart_polling.o(i.putc)
-    i.putchw                                 0x00001c04   Section        0  printf.o(i.putchw)
-    putchw                                   0x00001c05   Thumb Code    82  printf.o(i.putchw)
-    i.putcp                                  0x00001c56   Section        0  printf.o(i.putcp)
-    putcp                                    0x00001c57   Thumb Code    10  printf.o(i.putcp)
-    i.q_insert                               0x00001c60   Section        0  k_queue.o(i.q_insert)
-    i.q_remove                               0x00001c7e   Section        0  k_queue.o(i.q_remove)
-    i.q_remove_by_addr                       0x00001c98   Section        0  k_queue.o(i.q_remove_by_addr)
-    i.registerCommand                        0x00001cd8   Section        0  k_sys_procs.o(i.registerCommand)
-    i.scheduler                              0x00001d00   Section        0  k_process.o(i.scheduler)
-    i.sendUARTMsg                            0x00001d30   Section        0  ae_util_1.o(i.sendUARTMsg)
-    i.setPrioProc                            0x00001d60   Section        0  k_sys_procs.o(i.setPrioProc)
-    i.set_test_procs                         0x00001ed4   Section        0  ae_proc_12.o(i.set_test_procs)
-    i.skipWhitespace                         0x00001f40   Section        0  ae_util_1.o(i.skipWhitespace)
-    i.strcpy                                 0x00001f5a   Section        0  ae_util_1.o(i.strcpy)
-    i.stringToNum                            0x00001f70   Section        0  ae_util_1.o(i.stringToNum)
-    i.stringToNumAndCount                    0x00001f92   Section        0  ae_util_1.o(i.stringToNumAndCount)
-    i.tfp_format                             0x00001fb6   Section        0  printf.o(i.tfp_format)
-    i.tfp_printf                             0x000020e0   Section        0  printf.o(i.tfp_printf)
-    i.tfp_sprintf                            0x0000210c   Section        0  printf.o(i.tfp_sprintf)
-    i.timer0_iproc                           0x00002138   Section        0  timer.o(i.timer0_iproc)
-    i.timerIProc                             0x00002158   Section        0  k_sys_iproc.o(i.timerIProc)
-    i.timer_init                             0x00002214   Section        0  timer.o(i.timer_init)
-    i.uartIProc                              0x00002268   Section        0  k_sys_iproc.o(i.uartIProc)
-    i.uart_init                              0x000024b4   Section        0  uart_polling.o(i.uart_init)
-    i.uart_irq_init                          0x00002520   Section        0  uart_irq.o(i.uart_irq_init)
-    i.uart_put_char                          0x000025b0   Section        0  uart_polling.o(i.uart_put_char)
-    i.uart_put_string                        0x000025e4   Section        0  uart_polling.o(i.uart_put_string)
-    i.ui2a                                   0x0000260a   Section        0  printf.o(i.ui2a)
-    ui2a                                     0x0000260b   Thumb Code    86  printf.o(i.ui2a)
-    .conststring                             0x00002660   Section      212  k_sys_procs.o(.conststring)
+    .text                                    0x00000300   Section       74  sys_stackheap_outer.o(.text)
+    .text                                    0x0000034a   Section        2  use_no_semi.o(.text)
+    .text                                    0x0000034c   Section        0  indicate_semi.o(.text)
+    i.CRTProc                                0x0000034c   Section        0  k_sys_procs.o(i.CRTProc)
+    i.KCDProc                                0x000003a8   Section        0  k_sys_proc_kcd.o(i.KCDProc)
+    i.SystemInit                             0x00000558   Section        0  system_lpc17xx.o(i.SystemInit)
+    i.__NVIC_EnableIRQ                       0x00000698   Section        0  uart_irq.o(i.__NVIC_EnableIRQ)
+    __NVIC_EnableIRQ                         0x00000699   Thumb Code    34  uart_irq.o(i.__NVIC_EnableIRQ)
+    i.a2d                                    0x000006ba   Section        0  printf.o(i.a2d)
+    a2d                                      0x000006bb   Thumb Code    50  printf.o(i.a2d)
+    i.a2i                                    0x000006ec   Section        0  printf.o(i.a2i)
+    a2i                                      0x000006ed   Thumb Code    58  printf.o(i.a2i)
+    i.aProc                                  0x00000728   Section        0  k_sys_procs.o(i.aProc)
+    i.ae_init                                0x00000798   Section        0  ae10.o(i.ae_init)
+    i.ae_set_proc_info                       0x000007c4   Section        0  ae10.o(i.ae_set_proc_info)
+    i.alloc_stack                            0x00000830   Section        0  k_memory.o(i.alloc_stack)
+    i.assertTest                             0x00000854   Section        0  ae_util_1.o(i.assertTest)
+    i.bProc                                  0x000008b0   Section        0  k_sys_procs.o(i.bProc)
+    i.cProc                                  0x000008e8   Section        0  k_sys_procs.o(i.cProc)
+    i.c_UART0_IRQHandler                     0x000009ac   Section        0  uart_irq.o(i.c_UART0_IRQHandler)
+    i.charMap                                0x000009b4   Section        0  k_sys_proc_kcd.o(i.charMap)
+    i.clockProc                              0x000009d8   Section        0  k_sys_procs.o(i.clockProc)
+    i.emplace_msg_record                     0x00000d50   Section        0  k_msg.o(i.emplace_msg_record)
+    i.get_pcb_by_pid                         0x00000dcc   Section        0  k_process.o(i.get_pcb_by_pid)
+    i.hotKeyDecoder                          0x00000e04   Section        0  k_sys_proc_kcd.o(i.hotKeyDecoder)
+    i.i2a                                    0x00001080   Section        0  printf.o(i.i2a)
+    i2a                                      0x00001081   Thumb Code    32  printf.o(i.i2a)
+    i.init_printf                            0x000010a0   Section        0  printf.o(i.init_printf)
+    i.k_delayed_send                         0x000010b4   Section        0  k_msg.o(i.k_delayed_send)
+    i.k_receive_message                      0x000010f8   Section        0  k_msg.o(i.k_receive_message)
+    i.k_receive_message_actual               0x00001130   Section        0  k_msg.o(i.k_receive_message_actual)
+    i.k_receive_message_nb                   0x00001174   Section        0  k_msg.o(i.k_receive_message_nb)
+    i.k_release_memory_block                 0x00001190   Section        0  k_memory.o(i.k_release_memory_block)
+    i.k_release_processor                    0x00001240   Section        0  k_process.o(i.k_release_processor)
+    i.k_request_memory_block                 0x0000128c   Section        0  k_memory.o(i.k_request_memory_block)
+    i.k_request_memory_block_nb              0x000012dc   Section        0  k_memory.o(i.k_request_memory_block_nb)
+    i.k_rtx_init                             0x00001304   Section        0  k_rtx_init.o(i.k_rtx_init)
+    i.k_run_new_process                      0x00001330   Section        0  k_process.o(i.k_run_new_process)
+    i.k_send_message                         0x00001370   Section        0  k_msg.o(i.k_send_message)
+    i.k_send_message_actual                  0x0000138c   Section        0  k_msg.o(i.k_send_message_actual)
+    i.k_set_process_priority                 0x00001448   Section        0  k_process.o(i.k_set_process_priority)
+    i.main                                   0x0000150c   Section        0  main_svc.o(i.main)
+    i.memory_init                            0x00001554   Section        0  k_memory.o(i.memory_init)
+    i.nullProc                               0x000016e4   Section        0  k_sys_procs.o(i.nullProc)
+    i.numToString                            0x000016fc   Section        0  ae_util_1.o(i.numToString)
+    i.pq_insert                              0x0000174a   Section        0  k_priority_queue.o(i.pq_insert)
+    i.pq_insert_blocked                      0x00001788   Section        0  k_memory.o(i.pq_insert_blocked)
+    i.pq_insert_front                        0x0000179c   Section        0  k_priority_queue.o(i.pq_insert_front)
+    i.pq_insert_front_ready                  0x000017d8   Section        0  k_process.o(i.pq_insert_front_ready)
+    i.pq_insert_ready                        0x000017fc   Section        0  k_process.o(i.pq_insert_ready)
+    i.pq_remove                              0x00001820   Section        0  k_priority_queue.o(i.pq_remove)
+    i.pq_remove_by_pid                       0x00001836   Section        0  k_priority_queue.o(i.pq_remove_by_pid)
+    i.pq_remove_by_pid_blocked               0x0000187c   Section        0  k_memory.o(i.pq_remove_by_pid_blocked)
+    i.pre_rtx_init                           0x00001890   Section        0  main_svc.o(i.pre_rtx_init)
+    i.printFraction                          0x00001896   Section        0  ae_util_1.o(i.printFraction)
+    i.printMessageRecord                     0x000018b4   Section        0  k_sys_proc_kcd.o(i.printMessageRecord)
+    i.printMessageType                       0x00001948   Section        0  k_sys_proc_kcd.o(i.printMessageType)
+    i.printNumber                            0x00001a20   Section        0  ae_util_1.o(i.printNumber)
+    i.printProcAndPrio                       0x00001a6c   Section        0  k_sys_proc_kcd.o(i.printProcAndPrio)
+    i.printProcState                         0x00001aa4   Section        0  k_sys_proc_kcd.o(i.printProcState)
+    i.printStringEscaped                     0x00001b48   Section        0  ae_util_1.o(i.printStringEscaped)
+    i.printSummary                           0x00001ba4   Section        0  ae_util_1.o(i.printSummary)
+    i.printUart1                             0x00001c1c   Section        0  ae_util_1.o(i.printUart1)
+    i.proc1                                  0x00001c4c   Section        0  ae_proc_10.o(i.proc1)
+    i.proc2                                  0x00001cd8   Section        0  ae_proc_10.o(i.proc2)
+    i.proc3                                  0x00001d24   Section        0  ae_proc_10.o(i.proc3)
+    i.proc4                                  0x00001da4   Section        0  ae_proc_10.o(i.proc4)
+    i.proc5                                  0x00001ec8   Section        0  ae_proc_10.o(i.proc5)
+    i.proc6                                  0x00001f44   Section        0  ae_proc_10.o(i.proc6)
+    i.process_init                           0x00001fc4   Section        0  k_process.o(i.process_init)
+    i.process_switch                         0x00002294   Section        0  k_process.o(i.process_switch)
+    i.putc                                   0x00002324   Section        0  uart_polling.o(i.putc)
+    i.putchw                                 0x00002368   Section        0  printf.o(i.putchw)
+    putchw                                   0x00002369   Thumb Code    82  printf.o(i.putchw)
+    i.q_insert                               0x000023ba   Section        0  k_queue.o(i.q_insert)
+    i.q_remove                               0x000023d8   Section        0  k_queue.o(i.q_remove)
+    i.q_remove_by_addr                       0x000023f2   Section        0  k_queue.o(i.q_remove_by_addr)
+    i.registerCommand                        0x00002430   Section        0  k_sys_procs.o(i.registerCommand)
+    i.scheduler                              0x00002458   Section        0  k_process.o(i.scheduler)
+    i.sendUARTMsg                            0x00002488   Section        0  ae_util_1.o(i.sendUARTMsg)
+    i.setPrioProc                            0x000024b8   Section        0  k_sys_procs.o(i.setPrioProc)
+    i.skipWhitespace                         0x0000262c   Section        0  ae_util_1.o(i.skipWhitespace)
+    i.strcpy                                 0x00002646   Section        0  ae_util_1.o(i.strcpy)
+    i.stringToNum                            0x0000265c   Section        0  ae_util_1.o(i.stringToNum)
+    i.stringToNumAndCount                    0x0000267e   Section        0  ae_util_1.o(i.stringToNumAndCount)
+    i.strncpy                                0x000026a2   Section        0  ae_util_1.o(i.strncpy)
+    i.tfp_format                             0x000026ca   Section        0  printf.o(i.tfp_format)
+    i.tfp_printf                             0x000027f4   Section        0  printf.o(i.tfp_printf)
+    i.timer0_iproc                           0x00002820   Section        0  timer.o(i.timer0_iproc)
+    i.timerIProc                             0x00002840   Section        0  k_sys_iproc.o(i.timerIProc)
+    i.timer_init                             0x000028fc   Section        0  timer.o(i.timer_init)
+    i.uart0_printMsgText                     0x00002950   Section        0  ae_util_1.o(i.uart0_printMsgText)
+    i.uartIProc                              0x00002974   Section        0  k_sys_iproc.o(i.uartIProc)
+    i.uart_init                              0x00002bc0   Section        0  uart_polling.o(i.uart_init)
+    i.uart_irq_init                          0x00002c2c   Section        0  uart_irq.o(i.uart_irq_init)
+    i.uart_put_char                          0x00002cbc   Section        0  uart_polling.o(i.uart_put_char)
+    i.uart_put_string                        0x00002cf0   Section        0  uart_polling.o(i.uart_put_string)
+    i.ui2a                                   0x00002d16   Section        0  printf.o(i.ui2a)
+    ui2a                                     0x00002d17   Thumb Code    86  printf.o(i.ui2a)
+    .conststring                             0x00002d6c   Section      212  k_sys_procs.o(.conststring)
+    .conststring                             0x00002e40   Section       13  ae_proc_10.o(.conststring)
     .data                                    0x10000000   Section        8  printf.o(.data)
     stdout_putf                              0x10000000   Data           4  printf.o(.data)
     stdout_putp                              0x10000004   Data           4  printf.o(.data)
     .data                                    0x10000008   Section       20  k_memory.o(.data)
-    .data                                    0x1000001c   Section        4  k_msg.o(.data)
-    .data                                    0x10000020   Section       24  k_process.o(.data)
-    .data                                    0x10000038   Section       12  k_sys_iproc.o(.data)
-    .data                                    0x10000044   Section       40  k_sys_procs.o(.data)
-    .data                                    0x1000006c   Section        4  timer.o(.data)
-    .bss                                     0x10000070   Section      112  k_process.o(.bss)
-    .bss                                     0x100000e0   Section      896  k_sys_proc_kcd.o(.bss)
-    .bss                                     0x10000460   Section       96  libspace.o(.bss)
-    HEAP                                     0x100004c0   Section        0  startup_lpc17xx.o(HEAP)
-    STACK                                    0x100004c0   Section      512  startup_lpc17xx.o(STACK)
-    Heap_Mem                                 0x100004c0   Data           0  startup_lpc17xx.o(HEAP)
-    Stack_Mem                                0x100004c0   Data         512  startup_lpc17xx.o(STACK)
-    __initial_sp                             0x100006c0   Data           0  startup_lpc17xx.o(STACK)
+    .data                                    0x1000001c   Section       20  k_msg.o(.data)
+    .data                                    0x10000030   Section       24  k_process.o(.data)
+    .data                                    0x10000048   Section       12  k_sys_iproc.o(.data)
+    .data                                    0x10000054   Section       49  k_sys_procs.o(.data)
+    .data                                    0x10000088   Section        4  timer.o(.data)
+    .data                                    0x1000008c   Section       16  ae_proc_10.o(.data)
+    .bss                                     0x1000009c   Section      640  k_msg.o(.bss)
+    .bss                                     0x1000031c   Section      112  k_process.o(.bss)
+    .bss                                     0x1000038c   Section      896  k_sys_proc_kcd.o(.bss)
+    .bss                                     0x1000070c   Section       96  libspace.o(.bss)
+    HEAP                                     0x10000770   Section        0  startup_lpc17xx.o(HEAP)
+    STACK                                    0x10000770   Section      512  startup_lpc17xx.o(STACK)
+    Heap_Mem                                 0x10000770   Data           0  startup_lpc17xx.o(HEAP)
+    Stack_Mem                                0x10000770   Data         512  startup_lpc17xx.o(STACK)
+    __initial_sp                             0x10000970   Data           0  startup_lpc17xx.o(STACK)
 
     Global Symbols
 
@@ -832,121 +871,144 @@ Image Symbol Table
     USB_IRQHandler                           0x0000024b   Thumb Code     0  startup_lpc17xx.o(.text)
     WDT_IRQHandler                           0x0000024b   Thumb Code     0  startup_lpc17xx.o(.text)
     __user_initial_stackheap                 0x0000024d   Thumb Code     0  startup_lpc17xx.o(.text)
-    __use_two_region_memory                  0x0000026d   Thumb Code     2  heapauxi.o(.text)
-    __rt_heap_escrow$2region                 0x0000026f   Thumb Code     2  heapauxi.o(.text)
-    __rt_heap_expand$2region                 0x00000271   Thumb Code     2  heapauxi.o(.text)
-    __user_setup_stackheap                   0x00000273   Thumb Code    74  sys_stackheap_outer.o(.text)
-    exit                                     0x000002bd   Thumb Code    18  exit.o(.text)
-    __user_libspace                          0x000002d1   Thumb Code     8  libspace.o(.text)
-    __user_perproc_libspace                  0x000002d1   Thumb Code     0  libspace.o(.text)
-    __user_perthread_libspace                0x000002d1   Thumb Code     0  libspace.o(.text)
-    _sys_exit                                0x000002d9   Thumb Code     8  sys_exit.o(.text)
-    __I$use$semihosting                      0x000002e5   Thumb Code     0  use_no_semi.o(.text)
-    __use_no_semihosting_swi                 0x000002e5   Thumb Code     2  use_no_semi.o(.text)
-    __semihosting_library_function           0x000002e7   Thumb Code     0  indicate_semi.o(.text)
-    ae_set_proc_info                         0x000002e7   Thumb Code    16  ae_2.o(i.ae_set_proc_info)
-    pre_rtx_init                             0x000002f7   Thumb Code     6  main_svc.o(i.pre_rtx_init)
-    CRTProc                                  0x00000301   Thumb Code    74  k_sys_procs.o(i.CRTProc)
-    KCDProc                                  0x0000035d   Thumb Code   350  k_sys_proc_kcd.o(i.KCDProc)
-    SystemInit                               0x0000050d   Thumb Code   302  system_lpc17xx.o(i.SystemInit)
-    aProc                                    0x000006dd   Thumb Code    92  k_sys_procs.o(i.aProc)
-    ae_init                                  0x0000074d   Thumb Code    48  ae_2.o(i.ae_init)
-    ae_timer_init_100MHZ                     0x0000077d   Thumb Code    80  ae_timer_2.o(i.ae_timer_init_100MHZ)
-    alloc_stack                              0x000007d9   Thumb Code    32  k_memory.o(i.alloc_stack)
-    bProc                                    0x000007fd   Thumb Code    42  k_sys_procs.o(i.bProc)
-    cProc                                    0x00000835   Thumb Code   164  k_sys_procs.o(i.cProc)
-    c_UART0_IRQHandler                       0x000008f9   Thumb Code     8  uart_irq.o(i.c_UART0_IRQHandler)
-    charMap                                  0x00000901   Thumb Code    36  k_sys_proc_kcd.o(i.charMap)
-    clockProc                                0x00000925   Thumb Code   570  k_sys_procs.o(i.clockProc)
-    get_pcb_by_pid                           0x00000c49   Thumb Code    50  k_process.o(i.get_pcb_by_pid)
-    hotKeyDecoder                            0x00000c81   Thumb Code   250  k_sys_proc_kcd.o(i.hotKeyDecoder)
-    init_printf                              0x00000e49   Thumb Code    10  printf.o(i.init_printf)
-    k_delayed_send                           0x00000e5d   Thumb Code    68  k_msg.o(i.k_delayed_send)
-    k_receive_message                        0x00000ea1   Thumb Code    86  k_msg.o(i.k_receive_message)
-    k_receive_message_nb                     0x00000efd   Thumb Code    50  k_msg.o(i.k_receive_message_nb)
-    k_release_memory_block                   0x00000f35   Thumb Code   150  k_memory.o(i.k_release_memory_block)
-    k_release_processor                      0x00000fe5   Thumb Code    72  k_process.o(i.k_release_processor)
-    k_request_memory_block                   0x00001031   Thumb Code    70  k_memory.o(i.k_request_memory_block)
-    k_request_memory_block_nb                0x00001081   Thumb Code    30  k_memory.o(i.k_request_memory_block_nb)
-    k_rtx_init                               0x000010a9   Thumb Code    44  k_rtx_init.o(i.k_rtx_init)
-    k_run_new_process                        0x000010d5   Thumb Code    58  k_process.o(i.k_run_new_process)
-    k_send_message                           0x00001115   Thumb Code    26  k_msg.o(i.k_send_message)
-    k_send_message_actual                    0x00001131   Thumb Code   158  k_msg.o(i.k_send_message_actual)
-    k_set_process_priority                   0x000011d5   Thumb Code   186  k_process.o(i.k_set_process_priority)
-    main                                     0x00001299   Thumb Code    58  main_svc.o(i.main)
-    memory_init                              0x000012e1   Thumb Code   200  k_memory.o(i.memory_init)
-    nullProc                                 0x00001471   Thumb Code    10  k_sys_procs.o(i.nullProc)
-    numToString                              0x00001489   Thumb Code    78  ae_util_1.o(i.numToString)
-    pq_insert                                0x000014d7   Thumb Code    60  k_priority_queue.o(i.pq_insert)
-    pq_insert_blocked                        0x00001515   Thumb Code    14  k_memory.o(i.pq_insert_blocked)
-    pq_insert_front                          0x00001529   Thumb Code    60  k_priority_queue.o(i.pq_insert_front)
-    pq_insert_front_ready                    0x00001565   Thumb Code    32  k_process.o(i.pq_insert_front_ready)
-    pq_insert_ready                          0x00001589   Thumb Code    32  k_process.o(i.pq_insert_ready)
-    pq_remove                                0x000015ad   Thumb Code    22  k_priority_queue.o(i.pq_remove)
-    pq_remove_by_pid                         0x000015c3   Thumb Code    68  k_priority_queue.o(i.pq_remove_by_pid)
-    pq_remove_by_pid_blocked                 0x00001609   Thumb Code    14  k_memory.o(i.pq_remove_by_pid_blocked)
-    printNumber                              0x0000161d   Thumb Code    74  ae_util_1.o(i.printNumber)
-    printProcAndPrio                         0x00001669   Thumb Code    34  k_sys_proc_kcd.o(i.printProcAndPrio)
-    printProcState                           0x000016a1   Thumb Code    92  k_sys_proc_kcd.o(i.printProcState)
-    proc1                                    0x00001745   Thumb Code    64  ae_proc_12.o(i.proc1)
-    proc2                                    0x000017b5   Thumb Code    64  ae_proc_12.o(i.proc2)
-    proc3                                    0x00001821   Thumb Code    10  ae_proc_12.o(i.proc3)
-    proc4                                    0x00001831   Thumb Code    10  ae_proc_12.o(i.proc4)
-    proc5                                    0x00001841   Thumb Code    10  ae_proc_12.o(i.proc5)
-    proc6                                    0x00001851   Thumb Code    10  ae_proc_12.o(i.proc6)
-    process_init                             0x00001861   Thumb Code   668  k_process.o(i.process_init)
-    process_switch                           0x00001b31   Thumb Code   136  k_process.o(i.process_switch)
-    putc                                     0x00001bc1   Thumb Code    28  uart_polling.o(i.putc)
-    q_insert                                 0x00001c61   Thumb Code    30  k_queue.o(i.q_insert)
-    q_remove                                 0x00001c7f   Thumb Code    26  k_queue.o(i.q_remove)
-    q_remove_by_addr                         0x00001c99   Thumb Code    62  k_queue.o(i.q_remove_by_addr)
-    registerCommand                          0x00001cd9   Thumb Code    32  k_sys_procs.o(i.registerCommand)
-    scheduler                                0x00001d01   Thumb Code    40  k_process.o(i.scheduler)
-    sendUARTMsg                              0x00001d31   Thumb Code    38  ae_util_1.o(i.sendUARTMsg)
-    setPrioProc                              0x00001d61   Thumb Code   222  k_sys_procs.o(i.setPrioProc)
-    set_test_procs                           0x00001ed5   Thumb Code    82  ae_proc_12.o(i.set_test_procs)
-    skipWhitespace                           0x00001f41   Thumb Code    26  ae_util_1.o(i.skipWhitespace)
-    strcpy                                   0x00001f5b   Thumb Code    22  ae_util_1.o(i.strcpy)
-    stringToNum                              0x00001f71   Thumb Code    34  ae_util_1.o(i.stringToNum)
-    stringToNumAndCount                      0x00001f93   Thumb Code    36  ae_util_1.o(i.stringToNumAndCount)
-    tfp_format                               0x00001fb7   Thumb Code   296  printf.o(i.tfp_format)
-    tfp_printf                               0x000020e1   Thumb Code    34  printf.o(i.tfp_printf)
-    tfp_sprintf                              0x0000210d   Thumb Code    38  printf.o(i.tfp_sprintf)
-    timer0_iproc                             0x00002139   Thumb Code    26  timer.o(i.timer0_iproc)
-    timerIProc                               0x00002159   Thumb Code   182  k_sys_iproc.o(i.timerIProc)
-    timer_init                               0x00002215   Thumb Code    80  timer.o(i.timer_init)
-    uartIProc                                0x00002269   Thumb Code   326  k_sys_iproc.o(i.uartIProc)
-    uart_init                                0x000024b5   Thumb Code    96  uart_polling.o(i.uart_init)
-    uart_irq_init                            0x00002521   Thumb Code   132  uart_irq.o(i.uart_irq_init)
-    uart_put_char                            0x000025b1   Thumb Code    42  uart_polling.o(i.uart_put_char)
-    uart_put_string                          0x000025e5   Thumb Code    38  uart_polling.o(i.uart_put_string)
-    Region$$Table$$Base                      0x00002734   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x00002754   Number         0  anon$$obj.o(Region$$Table)
+    __aeabi_memcpy4                          0x0000026d   Thumb Code     0  rt_memcpy_w.o(.text)
+    __aeabi_memcpy8                          0x0000026d   Thumb Code     0  rt_memcpy_w.o(.text)
+    __rt_memcpy_w                            0x0000026d   Thumb Code   100  rt_memcpy_w.o(.text)
+    _memcpy_lastbytes_aligned                0x000002b5   Thumb Code     0  rt_memcpy_w.o(.text)
+    __use_two_region_memory                  0x000002d1   Thumb Code     2  heapauxi.o(.text)
+    __rt_heap_escrow$2region                 0x000002d3   Thumb Code     2  heapauxi.o(.text)
+    __rt_heap_expand$2region                 0x000002d5   Thumb Code     2  heapauxi.o(.text)
+    exit                                     0x000002d7   Thumb Code    18  exit.o(.text)
+    __user_libspace                          0x000002e9   Thumb Code     8  libspace.o(.text)
+    __user_perproc_libspace                  0x000002e9   Thumb Code     0  libspace.o(.text)
+    __user_perthread_libspace                0x000002e9   Thumb Code     0  libspace.o(.text)
+    _sys_exit                                0x000002f1   Thumb Code     8  sys_exit.o(.text)
+    __user_setup_stackheap                   0x00000301   Thumb Code    74  sys_stackheap_outer.o(.text)
+    __I$use$semihosting                      0x0000034b   Thumb Code     0  use_no_semi.o(.text)
+    __use_no_semihosting_swi                 0x0000034b   Thumb Code     2  use_no_semi.o(.text)
+    CRTProc                                  0x0000034d   Thumb Code    74  k_sys_procs.o(i.CRTProc)
+    __semihosting_library_function           0x0000034d   Thumb Code     0  indicate_semi.o(.text)
+    KCDProc                                  0x000003a9   Thumb Code   350  k_sys_proc_kcd.o(i.KCDProc)
+    SystemInit                               0x00000559   Thumb Code   302  system_lpc17xx.o(i.SystemInit)
+    aProc                                    0x00000729   Thumb Code    92  k_sys_procs.o(i.aProc)
+    ae_init                                  0x00000799   Thumb Code    42  ae10.o(i.ae_init)
+    ae_set_proc_info                         0x000007c5   Thumb Code    82  ae10.o(i.ae_set_proc_info)
+    alloc_stack                              0x00000831   Thumb Code    32  k_memory.o(i.alloc_stack)
+    assertTest                               0x00000855   Thumb Code    66  ae_util_1.o(i.assertTest)
+    bProc                                    0x000008b1   Thumb Code    42  k_sys_procs.o(i.bProc)
+    cProc                                    0x000008e9   Thumb Code   164  k_sys_procs.o(i.cProc)
+    c_UART0_IRQHandler                       0x000009ad   Thumb Code     8  uart_irq.o(i.c_UART0_IRQHandler)
+    charMap                                  0x000009b5   Thumb Code    36  k_sys_proc_kcd.o(i.charMap)
+    clockProc                                0x000009d9   Thumb Code   668  k_sys_procs.o(i.clockProc)
+    emplace_msg_record                       0x00000d51   Thumb Code   120  k_msg.o(i.emplace_msg_record)
+    get_pcb_by_pid                           0x00000dcd   Thumb Code    50  k_process.o(i.get_pcb_by_pid)
+    hotKeyDecoder                            0x00000e05   Thumb Code   396  k_sys_proc_kcd.o(i.hotKeyDecoder)
+    init_printf                              0x000010a1   Thumb Code    10  printf.o(i.init_printf)
+    k_delayed_send                           0x000010b5   Thumb Code    68  k_msg.o(i.k_delayed_send)
+    k_receive_message                        0x000010f9   Thumb Code    52  k_msg.o(i.k_receive_message)
+    k_receive_message_actual                 0x00001131   Thumb Code    50  k_msg.o(i.k_receive_message_actual)
+    k_receive_message_nb                     0x00001175   Thumb Code    24  k_msg.o(i.k_receive_message_nb)
+    k_release_memory_block                   0x00001191   Thumb Code   150  k_memory.o(i.k_release_memory_block)
+    k_release_processor                      0x00001241   Thumb Code    72  k_process.o(i.k_release_processor)
+    k_request_memory_block                   0x0000128d   Thumb Code    70  k_memory.o(i.k_request_memory_block)
+    k_request_memory_block_nb                0x000012dd   Thumb Code    30  k_memory.o(i.k_request_memory_block_nb)
+    k_rtx_init                               0x00001305   Thumb Code    44  k_rtx_init.o(i.k_rtx_init)
+    k_run_new_process                        0x00001331   Thumb Code    58  k_process.o(i.k_run_new_process)
+    k_send_message                           0x00001371   Thumb Code    26  k_msg.o(i.k_send_message)
+    k_send_message_actual                    0x0000138d   Thumb Code   170  k_msg.o(i.k_send_message_actual)
+    k_set_process_priority                   0x00001449   Thumb Code   186  k_process.o(i.k_set_process_priority)
+    main                                     0x0000150d   Thumb Code    58  main_svc.o(i.main)
+    memory_init                              0x00001555   Thumb Code   200  k_memory.o(i.memory_init)
+    nullProc                                 0x000016e5   Thumb Code    10  k_sys_procs.o(i.nullProc)
+    numToString                              0x000016fd   Thumb Code    78  ae_util_1.o(i.numToString)
+    pq_insert                                0x0000174b   Thumb Code    60  k_priority_queue.o(i.pq_insert)
+    pq_insert_blocked                        0x00001789   Thumb Code    14  k_memory.o(i.pq_insert_blocked)
+    pq_insert_front                          0x0000179d   Thumb Code    60  k_priority_queue.o(i.pq_insert_front)
+    pq_insert_front_ready                    0x000017d9   Thumb Code    32  k_process.o(i.pq_insert_front_ready)
+    pq_insert_ready                          0x000017fd   Thumb Code    32  k_process.o(i.pq_insert_ready)
+    pq_remove                                0x00001821   Thumb Code    22  k_priority_queue.o(i.pq_remove)
+    pq_remove_by_pid                         0x00001837   Thumb Code    68  k_priority_queue.o(i.pq_remove_by_pid)
+    pq_remove_by_pid_blocked                 0x0000187d   Thumb Code    14  k_memory.o(i.pq_remove_by_pid_blocked)
+    pre_rtx_init                             0x00001891   Thumb Code     6  main_svc.o(i.pre_rtx_init)
+    printFraction                            0x00001897   Thumb Code    28  ae_util_1.o(i.printFraction)
+    printMessageRecord                       0x000018b5   Thumb Code    82  k_sys_proc_kcd.o(i.printMessageRecord)
+    printMessageType                         0x00001949   Thumb Code   112  k_sys_proc_kcd.o(i.printMessageType)
+    printNumber                              0x00001a21   Thumb Code    74  ae_util_1.o(i.printNumber)
+    printProcAndPrio                         0x00001a6d   Thumb Code    34  k_sys_proc_kcd.o(i.printProcAndPrio)
+    printProcState                           0x00001aa5   Thumb Code    92  k_sys_proc_kcd.o(i.printProcState)
+    printStringEscaped                       0x00001b49   Thumb Code    80  ae_util_1.o(i.printStringEscaped)
+    printSummary                             0x00001ba5   Thumb Code    82  ae_util_1.o(i.printSummary)
+    printUart1                               0x00001c1d   Thumb Code    40  ae_util_1.o(i.printUart1)
+    proc1                                    0x00001c4d   Thumb Code   108  ae_proc_10.o(i.proc1)
+    proc2                                    0x00001cd9   Thumb Code    56  ae_proc_10.o(i.proc2)
+    proc3                                    0x00001d25   Thumb Code   106  ae_proc_10.o(i.proc3)
+    proc4                                    0x00001da5   Thumb Code   130  ae_proc_10.o(i.proc4)
+    proc5                                    0x00001ec9   Thumb Code   102  ae_proc_10.o(i.proc5)
+    proc6                                    0x00001f45   Thumb Code    70  ae_proc_10.o(i.proc6)
+    process_init                             0x00001fc5   Thumb Code   668  k_process.o(i.process_init)
+    process_switch                           0x00002295   Thumb Code   136  k_process.o(i.process_switch)
+    putc                                     0x00002325   Thumb Code    28  uart_polling.o(i.putc)
+    q_insert                                 0x000023bb   Thumb Code    30  k_queue.o(i.q_insert)
+    q_remove                                 0x000023d9   Thumb Code    26  k_queue.o(i.q_remove)
+    q_remove_by_addr                         0x000023f3   Thumb Code    62  k_queue.o(i.q_remove_by_addr)
+    registerCommand                          0x00002431   Thumb Code    32  k_sys_procs.o(i.registerCommand)
+    scheduler                                0x00002459   Thumb Code    40  k_process.o(i.scheduler)
+    sendUARTMsg                              0x00002489   Thumb Code    38  ae_util_1.o(i.sendUARTMsg)
+    setPrioProc                              0x000024b9   Thumb Code   222  k_sys_procs.o(i.setPrioProc)
+    skipWhitespace                           0x0000262d   Thumb Code    26  ae_util_1.o(i.skipWhitespace)
+    strcpy                                   0x00002647   Thumb Code    22  ae_util_1.o(i.strcpy)
+    stringToNum                              0x0000265d   Thumb Code    34  ae_util_1.o(i.stringToNum)
+    stringToNumAndCount                      0x0000267f   Thumb Code    36  ae_util_1.o(i.stringToNumAndCount)
+    strncpy                                  0x000026a3   Thumb Code    40  ae_util_1.o(i.strncpy)
+    tfp_format                               0x000026cb   Thumb Code   296  printf.o(i.tfp_format)
+    tfp_printf                               0x000027f5   Thumb Code    34  printf.o(i.tfp_printf)
+    timer0_iproc                             0x00002821   Thumb Code    26  timer.o(i.timer0_iproc)
+    timerIProc                               0x00002841   Thumb Code   182  k_sys_iproc.o(i.timerIProc)
+    timer_init                               0x000028fd   Thumb Code    80  timer.o(i.timer_init)
+    uart0_printMsgText                       0x00002951   Thumb Code    36  ae_util_1.o(i.uart0_printMsgText)
+    uartIProc                                0x00002975   Thumb Code   326  k_sys_iproc.o(i.uartIProc)
+    uart_init                                0x00002bc1   Thumb Code    96  uart_polling.o(i.uart_init)
+    uart_irq_init                            0x00002c2d   Thumb Code   132  uart_irq.o(i.uart_irq_init)
+    uart_put_char                            0x00002cbd   Thumb Code    42  uart_polling.o(i.uart_put_char)
+    uart_put_string                          0x00002cf1   Thumb Code    38  uart_polling.o(i.uart_put_string)
+    Region$$Table$$Base                      0x00002e50   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x00002e70   Number         0  anon$$obj.o(Region$$Table)
     gp_stack                                 0x10000008   Data           4  k_memory.o(.data)
     heap_start                               0x1000000c   Data           4  k_memory.o(.data)
     freeList                                 0x10000010   Data           4  k_memory.o(.data)
     proc_blocked_queue                       0x10000014   Data           4  k_memory.o(.data)
     num_free_mem_blks                        0x10000018   Data           4  k_memory.o(.data)
     delayed_msg_queue                        0x1000001c   Data           4  k_msg.o(.data)
-    gp_pcbs                                  0x10000020   Data           4  k_process.o(.data)
-    gp_current_process                       0x10000024   Data           4  k_process.o(.data)
-    gp_pcb_timer_iproc                       0x10000028   Data           4  k_process.o(.data)
-    gp_pcb_uart_iproc                        0x1000002c   Data           4  k_process.o(.data)
-    gp_pcb_interrupted                       0x10000030   Data           4  k_process.o(.data)
-    proc_ready_queue                         0x10000034   Data           4  k_process.o(.data)
-    g_char_in                                0x10000038   Data           1  k_sys_iproc.o(.data)
-    g_char_out                               0x10000039   Data           1  k_sys_iproc.o(.data)
-    currMsg                                  0x1000003c   Data           4  k_sys_iproc.o(.data)
-    msg_char_ptr                             0x10000040   Data           4  k_sys_iproc.o(.data)
-    time                                     0x10000044   Data           4  k_sys_procs.o(.data)
-    invalidCommandMsg                        0x10000048   Data          36  k_sys_procs.o(.data)
-    g_timer_count                            0x1000006c   Data           4  timer.o(.data)
-    g_proc_table                             0x10000070   Data         112  k_process.o(.bss)
-    registrationTable                        0x100000e0   Data         832  k_sys_proc_kcd.o(.bss)
-    msgBuf                                   0x10000420   Data          64  k_sys_proc_kcd.o(.bss)
-    __libspace_start                         0x10000460   Data          96  libspace.o(.bss)
-    __temporary_stack_top$libspace           0x100004c0   Data           0  libspace.o(.bss)
-    Image$$RW_IRAM1$$ZI$$Limit               0x100006c0   Number         0  anon$$obj.o ABSOLUTE
+    sent_msgs_start                          0x10000020   Data           4  k_msg.o(.data)
+    received_msgs_start                      0x10000024   Data           4  k_msg.o(.data)
+    sent_msgs_size                           0x10000028   Data           4  k_msg.o(.data)
+    received_msgs_size                       0x1000002c   Data           4  k_msg.o(.data)
+    gp_pcbs                                  0x10000030   Data           4  k_process.o(.data)
+    gp_current_process                       0x10000034   Data           4  k_process.o(.data)
+    gp_pcb_timer_iproc                       0x10000038   Data           4  k_process.o(.data)
+    gp_pcb_uart_iproc                        0x1000003c   Data           4  k_process.o(.data)
+    gp_pcb_interrupted                       0x10000040   Data           4  k_process.o(.data)
+    proc_ready_queue                         0x10000044   Data           4  k_process.o(.data)
+    g_char_in                                0x10000048   Data           1  k_sys_iproc.o(.data)
+    g_char_out                               0x10000049   Data           1  k_sys_iproc.o(.data)
+    currMsg                                  0x1000004c   Data           4  k_sys_iproc.o(.data)
+    msg_char_ptr                             0x10000050   Data           4  k_sys_iproc.o(.data)
+    time                                     0x10000054   Data           4  k_sys_procs.o(.data)
+    invalidCommandMsg                        0x10000058   Data          36  k_sys_procs.o(.data)
+    timeStr                                  0x1000007c   Data           9  k_sys_procs.o(.data)
+    g_timer_count                            0x10000088   Data           4  timer.o(.data)
+    successfulTests                          0x1000008c   Data           4  ae_proc_10.o(.data)
+    testName                                 0x10000090   Data           4  ae_proc_10.o(.data)
+    nextProcess                              0x10000094   Data           4  ae_proc_10.o(.data)
+    baseChar                                 0x10000098   Data           4  ae_proc_10.o(.data)
+    sent_msgs                                0x1000009c   Data         320  k_msg.o(.bss)
+    received_msgs                            0x100001dc   Data         320  k_msg.o(.bss)
+    g_proc_table                             0x1000031c   Data         112  k_process.o(.bss)
+    registrationTable                        0x1000038c   Data         832  k_sys_proc_kcd.o(.bss)
+    msgBuf                                   0x100006cc   Data          64  k_sys_proc_kcd.o(.bss)
+    __libspace_start                         0x1000070c   Data          96  libspace.o(.bss)
+    __temporary_stack_top$libspace           0x1000076c   Data           0  libspace.o(.bss)
+    Image$$RW_IRAM1$$ZI$$Limit               0x10000970   Number         0  anon$$obj.o ABSOLUTE
 
 
 
@@ -956,183 +1018,197 @@ Memory Map of the image
 
   Image Entry point : 0x000000cd
 
-  Load Region LR_IROM1 (Base: 0x00000000, Size: 0x000027c4, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x00000000, Size: 0x00002f0c, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00002754, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00002e70, Max: 0x00080000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x00000000   0x00000000   0x000000cc   Data   RO         1072    RESET               startup_lpc17xx.o
-    0x000000cc   0x000000cc   0x00000008   Code   RO         1122  * !!!main             c_w.l(__main.o)
-    0x000000d4   0x000000d4   0x00000034   Code   RO         1289    !!!scatter          c_w.l(__scatter.o)
-    0x00000108   0x00000108   0x0000001a   Code   RO         1291    !!handler_copy      c_w.l(__scatter_copy.o)
+    0x00000000   0x00000000   0x000000cc   Data   RO         1097    RESET               startup_lpc17xx.o
+    0x000000cc   0x000000cc   0x00000008   Code   RO         1149  * !!!main             c_w.l(__main.o)
+    0x000000d4   0x000000d4   0x00000034   Code   RO         1316    !!!scatter          c_w.l(__scatter.o)
+    0x00000108   0x00000108   0x0000001a   Code   RO         1318    !!handler_copy      c_w.l(__scatter_copy.o)
     0x00000122   0x00000122   0x00000002   PAD
-    0x00000124   0x00000124   0x0000001c   Code   RO         1293    !!handler_zi        c_w.l(__scatter_zi.o)
-    0x00000140   0x00000140   0x00000002   Code   RO         1159    .ARM.Collect$$libinit$$00000000  c_w.l(libinit.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1172    .ARM.Collect$$libinit$$00000002  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1174    .ARM.Collect$$libinit$$00000004  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1177    .ARM.Collect$$libinit$$0000000A  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1179    .ARM.Collect$$libinit$$0000000C  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1181    .ARM.Collect$$libinit$$0000000E  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1184    .ARM.Collect$$libinit$$00000011  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1186    .ARM.Collect$$libinit$$00000013  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1188    .ARM.Collect$$libinit$$00000015  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1190    .ARM.Collect$$libinit$$00000017  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1192    .ARM.Collect$$libinit$$00000019  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1194    .ARM.Collect$$libinit$$0000001B  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1196    .ARM.Collect$$libinit$$0000001D  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1198    .ARM.Collect$$libinit$$0000001F  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1200    .ARM.Collect$$libinit$$00000021  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1202    .ARM.Collect$$libinit$$00000023  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1204    .ARM.Collect$$libinit$$00000025  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1208    .ARM.Collect$$libinit$$0000002C  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1210    .ARM.Collect$$libinit$$0000002E  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1212    .ARM.Collect$$libinit$$00000030  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000000   Code   RO         1214    .ARM.Collect$$libinit$$00000032  c_w.l(libinit2.o)
-    0x00000142   0x00000142   0x00000002   Code   RO         1215    .ARM.Collect$$libinit$$00000033  c_w.l(libinit2.o)
-    0x00000144   0x00000144   0x00000002   Code   RO         1246    .ARM.Collect$$libshutdown$$00000000  c_w.l(libshutdown.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1272    .ARM.Collect$$libshutdown$$00000002  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1274    .ARM.Collect$$libshutdown$$00000004  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1277    .ARM.Collect$$libshutdown$$00000007  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1280    .ARM.Collect$$libshutdown$$0000000A  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1282    .ARM.Collect$$libshutdown$$0000000C  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000000   Code   RO         1285    .ARM.Collect$$libshutdown$$0000000F  c_w.l(libshutdown2.o)
-    0x00000146   0x00000146   0x00000002   Code   RO         1286    .ARM.Collect$$libshutdown$$00000010  c_w.l(libshutdown2.o)
-    0x00000148   0x00000148   0x00000000   Code   RO         1124    .ARM.Collect$$rtentry$$00000000  c_w.l(__rtentry.o)
-    0x00000148   0x00000148   0x00000000   Code   RO         1130    .ARM.Collect$$rtentry$$00000002  c_w.l(__rtentry2.o)
-    0x00000148   0x00000148   0x00000006   Code   RO         1142    .ARM.Collect$$rtentry$$00000004  c_w.l(__rtentry4.o)
-    0x0000014e   0x0000014e   0x00000000   Code   RO         1132    .ARM.Collect$$rtentry$$00000009  c_w.l(__rtentry2.o)
-    0x0000014e   0x0000014e   0x00000004   Code   RO         1133    .ARM.Collect$$rtentry$$0000000A  c_w.l(__rtentry2.o)
-    0x00000152   0x00000152   0x00000000   Code   RO         1135    .ARM.Collect$$rtentry$$0000000C  c_w.l(__rtentry2.o)
-    0x00000152   0x00000152   0x00000008   Code   RO         1136    .ARM.Collect$$rtentry$$0000000D  c_w.l(__rtentry2.o)
-    0x0000015a   0x0000015a   0x00000002   Code   RO         1163    .ARM.Collect$$rtexit$$00000000  c_w.l(rtexit.o)
-    0x0000015c   0x0000015c   0x00000000   Code   RO         1219    .ARM.Collect$$rtexit$$00000002  c_w.l(rtexit2.o)
-    0x0000015c   0x0000015c   0x00000004   Code   RO         1220    .ARM.Collect$$rtexit$$00000003  c_w.l(rtexit2.o)
-    0x00000160   0x00000160   0x00000006   Code   RO         1221    .ARM.Collect$$rtexit$$00000004  c_w.l(rtexit2.o)
+    0x00000124   0x00000124   0x0000001c   Code   RO         1320    !!handler_zi        c_w.l(__scatter_zi.o)
+    0x00000140   0x00000140   0x00000002   Code   RO         1186    .ARM.Collect$$libinit$$00000000  c_w.l(libinit.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1199    .ARM.Collect$$libinit$$00000002  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1201    .ARM.Collect$$libinit$$00000004  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1204    .ARM.Collect$$libinit$$0000000A  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1206    .ARM.Collect$$libinit$$0000000C  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1208    .ARM.Collect$$libinit$$0000000E  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1211    .ARM.Collect$$libinit$$00000011  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1213    .ARM.Collect$$libinit$$00000013  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1215    .ARM.Collect$$libinit$$00000015  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1217    .ARM.Collect$$libinit$$00000017  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1219    .ARM.Collect$$libinit$$00000019  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1221    .ARM.Collect$$libinit$$0000001B  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1223    .ARM.Collect$$libinit$$0000001D  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1225    .ARM.Collect$$libinit$$0000001F  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1227    .ARM.Collect$$libinit$$00000021  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1229    .ARM.Collect$$libinit$$00000023  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1231    .ARM.Collect$$libinit$$00000025  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1235    .ARM.Collect$$libinit$$0000002C  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1237    .ARM.Collect$$libinit$$0000002E  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1239    .ARM.Collect$$libinit$$00000030  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000000   Code   RO         1241    .ARM.Collect$$libinit$$00000032  c_w.l(libinit2.o)
+    0x00000142   0x00000142   0x00000002   Code   RO         1242    .ARM.Collect$$libinit$$00000033  c_w.l(libinit2.o)
+    0x00000144   0x00000144   0x00000002   Code   RO         1273    .ARM.Collect$$libshutdown$$00000000  c_w.l(libshutdown.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1299    .ARM.Collect$$libshutdown$$00000002  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1301    .ARM.Collect$$libshutdown$$00000004  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1304    .ARM.Collect$$libshutdown$$00000007  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1307    .ARM.Collect$$libshutdown$$0000000A  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1309    .ARM.Collect$$libshutdown$$0000000C  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000000   Code   RO         1312    .ARM.Collect$$libshutdown$$0000000F  c_w.l(libshutdown2.o)
+    0x00000146   0x00000146   0x00000002   Code   RO         1313    .ARM.Collect$$libshutdown$$00000010  c_w.l(libshutdown2.o)
+    0x00000148   0x00000148   0x00000000   Code   RO         1151    .ARM.Collect$$rtentry$$00000000  c_w.l(__rtentry.o)
+    0x00000148   0x00000148   0x00000000   Code   RO         1157    .ARM.Collect$$rtentry$$00000002  c_w.l(__rtentry2.o)
+    0x00000148   0x00000148   0x00000006   Code   RO         1169    .ARM.Collect$$rtentry$$00000004  c_w.l(__rtentry4.o)
+    0x0000014e   0x0000014e   0x00000000   Code   RO         1159    .ARM.Collect$$rtentry$$00000009  c_w.l(__rtentry2.o)
+    0x0000014e   0x0000014e   0x00000004   Code   RO         1160    .ARM.Collect$$rtentry$$0000000A  c_w.l(__rtentry2.o)
+    0x00000152   0x00000152   0x00000000   Code   RO         1162    .ARM.Collect$$rtentry$$0000000C  c_w.l(__rtentry2.o)
+    0x00000152   0x00000152   0x00000008   Code   RO         1163    .ARM.Collect$$rtentry$$0000000D  c_w.l(__rtentry2.o)
+    0x0000015a   0x0000015a   0x00000002   Code   RO         1190    .ARM.Collect$$rtexit$$00000000  c_w.l(rtexit.o)
+    0x0000015c   0x0000015c   0x00000000   Code   RO         1246    .ARM.Collect$$rtexit$$00000002  c_w.l(rtexit2.o)
+    0x0000015c   0x0000015c   0x00000004   Code   RO         1247    .ARM.Collect$$rtexit$$00000003  c_w.l(rtexit2.o)
+    0x00000160   0x00000160   0x00000006   Code   RO         1248    .ARM.Collect$$rtexit$$00000004  c_w.l(rtexit2.o)
     0x00000166   0x00000166   0x00000002   PAD
     0x00000168   0x00000168   0x00000034   Code   RO          197    .emb_text           hal.o
-    0x0000019c   0x0000019c   0x00000048   Code   RO          740    .emb_text           uart_irq.o
-    0x000001e4   0x000001e4   0x0000004c   Code   RO          787    .emb_text           timer.o
-    0x00000230   0x00000230   0x0000003c   Code   RO         1074    .text               startup_lpc17xx.o
-    0x0000026c   0x0000026c   0x00000006   Code   RO         1120    .text               c_w.l(heapauxi.o)
-    0x00000272   0x00000272   0x0000004a   Code   RO         1146    .text               c_w.l(sys_stackheap_outer.o)
-    0x000002bc   0x000002bc   0x00000012   Code   RO         1148    .text               c_w.l(exit.o)
-    0x000002ce   0x000002ce   0x00000002   PAD
-    0x000002d0   0x000002d0   0x00000008   Code   RO         1160    .text               c_w.l(libspace.o)
-    0x000002d8   0x000002d8   0x0000000c   Code   RO         1216    .text               c_w.l(sys_exit.o)
-    0x000002e4   0x000002e4   0x00000002   Code   RO         1235    .text               c_w.l(use_no_semi.o)
-    0x000002e6   0x000002e6   0x00000000   Code   RO         1237    .text               c_w.l(indicate_semi.o)
-    0x000002e6   0x000002e6   0x00000010   Code   RO          924    i.ae_set_proc_info  ae_2.o
-    0x000002f6   0x000002f6   0x00000006   Code   RO            5    i.pre_rtx_init      main_svc.o
-    0x000002fc   0x000002fc   0x00000004   Code   RO         1073    .ARM.__at_0x02FC    startup_lpc17xx.o
-    0x00000300   0x00000300   0x0000005c   Code   RO          619    i.CRTProc           k_sys_procs.o
-    0x0000035c   0x0000035c   0x000001b0   Code   RO          689    i.KCDProc           k_sys_proc_kcd.o
-    0x0000050c   0x0000050c   0x00000140   Code   RO         1084    i.SystemInit        system_lpc17xx.o
-    0x0000064c   0x0000064c   0x00000022   Code   RO          741    i.__NVIC_EnableIRQ  uart_irq.o
-    0x0000066e   0x0000066e   0x00000032   Code   RO           84    i.a2d               printf.o
-    0x000006a0   0x000006a0   0x0000003a   Code   RO           85    i.a2i               printf.o
-    0x000006da   0x000006da   0x00000002   PAD
-    0x000006dc   0x000006dc   0x00000070   Code   RO          620    i.aProc             k_sys_procs.o
-    0x0000074c   0x0000074c   0x00000030   Code   RO          923    i.ae_init           ae_2.o
-    0x0000077c   0x0000077c   0x0000005c   Code   RO          961    i.ae_timer_init_100MHZ  ae_timer_2.o
-    0x000007d8   0x000007d8   0x00000024   Code   RO          207    i.alloc_stack       k_memory.o
-    0x000007fc   0x000007fc   0x00000038   Code   RO          621    i.bProc             k_sys_procs.o
-    0x00000834   0x00000834   0x000000c4   Code   RO          622    i.cProc             k_sys_procs.o
-    0x000008f8   0x000008f8   0x00000008   Code   RO          742    i.c_UART0_IRQHandler  uart_irq.o
-    0x00000900   0x00000900   0x00000024   Code   RO          690    i.charMap           k_sys_proc_kcd.o
-    0x00000924   0x00000924   0x00000324   Code   RO          623    i.clockProc         k_sys_procs.o
-    0x00000c48   0x00000c48   0x00000038   Code   RO          356    i.get_pcb_by_pid    k_process.o
-    0x00000c80   0x00000c80   0x000001a8   Code   RO          691    i.hotKeyDecoder     k_sys_proc_kcd.o
-    0x00000e28   0x00000e28   0x00000020   Code   RO           86    i.i2a               printf.o
-    0x00000e48   0x00000e48   0x00000014   Code   RO           87    i.init_printf       printf.o
-    0x00000e5c   0x00000e5c   0x00000044   Code   RO          298    i.k_delayed_send    k_msg.o
-    0x00000ea0   0x00000ea0   0x0000005c   Code   RO          299    i.k_receive_message  k_msg.o
-    0x00000efc   0x00000efc   0x00000038   Code   RO          300    i.k_receive_message_nb  k_msg.o
-    0x00000f34   0x00000f34   0x000000b0   Code   RO          208    i.k_release_memory_block  k_memory.o
-    0x00000fe4   0x00000fe4   0x0000004c   Code   RO          358    i.k_release_processor  k_process.o
-    0x00001030   0x00001030   0x00000050   Code   RO          209    i.k_request_memory_block  k_memory.o
-    0x00001080   0x00001080   0x00000028   Code   RO          210    i.k_request_memory_block_nb  k_memory.o
-    0x000010a8   0x000010a8   0x0000002c   Code   RO          460    i.k_rtx_init        k_rtx_init.o
-    0x000010d4   0x000010d4   0x00000040   Code   RO          359    i.k_run_new_process  k_process.o
-    0x00001114   0x00001114   0x0000001a   Code   RO          301    i.k_send_message    k_msg.o
-    0x0000112e   0x0000112e   0x00000002   PAD
-    0x00001130   0x00001130   0x000000a4   Code   RO          302    i.k_send_message_actual  k_msg.o
-    0x000011d4   0x000011d4   0x000000c4   Code   RO          360    i.k_set_process_priority  k_process.o
-    0x00001298   0x00001298   0x00000048   Code   RO            4    i.main              main_svc.o
-    0x000012e0   0x000012e0   0x00000190   Code   RO          211    i.memory_init       k_memory.o
-    0x00001470   0x00001470   0x00000018   Code   RO          624    i.nullProc          k_sys_procs.o
-    0x00001488   0x00001488   0x0000004e   Code   RO          993    i.numToString       ae_util_1.o
-    0x000014d6   0x000014d6   0x0000003c   Code   RO          491    i.pq_insert         k_priority_queue.o
-    0x00001512   0x00001512   0x00000002   PAD
-    0x00001514   0x00001514   0x00000014   Code   RO          212    i.pq_insert_blocked  k_memory.o
-    0x00001528   0x00001528   0x0000003c   Code   RO          492    i.pq_insert_front   k_priority_queue.o
-    0x00001564   0x00001564   0x00000024   Code   RO          361    i.pq_insert_front_ready  k_process.o
-    0x00001588   0x00001588   0x00000024   Code   RO          362    i.pq_insert_ready   k_process.o
-    0x000015ac   0x000015ac   0x00000016   Code   RO          494    i.pq_remove         k_priority_queue.o
-    0x000015c2   0x000015c2   0x00000044   Code   RO          495    i.pq_remove_by_pid  k_priority_queue.o
-    0x00001606   0x00001606   0x00000002   PAD
-    0x00001608   0x00001608   0x00000014   Code   RO          213    i.pq_remove_by_pid_blocked  k_memory.o
-    0x0000161c   0x0000161c   0x0000004a   Code   RO          995    i.printNumber       ae_util_1.o
-    0x00001666   0x00001666   0x00000002   PAD
-    0x00001668   0x00001668   0x00000038   Code   RO          692    i.printProcAndPrio  k_sys_proc_kcd.o
-    0x000016a0   0x000016a0   0x000000a4   Code   RO          693    i.printProcState    k_sys_proc_kcd.o
-    0x00001744   0x00001744   0x00000070   Code   RO          832    i.proc1             ae_proc_12.o
-    0x000017b4   0x000017b4   0x0000006c   Code   RO          833    i.proc2             ae_proc_12.o
-    0x00001820   0x00001820   0x00000010   Code   RO          834    i.proc3             ae_proc_12.o
-    0x00001830   0x00001830   0x00000010   Code   RO          835    i.proc4             ae_proc_12.o
-    0x00001840   0x00001840   0x00000010   Code   RO          836    i.proc5             ae_proc_12.o
-    0x00001850   0x00001850   0x00000010   Code   RO          837    i.proc6             ae_proc_12.o
-    0x00001860   0x00001860   0x000002d0   Code   RO          364    i.process_init      k_process.o
-    0x00001b30   0x00001b30   0x00000090   Code   RO          365    i.process_switch    k_process.o
-    0x00001bc0   0x00001bc0   0x00000044   Code   RO          149    i.putc              uart_polling.o
-    0x00001c04   0x00001c04   0x00000052   Code   RO           88    i.putchw            printf.o
-    0x00001c56   0x00001c56   0x0000000a   Code   RO           89    i.putcp             printf.o
-    0x00001c60   0x00001c60   0x0000001e   Code   RO          543    i.q_insert          k_queue.o
-    0x00001c7e   0x00001c7e   0x0000001a   Code   RO          544    i.q_remove          k_queue.o
-    0x00001c98   0x00001c98   0x0000003e   Code   RO          545    i.q_remove_by_addr  k_queue.o
-    0x00001cd6   0x00001cd6   0x00000002   PAD
-    0x00001cd8   0x00001cd8   0x00000028   Code   RO          625    i.registerCommand   k_sys_procs.o
-    0x00001d00   0x00001d00   0x00000030   Code   RO          366    i.scheduler         k_process.o
-    0x00001d30   0x00001d30   0x00000030   Code   RO          998    i.sendUARTMsg       ae_util_1.o
-    0x00001d60   0x00001d60   0x00000174   Code   RO          626    i.setPrioProc       k_sys_procs.o
-    0x00001ed4   0x00001ed4   0x0000006c   Code   RO          838    i.set_test_procs    ae_proc_12.o
-    0x00001f40   0x00001f40   0x0000001a   Code   RO          999    i.skipWhitespace    ae_util_1.o
-    0x00001f5a   0x00001f5a   0x00000016   Code   RO         1000    i.strcpy            ae_util_1.o
-    0x00001f70   0x00001f70   0x00000022   Code   RO         1001    i.stringToNum       ae_util_1.o
-    0x00001f92   0x00001f92   0x00000024   Code   RO         1002    i.stringToNumAndCount  ae_util_1.o
-    0x00001fb6   0x00001fb6   0x00000128   Code   RO           90    i.tfp_format        printf.o
-    0x000020de   0x000020de   0x00000002   PAD
-    0x000020e0   0x000020e0   0x0000002c   Code   RO           91    i.tfp_printf        printf.o
-    0x0000210c   0x0000210c   0x0000002c   Code   RO           92    i.tfp_sprintf       printf.o
-    0x00002138   0x00002138   0x00000020   Code   RO          788    i.timer0_iproc      timer.o
-    0x00002158   0x00002158   0x000000bc   Code   RO          579    i.timerIProc        k_sys_iproc.o
-    0x00002214   0x00002214   0x00000054   Code   RO          789    i.timer_init        timer.o
-    0x00002268   0x00002268   0x0000024c   Code   RO          580    i.uartIProc         k_sys_iproc.o
-    0x000024b4   0x000024b4   0x0000006c   Code   RO          151    i.uart_init         uart_polling.o
-    0x00002520   0x00002520   0x00000090   Code   RO          743    i.uart_irq_init     uart_irq.o
-    0x000025b0   0x000025b0   0x00000034   Code   RO          152    i.uart_put_char     uart_polling.o
-    0x000025e4   0x000025e4   0x00000026   Code   RO          153    i.uart_put_string   uart_polling.o
-    0x0000260a   0x0000260a   0x00000056   Code   RO           93    i.ui2a              printf.o
-    0x00002660   0x00002660   0x000000d4   Data   RO          627    .conststring        k_sys_procs.o
-    0x00002734   0x00002734   0x00000020   Data   RO         1287    Region$$Table       anon$$obj.o
+    0x0000019c   0x0000019c   0x00000048   Code   RO          769    .emb_text           uart_irq.o
+    0x000001e4   0x000001e4   0x0000004c   Code   RO          812    .emb_text           timer.o
+    0x00000230   0x00000230   0x0000003c   Code   RO         1099    .text               startup_lpc17xx.o
+    0x0000026c   0x0000026c   0x00000064   Code   RO         1145    .text               c_w.l(rt_memcpy_w.o)
+    0x000002d0   0x000002d0   0x00000006   Code   RO         1147    .text               c_w.l(heapauxi.o)
+    0x000002d6   0x000002d6   0x00000012   Code   RO         1175    .text               c_w.l(exit.o)
+    0x000002e8   0x000002e8   0x00000008   Code   RO         1187    .text               c_w.l(libspace.o)
+    0x000002f0   0x000002f0   0x0000000c   Code   RO         1243    .text               c_w.l(sys_exit.o)
+    0x000002fc   0x000002fc   0x00000004   Code   RO         1098    .ARM.__at_0x02FC    startup_lpc17xx.o
+    0x00000300   0x00000300   0x0000004a   Code   RO         1173    .text               c_w.l(sys_stackheap_outer.o)
+    0x0000034a   0x0000034a   0x00000002   Code   RO         1262    .text               c_w.l(use_no_semi.o)
+    0x0000034c   0x0000034c   0x00000000   Code   RO         1264    .text               c_w.l(indicate_semi.o)
+    0x0000034c   0x0000034c   0x0000005c   Code   RO          632    i.CRTProc           k_sys_procs.o
+    0x000003a8   0x000003a8   0x000001b0   Code   RO          702    i.KCDProc           k_sys_proc_kcd.o
+    0x00000558   0x00000558   0x00000140   Code   RO         1109    i.SystemInit        system_lpc17xx.o
+    0x00000698   0x00000698   0x00000022   Code   RO          770    i.__NVIC_EnableIRQ  uart_irq.o
+    0x000006ba   0x000006ba   0x00000032   Code   RO           84    i.a2d               printf.o
+    0x000006ec   0x000006ec   0x0000003a   Code   RO           85    i.a2i               printf.o
+    0x00000726   0x00000726   0x00000002   PAD
+    0x00000728   0x00000728   0x00000070   Code   RO          633    i.aProc             k_sys_procs.o
+    0x00000798   0x00000798   0x0000002a   Code   RO          942    i.ae_init           ae10.o
+    0x000007c2   0x000007c2   0x00000002   PAD
+    0x000007c4   0x000007c4   0x0000006c   Code   RO          943    i.ae_set_proc_info  ae10.o
+    0x00000830   0x00000830   0x00000024   Code   RO          207    i.alloc_stack       k_memory.o
+    0x00000854   0x00000854   0x0000005c   Code   RO         1005    i.assertTest        ae_util_1.o
+    0x000008b0   0x000008b0   0x00000038   Code   RO          634    i.bProc             k_sys_procs.o
+    0x000008e8   0x000008e8   0x000000c4   Code   RO          635    i.cProc             k_sys_procs.o
+    0x000009ac   0x000009ac   0x00000008   Code   RO          771    i.c_UART0_IRQHandler  uart_irq.o
+    0x000009b4   0x000009b4   0x00000024   Code   RO          703    i.charMap           k_sys_proc_kcd.o
+    0x000009d8   0x000009d8   0x00000378   Code   RO          636    i.clockProc         k_sys_procs.o
+    0x00000d50   0x00000d50   0x0000007c   Code   RO          298    i.emplace_msg_record  k_msg.o
+    0x00000dcc   0x00000dcc   0x00000038   Code   RO          372    i.get_pcb_by_pid    k_process.o
+    0x00000e04   0x00000e04   0x0000027c   Code   RO          704    i.hotKeyDecoder     k_sys_proc_kcd.o
+    0x00001080   0x00001080   0x00000020   Code   RO           86    i.i2a               printf.o
+    0x000010a0   0x000010a0   0x00000014   Code   RO           87    i.init_printf       printf.o
+    0x000010b4   0x000010b4   0x00000044   Code   RO          299    i.k_delayed_send    k_msg.o
+    0x000010f8   0x000010f8   0x00000038   Code   RO          300    i.k_receive_message  k_msg.o
+    0x00001130   0x00001130   0x00000044   Code   RO          301    i.k_receive_message_actual  k_msg.o
+    0x00001174   0x00001174   0x0000001c   Code   RO          302    i.k_receive_message_nb  k_msg.o
+    0x00001190   0x00001190   0x000000b0   Code   RO          208    i.k_release_memory_block  k_memory.o
+    0x00001240   0x00001240   0x0000004c   Code   RO          374    i.k_release_processor  k_process.o
+    0x0000128c   0x0000128c   0x00000050   Code   RO          209    i.k_request_memory_block  k_memory.o
+    0x000012dc   0x000012dc   0x00000028   Code   RO          210    i.k_request_memory_block_nb  k_memory.o
+    0x00001304   0x00001304   0x0000002c   Code   RO          476    i.k_rtx_init        k_rtx_init.o
+    0x00001330   0x00001330   0x00000040   Code   RO          375    i.k_run_new_process  k_process.o
+    0x00001370   0x00001370   0x0000001a   Code   RO          303    i.k_send_message    k_msg.o
+    0x0000138a   0x0000138a   0x00000002   PAD
+    0x0000138c   0x0000138c   0x000000bc   Code   RO          304    i.k_send_message_actual  k_msg.o
+    0x00001448   0x00001448   0x000000c4   Code   RO          376    i.k_set_process_priority  k_process.o
+    0x0000150c   0x0000150c   0x00000048   Code   RO            4    i.main              main_svc.o
+    0x00001554   0x00001554   0x00000190   Code   RO          211    i.memory_init       k_memory.o
+    0x000016e4   0x000016e4   0x00000018   Code   RO          637    i.nullProc          k_sys_procs.o
+    0x000016fc   0x000016fc   0x0000004e   Code   RO         1006    i.numToString       ae_util_1.o
+    0x0000174a   0x0000174a   0x0000003c   Code   RO          507    i.pq_insert         k_priority_queue.o
+    0x00001786   0x00001786   0x00000002   PAD
+    0x00001788   0x00001788   0x00000014   Code   RO          212    i.pq_insert_blocked  k_memory.o
+    0x0000179c   0x0000179c   0x0000003c   Code   RO          508    i.pq_insert_front   k_priority_queue.o
+    0x000017d8   0x000017d8   0x00000024   Code   RO          377    i.pq_insert_front_ready  k_process.o
+    0x000017fc   0x000017fc   0x00000024   Code   RO          378    i.pq_insert_ready   k_process.o
+    0x00001820   0x00001820   0x00000016   Code   RO          510    i.pq_remove         k_priority_queue.o
+    0x00001836   0x00001836   0x00000044   Code   RO          511    i.pq_remove_by_pid  k_priority_queue.o
+    0x0000187a   0x0000187a   0x00000002   PAD
+    0x0000187c   0x0000187c   0x00000014   Code   RO          213    i.pq_remove_by_pid_blocked  k_memory.o
+    0x00001890   0x00001890   0x00000006   Code   RO            5    i.pre_rtx_init      main_svc.o
+    0x00001896   0x00001896   0x0000001c   Code   RO         1007    i.printFraction     ae_util_1.o
+    0x000018b2   0x000018b2   0x00000002   PAD
+    0x000018b4   0x000018b4   0x00000094   Code   RO          705    i.printMessageRecord  k_sys_proc_kcd.o
+    0x00001948   0x00001948   0x000000d8   Code   RO          706    i.printMessageType  k_sys_proc_kcd.o
+    0x00001a20   0x00001a20   0x0000004a   Code   RO         1008    i.printNumber       ae_util_1.o
+    0x00001a6a   0x00001a6a   0x00000002   PAD
+    0x00001a6c   0x00001a6c   0x00000038   Code   RO          707    i.printProcAndPrio  k_sys_proc_kcd.o
+    0x00001aa4   0x00001aa4   0x000000a4   Code   RO          708    i.printProcState    k_sys_proc_kcd.o
+    0x00001b48   0x00001b48   0x0000005c   Code   RO         1009    i.printStringEscaped  ae_util_1.o
+    0x00001ba4   0x00001ba4   0x00000078   Code   RO         1010    i.printSummary      ae_util_1.o
+    0x00001c1c   0x00001c1c   0x00000030   Code   RO         1011    i.printUart1        ae_util_1.o
+    0x00001c4c   0x00001c4c   0x0000008c   Code   RO          857    i.proc1             ae_proc_10.o
+    0x00001cd8   0x00001cd8   0x0000004c   Code   RO          858    i.proc2             ae_proc_10.o
+    0x00001d24   0x00001d24   0x00000080   Code   RO          859    i.proc3             ae_proc_10.o
+    0x00001da4   0x00001da4   0x00000124   Code   RO          860    i.proc4             ae_proc_10.o
+    0x00001ec8   0x00001ec8   0x0000007c   Code   RO          861    i.proc5             ae_proc_10.o
+    0x00001f44   0x00001f44   0x00000080   Code   RO          862    i.proc6             ae_proc_10.o
+    0x00001fc4   0x00001fc4   0x000002d0   Code   RO          380    i.process_init      k_process.o
+    0x00002294   0x00002294   0x00000090   Code   RO          381    i.process_switch    k_process.o
+    0x00002324   0x00002324   0x00000044   Code   RO          149    i.putc              uart_polling.o
+    0x00002368   0x00002368   0x00000052   Code   RO           88    i.putchw            printf.o
+    0x000023ba   0x000023ba   0x0000001e   Code   RO          559    i.q_insert          k_queue.o
+    0x000023d8   0x000023d8   0x0000001a   Code   RO          560    i.q_remove          k_queue.o
+    0x000023f2   0x000023f2   0x0000003e   Code   RO          561    i.q_remove_by_addr  k_queue.o
+    0x00002430   0x00002430   0x00000028   Code   RO          638    i.registerCommand   k_sys_procs.o
+    0x00002458   0x00002458   0x00000030   Code   RO          382    i.scheduler         k_process.o
+    0x00002488   0x00002488   0x00000030   Code   RO         1012    i.sendUARTMsg       ae_util_1.o
+    0x000024b8   0x000024b8   0x00000174   Code   RO          639    i.setPrioProc       k_sys_procs.o
+    0x0000262c   0x0000262c   0x0000001a   Code   RO         1013    i.skipWhitespace    ae_util_1.o
+    0x00002646   0x00002646   0x00000016   Code   RO         1014    i.strcpy            ae_util_1.o
+    0x0000265c   0x0000265c   0x00000022   Code   RO         1015    i.stringToNum       ae_util_1.o
+    0x0000267e   0x0000267e   0x00000024   Code   RO         1016    i.stringToNumAndCount  ae_util_1.o
+    0x000026a2   0x000026a2   0x00000028   Code   RO         1017    i.strncpy           ae_util_1.o
+    0x000026ca   0x000026ca   0x00000128   Code   RO           90    i.tfp_format        printf.o
+    0x000027f2   0x000027f2   0x00000002   PAD
+    0x000027f4   0x000027f4   0x0000002c   Code   RO           91    i.tfp_printf        printf.o
+    0x00002820   0x00002820   0x00000020   Code   RO          813    i.timer0_iproc      timer.o
+    0x00002840   0x00002840   0x000000bc   Code   RO          595    i.timerIProc        k_sys_iproc.o
+    0x000028fc   0x000028fc   0x00000054   Code   RO          814    i.timer_init        timer.o
+    0x00002950   0x00002950   0x00000024   Code   RO         1018    i.uart0_printMsgText  ae_util_1.o
+    0x00002974   0x00002974   0x0000024c   Code   RO          596    i.uartIProc         k_sys_iproc.o
+    0x00002bc0   0x00002bc0   0x0000006c   Code   RO          151    i.uart_init         uart_polling.o
+    0x00002c2c   0x00002c2c   0x00000090   Code   RO          772    i.uart_irq_init     uart_irq.o
+    0x00002cbc   0x00002cbc   0x00000034   Code   RO          152    i.uart_put_char     uart_polling.o
+    0x00002cf0   0x00002cf0   0x00000026   Code   RO          153    i.uart_put_string   uart_polling.o
+    0x00002d16   0x00002d16   0x00000056   Code   RO           93    i.ui2a              printf.o
+    0x00002d6c   0x00002d6c   0x000000d4   Data   RO          640    .conststring        k_sys_procs.o
+    0x00002e40   0x00002e40   0x0000000d   Data   RO          863    .conststring        ae_proc_10.o
+    0x00002e4d   0x00002e4d   0x00000003   PAD
+    0x00002e50   0x00002e50   0x00000020   Data   RO         1314    Region$$Table       anon$$obj.o
 
 
-    Execution Region RW_IRAM1 (Exec base: 0x10000000, Load base: 0x00002754, Size: 0x000006c0, Max: 0x00008000, ABSOLUTE)
+    Execution Region RW_IRAM1 (Exec base: 0x10000000, Load base: 0x00002e70, Size: 0x00000970, Max: 0x00008000, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x10000000   0x00002754   0x00000008   Data   RW           94    .data               printf.o
-    0x10000008   0x0000275c   0x00000014   Data   RW          214    .data               k_memory.o
-    0x1000001c   0x00002770   0x00000004   Data   RW          303    .data               k_msg.o
-    0x10000020   0x00002774   0x00000018   Data   RW          369    .data               k_process.o
-    0x10000038   0x0000278c   0x0000000c   Data   RW          581    .data               k_sys_iproc.o
-    0x10000044   0x00002798   0x00000028   Data   RW          628    .data               k_sys_procs.o
-    0x1000006c   0x000027c0   0x00000004   Data   RW          790    .data               timer.o
-    0x10000070        -       0x00000070   Zero   RW          368    .bss                k_process.o
-    0x100000e0        -       0x00000380   Zero   RW          694    .bss                k_sys_proc_kcd.o
-    0x10000460        -       0x00000060   Zero   RW         1161    .bss                c_w.l(libspace.o)
-    0x100004c0        -       0x00000000   Zero   RW         1071    HEAP                startup_lpc17xx.o
-    0x100004c0        -       0x00000200   Zero   RW         1070    STACK               startup_lpc17xx.o
+    0x10000000   0x00002e70   0x00000008   Data   RW           94    .data               printf.o
+    0x10000008   0x00002e78   0x00000014   Data   RW          214    .data               k_memory.o
+    0x1000001c   0x00002e8c   0x00000014   Data   RW          306    .data               k_msg.o
+    0x10000030   0x00002ea0   0x00000018   Data   RW          385    .data               k_process.o
+    0x10000048   0x00002eb8   0x0000000c   Data   RW          597    .data               k_sys_iproc.o
+    0x10000054   0x00002ec4   0x00000031   Data   RW          641    .data               k_sys_procs.o
+    0x10000085   0x00002ef5   0x00000003   PAD
+    0x10000088   0x00002ef8   0x00000004   Data   RW          815    .data               timer.o
+    0x1000008c   0x00002efc   0x00000010   Data   RW          864    .data               ae_proc_10.o
+    0x1000009c        -       0x00000280   Zero   RW          305    .bss                k_msg.o
+    0x1000031c        -       0x00000070   Zero   RW          384    .bss                k_process.o
+    0x1000038c        -       0x00000380   Zero   RW          709    .bss                k_sys_proc_kcd.o
+    0x1000070c        -       0x00000060   Zero   RW         1188    .bss                c_w.l(libspace.o)
+    0x1000076c   0x00002f0c   0x00000004   PAD
+    0x10000770        -       0x00000000   Zero   RW         1096    HEAP                startup_lpc17xx.o
+    0x10000770        -       0x00000200   Zero   RW         1095    STACK               startup_lpc17xx.o
 
 
 ==============================================================================
@@ -1142,22 +1218,21 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-        64          0          0          0          0       1541   ae_2.o
-       392        142          0          0          0       4769   ae_proc_12.o
-        92         12          0          0          0        875   ae_timer_2.o
-       318         10          0          0          0       4236   ae_util_1.o
+       150         26          0          0          0       1649   ae10.o
+       888        316         13         16          0       4716   ae_proc_10.o
+       774         94          0          0          0       8369   ae_util_1.o
         52          0          0          0          0        360   hal.o
-       772        262          0         20          0       6839   k_memory.o
-       406         18          0          4          0       6319   k_msg.o
-       210          0          0          0          0       4221   k_priority_queue.o
-      1376        102          0         24        112      12580   k_process.o
+       772        262          0         20          0       7217   k_memory.o
+       558         48          0         20        640       7909   k_msg.o
+       210          0          0          0          0       4599   k_priority_queue.o
+      1376        102          0         24        112      12958   k_process.o
        118          0          0          0          0       2045   k_queue.o
         44          0          0          0          0       4645   k_rtx_init.o
-       776        268          0         12          0       4173   k_sys_iproc.o
-      1112        356          0          0        896       4319   k_sys_proc_kcd.o
-      1696        490        212         40          0       5766   k_sys_procs.o
-        78         14          0          0          0      24382   main_svc.o
-       722         26          0          8          0       6414   printf.o
+       776        268          0         12          0       4783   k_sys_iproc.o
+      1688        600          0          0        896       7933   k_sys_proc_kcd.o
+      1780        476        212         49          0       5870   k_sys_procs.o
+        78         14          0          0          0      23966   main_svc.o
+       668         20          0          8          0       5488   printf.o
         64         26        204          0        512       1016   startup_lpc17xx.o
        320         18          0          0          0        581   system_lpc17xx.o
        192         22          0          4          0      28575   timer.o
@@ -1165,9 +1240,9 @@ Image component sizes
        266         62          0          0          0       2733   uart_polling.o
 
     ----------------------------------------------------------------------
-      9342       1852        448        112       1520     128726   Object Totals
+     11048       2378        464        156       2160     137749   Object Totals
          0          0         32          0          0          0   (incl. Generated)
-        14          0          0          0          0          0   (incl. Padding)
+        16          0          3          3          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -1188,6 +1263,7 @@ Image component sizes
          2          0          0          0          0          0   libshutdown.o
          2          0          0          0          0          0   libshutdown2.o
          8          4          0          0         96         68   libspace.o
+       100          0          0          0          0         80   rt_memcpy_w.o
          2          0          0          0          0          0   rtexit.o
         10          0          0          0          0          0   rtexit2.o
         12          4          0          0          0         68   sys_exit.o
@@ -1195,17 +1271,17 @@ Image component sizes
          2          0          0          0          0         68   use_no_semi.o
 
     ----------------------------------------------------------------------
-       278         16          0          0         96        584   Library Totals
-         6          0          0          0          0          0   (incl. Padding)
+       376         16          0          0        100        664   Library Totals
+         4          0          0          0          4          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Library Name
 
-       272         16          0          0         96        584   c_w.l
+       372         16          0          0         96        664   c_w.l
 
     ----------------------------------------------------------------------
-       278         16          0          0         96        584   Library Totals
+       376         16          0          0        100        664   Library Totals
 
     ----------------------------------------------------------------------
 
@@ -1214,15 +1290,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      9620       1868        448        112       1616     124834   Grand Totals
-      9620       1868        448        112       1616     124834   ELF Image Totals
-      9620       1868        448        112          0          0   ROM Totals
+     11424       2394        464        156       2260     133521   Grand Totals
+     11424       2394        464        156       2260     133521   ELF Image Totals
+     11424       2394        464        156          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                10068 (   9.83kB)
-    Total RW  Size (RW Data + ZI Data)              1728 (   1.69kB)
-    Total ROM Size (Code + RO Data + RW Data)      10180 (   9.94kB)
+    Total RO  Size (Code + RO Data)                11888 (  11.61kB)
+    Total RW  Size (RW Data + ZI Data)              2416 (   2.36kB)
+    Total ROM Size (Code + RO Data + RW Data)      12044 (  11.76kB)
 
 ==============================================================================
 
