@@ -46,7 +46,7 @@ void aProc(void) {
 	// Wait until %Z command is recieved
 	while (1) {
 		msg = receive_message(NULL);
-		if (msg->mtype == KCD_CMD) {
+		if (msg->mtype == KCD_CMD && msg->mtext[1] == 'Z') {
 			release_memory_block(msg);
 			break;
 		}
@@ -61,20 +61,6 @@ void aProc(void) {
 		num++;
 		release_processor();
 	}
-
-	/*
-	Register %Z command with the KCD
-	Wait till %Z command is received
-	num = 0
-	loop forever
-		get a message envelope
-		set message_type field of to count_report
-		set message_textfield of to num
-		send the message to process B
-		num = num + 1
-		release_processor()
-	endloop
-	*/
 }
 
 void bProc(void) {
@@ -89,25 +75,6 @@ void bProc(void) {
 }
 
 void cProc(void) {
-	/*
-	create a local message queue
-	loop forever
-		if (local message queue is empty) then
-			p <-receive a message
-		else
-			p <-dequeue the first message from the local message queue
-		endif
-		
-		if msg_typeof p == count_report then
-			if message_text% 20 == 0 then
-				send "Process C" to CRT with msg envelope p
-				hibernatefor 10 sec
-			endif
-		endif
-		deallocate message envelope p
-		release_processor()
-	endloop
-*/
 	MSG_BUF* localQ = NULL;
 	MSG_BUF* msg;
 
@@ -121,7 +88,7 @@ void cProc(void) {
 
 		if (msg->mtype == COUNT_REPORT) {
 			int num = stringToNumAndCount(msg->mtext);
-			if (num % 2 == 0) {
+			if (num % 20 == 0) {
 				strcpy(msg->mtext, "Process C\n\r");
 				msg->mtype = CRT_DISPLAY;
 				send_message(PID_CRT, msg);
@@ -148,23 +115,8 @@ void cProc(void) {
 		}
 
 		release_memory_block(msg);
+		release_processor();
 	}
-
-/*
-hibernate:
-	q <-request_memory_block()
-	use q to delayed_sendto itself with 10 sec delay and msg_type=wakeup10
-	loop forever
-		// block and let other process execute
-		p <-receive a message
-		if (msg_typeof p == wakeup10) then
-			exit this loop
-		else
-			put message (p) on the local message queue
-			for later processing
-		endif
-	endloop
-	*/
 }
 
 // Registers to 'C'
@@ -191,7 +143,8 @@ void setPrioProc(void) {
 			if (numDigits != 0) {
 				procId = stringToNum(charPtr-numDigits, numDigits);	
 			} else {
-				sendUARTMsg("Set priority failed - invalid process ID!\r\n");
+				// Invalid process id!
+				sendUARTMsg("Invalid command input\r\n");
 				release_memory_block(msg);
 				continue;
 			}
@@ -213,13 +166,13 @@ void setPrioProc(void) {
 				int res = set_process_priority(procId, stringToNum(charPtr-numDigits, numDigits));
 				if (res == RTX_OK) {
 					release_memory_block(msg);
-					sendUARTMsg("Successfully set process priority!\r\n");
 					continue;
 				}
 			}
 			
 			SET_PRIO_ERROR:
-			sendUARTMsg("Set priority failed - invalid process priority!\r\n");
+			// Invalid process priority!
+			sendUARTMsg("Invalid command input\r\n");
 			release_memory_block(msg);
 		} else {
 			// this proc isn't expecting other message types

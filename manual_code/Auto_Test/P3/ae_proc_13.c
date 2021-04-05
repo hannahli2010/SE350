@@ -76,7 +76,7 @@ void set_test_procs(PROC_INIT *procs, int num) {
     }
   
     procs[0].mpf_start_pc = &proc1;
-    procs[0].m_priority   = HIGH;
+    procs[0].m_priority   = MEDIUM;
     
     procs[1].mpf_start_pc = &proc2;
     procs[1].m_priority   = MEDIUM;
@@ -101,8 +101,8 @@ void proc1(void)
 {
     int i = 0;
     while(1) {
-        uart1_put_string("Process 1");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 1\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 
@@ -113,8 +113,8 @@ void proc2(void)
 {
     int i = 0;
     while(1) {
-        uart1_put_string("Process 2");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 2\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 /**************************************************************************//**
@@ -125,8 +125,8 @@ void proc3(void)
 {
     int i = 0;
     while(1) {
-        uart1_put_string("Process 3");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 3\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 
@@ -138,8 +138,8 @@ void proc4(void)
 {
     int i = 0;
     while(1) {
-        uart1_put_string("Process 4");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 4\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 
@@ -150,8 +150,8 @@ void proc5(void)
 { 
     int i = 0;
     while(1) {
-        uart1_put_string("Process 5");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 5\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 
@@ -162,8 +162,8 @@ void proc6(void)
 {
     int i = 0;
     while(1) {
-        uart1_put_string("Process 6");
-        for(i = 0; i < 100; i++);
+        uart1_put_string("Process 6\r\n");
+        for(i = 0; i < 1000; i++);
     }
 }
 /*

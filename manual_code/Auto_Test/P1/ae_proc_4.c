@@ -74,6 +74,24 @@
 int successfulTests = 0;
 char * testName = "G_10_test_4";
 
+/* initialization table item */
+void set_test_procs(PROC_INIT *procs, int num)
+{
+    int i;
+    for( i = 0; i < num; i++ ) {
+        procs[i].m_pid        = (U32)(i+1);
+        procs[i].m_priority   = MEDIUM;
+        procs[i].m_stack_size = USR_SZ_STACK;
+    }
+  
+    procs[0].mpf_start_pc = &proc1;
+    procs[1].mpf_start_pc = &proc2;
+    procs[2].mpf_start_pc = &proc3;
+    procs[3].mpf_start_pc = &proc4;
+    procs[4].mpf_start_pc = &proc5;
+    procs[5].mpf_start_pc = &proc6;
+}
+
 void uart0_put_1digit_int(int i)
 {
     if (i > 9 || i < -9) {
