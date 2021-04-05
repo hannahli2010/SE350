@@ -67,6 +67,34 @@ int successfulTests = 0;
 char * testName = "G_10_test_6";
 int nextProcess;
 
+/* initialization table item */
+void set_test_procs(PROC_INIT *procs, int num)
+{
+    int i;
+    for( i = 0; i < num; i++ ) {
+        procs[i].m_pid        = (U32)(i+1);
+        procs[i].m_stack_size = USR_SZ_STACK;
+    }
+  
+    procs[0].mpf_start_pc = &proc1;
+    procs[0].m_priority   = HIGH;
+    
+    procs[1].mpf_start_pc = &proc2;
+    procs[1].m_priority   = MEDIUM;
+    
+    procs[2].mpf_start_pc = &proc3;
+    procs[2].m_priority   = LOWEST;
+    
+    procs[3].mpf_start_pc = &proc4;
+    procs[3].m_priority   = LOWEST;
+    
+    procs[4].mpf_start_pc = &proc5;
+    procs[4].m_priority   = LOWEST;
+    
+    procs[5].mpf_start_pc = &proc6;
+    procs[5].m_priority   = LOWEST;
+}
+
 /**************************************************************************//**
  * @brief: a high priority process that tries to receive a message, resulting in
            it getting blocked. After it receives the messge, it releases the memory
