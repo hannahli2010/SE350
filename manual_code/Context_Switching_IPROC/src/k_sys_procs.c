@@ -5,10 +5,10 @@
 #include "uart_def.h"
 #include "ae_util.h"
 #include "k_queue.h"
+#include "uart_polling.h"
 
 #ifdef DEBUG_0
 #include "printf.h"
-#include "uart_polling.h"
 #endif /* DEBUG_0 */
 
 uint32_t time = 0;
@@ -31,7 +31,9 @@ void nullProc(void) {
 
 void registerCommand(char c) {
 	MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
-	regMsg->mtext[0] = c;
+	regMsg->mtext[0] = '%';
+	regMsg->mtext[1] = c;
+	regMsg->mtext[2] = '\0';
 	regMsg->mtype = KCD_REG;
 	send_message(PID_KCD, regMsg);
 }
@@ -176,7 +178,7 @@ void setPrioProc(void) {
 		MSG_BUF* msg = receive_message(NULL);
 
 		if (msg->mtype == KCD_CMD) {
-			char* charPtr = msg->mtext;
+			char* charPtr = msg->mtext + 2;
 			
 			// Ditch all the white space until we get to a number char
 			skipWhitespace(&charPtr);
@@ -255,7 +257,7 @@ void clockProc(void) {
 
 	while (1) {
 		msg = receive_message(NULL);
-		charPtr = msg->mtext;
+		charPtr = msg->mtext + 2;
 		// printf("Message: '%s' of type %d\n", msg->mtext, msg->mtype);
 
 		if (msg->mtype == KCD_CMD) {
@@ -284,7 +286,7 @@ void clockProc(void) {
 					}
 				} else {
 					// error, was not expecting any parameters
-					sendUARTMsg("%WS clock command expects no arguments\r\n");
+					sendUARTMsg("%WR clock command expects no arguments\r\n");
 				}
 			}
 			// Set hh:mm:ss - sets current wall clock time to hh:mm:ss

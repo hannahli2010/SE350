@@ -162,7 +162,7 @@ int stringToNum(char* numberStr, int numDigits) {
 }
 
 void skipWhitespace(char** ptr) {
-    for (;**ptr == ' ' || **ptr == '\t'; (*ptr)++);
+    for (;**ptr == ' ' || **ptr == '\t' || **ptr == '\n' || **ptr == '\r'; (*ptr)++);
 }
 
 void sendUARTMsg(char* errText) {

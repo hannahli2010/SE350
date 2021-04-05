@@ -13,8 +13,10 @@ int charMap(char c) {
 	return -1;
 }
 
-char registrationTable[52][16];
-char msgBuf[64];
+#define MSG_BUF_SIZE 92
+
+int registrationTable[52];
+char msgBuf[MSG_BUF_SIZE];
 
 void printProcAndPrio(PCB* p) {
 	uart1_put_string("PID: ");
@@ -139,93 +141,87 @@ int hotKeyDecoder(char hotkey) {
 }
 
 void KCDProc(void) {
-
 	for (int i = 0; i < 52; i++) {
-		for (int j = 0; j < 16; j++) {
-			registrationTable[i][j] = FALSE;
-		}
+		registrationTable[i] = -1;
 	}
 
-	// Waiting for the user to input a %
-	char isWaitingForCommand = FALSE;
-	
-	// Most recent command that has been entered
-	char currCommand = NULL;
-
-	// Variables relating to the current message we're building up
-	// MSG_BUF* command_msg_buf = NULL;
-	char* msg_char_ptr = NULL;
-	// Lets see if we can do this today... (:D)>-|-<
+	char* msg_char_ptr = msgBuf;
+	int bufCounter = 0;
+	char command;
+	int charInteger;
 	
 	while (1) {
-		// MSG_BUF* fullcommand = receive_message(NULL);
-		int senderPtr;
-		MSG_BUF* msg = receive_message(&senderPtr);
+		int senderPid;
+		MSG_BUF* msg = receive_message(&senderPid);
 		char inputChar = msg->mtext[0];
 		
 		if (msg->mtype == KEY_IN) {
  			msg->mtype = CRT_DISPLAY;
-			send_message(PID_CRT, msg);
-			
+			 
 			// Implement backspace
-			if (inputChar == '\b') {
-				if (isWaitingForCommand == TRUE) {
-					isWaitingForCommand = FALSE;
-				} else if (currCommand != NULL && msg_char_ptr == msgBuf) {
-					currCommand = NULL;
-					isWaitingForCommand = TRUE;
-				} else if (currCommand != NULL) {
+			if (inputChar == '\b' || (int) inputChar == 127)  {
+				if (bufCounter > 0) {
 					msg_char_ptr--;
+					bufCounter--;
+					if (inputChar == '\b') {
+						msg->mtext[1] = ' ';
+						msg->mtext[2] = '\b';
+						msg->mtext[3] = '\0';
+					}
 				}
+				send_message(PID_CRT, msg);
+				continue;
 			}
-			// If a command has been chosen, add the new character to the message buff until new line
-			else if (currCommand != NULL && inputChar != '\r') {
+
+			send_message(PID_CRT, msg);
+
+			// Stop filling the buffer if the size is going to be exceeded
+			// Leave a space for the \0 character
+			if (bufCounter < MSG_BUF_SIZE - 1) {
 				*msg_char_ptr = inputChar;
 				msg_char_ptr++;
-			} 
-			// If the user is waiting for a command
-			else if (isWaitingForCommand && inputChar != '\r') {
-				// validate character input
-				if ((inputChar >= 'A' && inputChar <= 'Z')  ||  (inputChar >= 'a' && inputChar <= 'z')) {
-					currCommand = inputChar;
-					isWaitingForCommand = FALSE;
-				} else {
-					// Send an error message and have the user reenter the %
-					isWaitingForCommand = FALSE;
-					sendUARTMsg("\r\nInvalid command. Only alphabetic commands allowed \r\n");
-				}
 			}
+			bufCounter++;
+
+			if (inputChar == '\r') {
+				// Terminate the message
+				*msg_char_ptr = '\0';
+				
+				if (bufCounter < 2 || *msgBuf != '%' || bufCounter > MSG_BUF_SIZE) {
+					sendUARTMsg("Invalid Command\r\n");
+					goto FINISH_ENTER_COMMAND;
+				}
+
+				command = *(msgBuf+1);
+				charInteger = charMap(command);
+
+				if (charInteger == -1) {
+					sendUARTMsg("Command not found\r\n");
+					goto FINISH_ENTER_COMMAND;
+				}
+				
+				if (registrationTable[charInteger] != -1) {
+					MSG_BUF* command_msg_buf = (MSG_BUF*) request_memory_block();
+					command_msg_buf->mtype = KCD_CMD;
+					strcpy(command_msg_buf->mtext, msgBuf);
+					send_message(registrationTable[charInteger], command_msg_buf);
+				}
+				
+FINISH_ENTER_COMMAND:
+				bufCounter = 0;
+				msg_char_ptr = msgBuf;
+			}
+			
 			#ifdef _DEBUG_HOTKEYS
 			else if (hotKeyDecoder(inputChar) == TRUE) {
 				// do nothing since hotkeyDecoder handles it
 			}
 			#endif
-			// start collecting the characters in a message buf
-			else if (inputChar == '%') {
-				isWaitingForCommand = TRUE;
-				msg_char_ptr = msgBuf;
-				
-			} else if (inputChar == '\r') {
-				// Determinate the message we have been building and send it to all registered processes
-				if (currCommand != NULL) {
-					*msg_char_ptr = '\0';
-					int charInteger = charMap(currCommand);
-					for (int i = 0; i < 16; i++) {
-						if (registrationTable[charInteger][i] == TRUE) {
-							MSG_BUF* command_msg_buf = (MSG_BUF*) request_memory_block();
-							command_msg_buf->mtype = KCD_CMD;
-							strcpy(command_msg_buf->mtext, msgBuf);
-							send_message(i, command_msg_buf);
-						} 
-					}
-					currCommand = NULL;
-				}
-			}
 		}
 		else if (msg->mtype == KCD_REG) {
-			char regChar = msg->mtext[0];
+			char regChar = msg->mtext[1];
 			if ((regChar >= 'A' && regChar <= 'Z')  ||  (regChar >= 'a' && regChar <= 'z')) {
-				registrationTable[charMap(regChar)][senderPtr] = TRUE;
+				registrationTable[charMap(regChar)] = senderPid;
 			}
 			release_memory_block(msg);
 		}

@@ -69,7 +69,6 @@ int nextProcess;
 int baseChar = (int) '0';
 
 void set_test_procs(PROC_INIT *procs, int num) {
-
     int i;
     for( i = 0; i < num; i++ ) {
         procs[i].m_pid        = (U32)(i+1);
@@ -80,7 +79,7 @@ void set_test_procs(PROC_INIT *procs, int num) {
     procs[0].m_priority   = HIGH;
     
     procs[1].mpf_start_pc = &proc2;
-    procs[1].m_priority   = LOW;
+    procs[1].m_priority   = MEDIUM;
     
     procs[2].mpf_start_pc = &proc3;
     procs[2].m_priority   = LOW;
@@ -101,15 +100,39 @@ void set_test_procs(PROC_INIT *procs, int num) {
 void proc1(void)
 {
     MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
-	regMsg->mtext[0] = 'H';
+	regMsg->mtext[0] = '%';
+	regMsg->mtext[1] = 'H';
+	regMsg->mtext[2] = '\0';
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+
+    regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = '%';
+	regMsg->mtext[1] = 'E';
+	regMsg->mtext[2] = '\0';
+	regMsg->mtype = KCD_REG;
+	send_message(PID_KCD, regMsg);
+
+    regMsg = (MSG_BUF*) request_memory_block();
+	regMsg->mtext[0] = '%';
+	regMsg->mtext[1] = 'R';
+	regMsg->mtext[2] = '\0';
 	regMsg->mtype = KCD_REG;
 	send_message(PID_KCD, regMsg);
 
     while(1) {
         MSG_BUF* msg = (MSG_BUF*) receive_message(NULL);
         
-        if (msg->mtype == KCD_CMD) {
+        if (msg->mtype == KCD_CMD && msg->mtext[1] == 'H') {
             sendUARTMsg("Hannah got some fan mail! \r\n");
+        }
+
+        if (msg->mtype == KCD_CMD && msg->mtext[1] == 'E') {
+            sendUARTMsg("Ethan recieved a Hack the North application! \r\n");
+        }
+
+        if (msg->mtype == KCD_CMD && msg->mtext[1] == 'R') {
+            sendUARTMsg("Jackie STOLE Rob's love letter \r\n");
         }
 
         release_memory_block(msg);
@@ -122,14 +145,16 @@ void proc1(void)
 void proc2(void)
 {
     MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
-	regMsg->mtext[0] = 'R';
+	regMsg->mtext[0] = '%';
+	regMsg->mtext[1] = 'R';
+	regMsg->mtext[2] = '\0';
 	regMsg->mtype = KCD_REG;
 	send_message(PID_KCD, regMsg);
 
     while(1) {
         MSG_BUF* msg = (MSG_BUF*) receive_message(NULL);
 
-        if (msg->mtype == KCD_CMD) {
+        if (msg->mtype == KCD_CMD && msg->mtext[1] == 'R') {
             sendUARTMsg("Rob got a love letter! \r\n");
         }
 
