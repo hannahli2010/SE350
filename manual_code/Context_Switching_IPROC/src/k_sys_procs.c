@@ -155,6 +155,8 @@ void setPrioProc(void) {
 				numDigits++;
 			}
 
+			int prio = stringToNum(charPtr-numDigits, numDigits);
+
 			// Error if there is extra data after the expected parameters,
 			// eg. '%C 5 4X' OR '%C 5 4 X'
 			skipWhitespace(&charPtr);
@@ -163,7 +165,7 @@ void setPrioProc(void) {
 			}
 
 			if (numDigits != 0) {
-				int res = set_process_priority(procId, stringToNum(charPtr-numDigits, numDigits));
+				int res = set_process_priority(procId, prio);
 				if (res == RTX_OK) {
 					release_memory_block(msg);
 					continue;

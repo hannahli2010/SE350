@@ -63,7 +63,7 @@
 #define NUM_TESTS 6
 
 int successfulTests = 0;
-char * testName = "G_10_test_12";
+char * testName = "G_10_test_13";
 int nextProcess;
 
 int baseChar = (int) '0';
@@ -102,7 +102,8 @@ void proc1(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 1\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 
@@ -114,7 +115,8 @@ void proc2(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 2\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 /**************************************************************************//**
@@ -126,7 +128,8 @@ void proc3(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 3\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 
@@ -139,7 +142,8 @@ void proc4(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 4\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 
@@ -151,7 +155,8 @@ void proc5(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 5\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 
@@ -163,7 +168,8 @@ void proc6(void)
     int i = 0;
     while(1) {
         uart1_put_string("Process 6\r\n");
-        for(i = 0; i < 1000; i++);
+        for(i = 0; i < 10000; i++);
+        release_processor();
     }
 }
 /*

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\SIM\RAM\cs_timer_irq.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\SIM\RAM\cs_timer_irq.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Apr 04 23:41:34 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Apr 05 00:25:00 2021
 <BR><P>
 <H3>Maximum Stack Usage =        152 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -106,6 +106,7 @@ Function Pointers
  <LI><a href="#[35]">k_release_memory_block</a> from k_memory.o(i.k_release_memory_block) referenced from ae_proc_12.o(i.proc2)
  <LI><a href="#[35]">k_release_memory_block</a> from k_memory.o(i.k_release_memory_block) referenced from k_sys_procs.o(i.setPrioProc)
  <LI><a href="#[37]">k_release_processor</a> from k_process.o(i.k_release_processor) referenced from k_sys_procs.o(i.aProc)
+ <LI><a href="#[37]">k_release_processor</a> from k_process.o(i.k_release_processor) referenced from k_sys_procs.o(i.cProc)
  <LI><a href="#[37]">k_release_processor</a> from k_process.o(i.k_release_processor) referenced from ae_proc_12.o(i.proc3)
  <LI><a href="#[37]">k_release_processor</a> from k_process.o(i.k_release_processor) referenced from ae_proc_12.o(i.proc4)
  <LI><a href="#[37]">k_release_processor</a> from k_process.o(i.k_release_processor) referenced from ae_proc_12.o(i.proc5)
@@ -144,8 +145,8 @@ Function Pointers
 Global Symbols
 </H3>
 <P><STRONG><a name="[4b]"></a>__main</STRONG> (Thumb, 8 bytes, Stack size 0 bytes, __main.o(!!!main))
-<BR><BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry
-<LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
+<BR><BR>[Calls]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload
+<LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry
 </UL>
 
 <P><STRONG><a name="[4c]"></a>__scatterload</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __scatter.o(!!!scatter))
@@ -233,8 +234,8 @@ Global Symbols
 <P><STRONG><a name="[b4]"></a>__rt_lib_shutdown_user_alloc_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, libshutdown2.o(.ARM.Collect$$libshutdown$$0000000C))
 
 <P><STRONG><a name="[4d]"></a>__rt_entry</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry.o(.ARM.Collect$$rtentry$$00000000))
-<BR><BR>[Called By]<UL><LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
-<LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload_rt2
+<BR><BR>[Called By]<UL><LI><a href="#[4e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__scatterload_rt2
+<LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__main
 </UL>
 
 <P><STRONG><a name="[b5]"></a>__rt_entry_presh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000002))
@@ -537,7 +538,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_lpc17xx.o(.text)
 </UL>
-<P><STRONG><a name="[3d]"></a>aProc</STRONG> (Thumb, 92 bytes, Stack size 0 bytes, k_sys_procs.o(i.aProc))
+<P><STRONG><a name="[3d]"></a>aProc</STRONG> (Thumb, 100 bytes, Stack size 0 bytes, k_sys_procs.o(i.aProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = aProc &rArr; numToString
 </UL>
 <BR>[Calls]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;numToString
@@ -573,7 +574,7 @@ Global Symbols
 <P><STRONG><a name="[3e]"></a>bProc</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, k_sys_procs.o(i.bProc))
 <BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
 </UL>
-<P><STRONG><a name="[3f]"></a>cProc</STRONG> (Thumb, 166 bytes, Stack size 8 bytes, k_sys_procs.o(i.cProc))
+<P><STRONG><a name="[3f]"></a>cProc</STRONG> (Thumb, 170 bytes, Stack size 8 bytes, k_sys_procs.o(i.cProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = cProc &rArr; stringToNumAndCount &rArr; stringToNum
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNumAndCount
@@ -712,7 +713,8 @@ Global Symbols
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_rtx_init
 </UL>
-<BR>[Address Reference Count : 5]<UL><LI> ae_proc_12.o(i.proc3)
+<BR>[Address Reference Count : 6]<UL><LI> k_sys_procs.o(i.cProc)
+<LI> ae_proc_12.o(i.proc3)
 <LI> ae_proc_12.o(i.proc4)
 <LI> ae_proc_12.o(i.proc5)
 <LI> ae_proc_12.o(i.proc6)
@@ -1067,7 +1069,7 @@ Global Symbols
 <LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proc1
 </UL>
 
-<P><STRONG><a name="[40]"></a>setPrioProc</STRONG> (Thumb, 222 bytes, Stack size 8 bytes, k_sys_procs.o(i.setPrioProc))
+<P><STRONG><a name="[40]"></a>setPrioProc</STRONG> (Thumb, 216 bytes, Stack size 8 bytes, k_sys_procs.o(i.setPrioProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = setPrioProc &rArr; sendUARTMsg
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNum
