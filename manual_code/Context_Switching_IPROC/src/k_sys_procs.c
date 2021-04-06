@@ -111,10 +111,12 @@ void cProc(void) {
 					}
 				}
 				// END OF HIBERNATE
+			} else {
+				release_memory_block(msg);
 			}
+		} else {
+			release_memory_block(msg);
 		}
-
-		release_memory_block(msg);
 		release_processor();
 	}
 }
@@ -247,7 +249,8 @@ void clockProc(void) {
 			// Set hh:mm:ss - sets current wall clock time to hh:mm:ss
 			else if (clockCommand == 'S') {
 				if (*charPtr == '\0') {
-					// was supposed to have stuff
+					sendUARTMsg("%WS clock command expects a hh:mm:ss time argument \r\n");
+					goto DONEZO;
 				} else if (
 					!(
 						IS_NUM(charPtr[0]) &&

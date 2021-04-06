@@ -82,16 +82,16 @@ void set_test_procs(PROC_INIT *procs, int num) {
     procs[1].m_priority   = MEDIUM;
     
     procs[2].mpf_start_pc = &proc3;
-    procs[2].m_priority   = LOW;
+    procs[2].m_priority   = LOWEST;
     
     procs[3].mpf_start_pc = &proc4;
-    procs[3].m_priority   = LOW;
+    procs[3].m_priority   = LOWEST;
     
     procs[4].mpf_start_pc = &proc5;
-    procs[4].m_priority   = LOW;
+    procs[4].m_priority   = LOWEST;
     
     procs[5].mpf_start_pc = &proc6;
-    procs[5].m_priority   = LOW;
+    procs[5].m_priority   = LOWEST;
 }
 
 /**************************************************************************//**
@@ -99,6 +99,16 @@ void set_test_procs(PROC_INIT *procs, int num) {
  *****************************************************************************/
 void proc1(void)
 {
+    // Should get stuck after printing "Process C" once
+    // set_process_priority(PID_A, MEDIUM);
+    // set_process_priority(PID_B, LOW);
+    // set_process_priority(PID_C, LOW);
+
+    // Should work, but breaks the clock proc
+    // set_process_priority(PID_A, MEDIUM);
+    // set_process_priority(PID_B, LOW);
+    // set_process_priority(PID_C, HIGH);
+
     MSG_BUF* regMsg = (MSG_BUF*) request_memory_block();
 	regMsg->mtext[0] = '%';
 	regMsg->mtext[1] = 'H';

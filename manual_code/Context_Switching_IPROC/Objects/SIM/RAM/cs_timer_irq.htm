@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\SIM\RAM\cs_timer_irq.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\SIM\RAM\cs_timer_irq.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Apr 05 00:25:00 2021
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Apr 05 23:48:05 2021
 <BR><P>
 <H3>Maximum Stack Usage =        152 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -37,7 +37,7 @@ Function Pointers
  <LI><a href="#[8]">BusFault_Handler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[30]">CANActivity_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[27]">CAN_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
- <LI><a href="#[43]">CRTProc</a> from k_sys_procs.o(i.CRTProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[44]">CRTProc</a> from k_sys_procs.o(i.CRTProc) referenced from k_process.o(i.process_init)
  <LI><a href="#[28]">DMA_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[b]">DebugMon_Handler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[20]">EINT0_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
@@ -50,7 +50,7 @@ Function Pointers
  <LI><a href="#[19]">I2C1_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[1a]">I2C2_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[29]">I2S_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
- <LI><a href="#[42]">KCDProc</a> from k_sys_proc_kcd.o(i.KCDProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[43]">KCDProc</a> from k_sys_proc_kcd.o(i.KCDProc) referenced from k_process.o(i.process_init)
  <LI><a href="#[2c]">MCPWM_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[7]">MemManage_Handler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[5]">NMI_Handler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
@@ -81,10 +81,10 @@ Function Pointers
  <LI><a href="#[9]">UsageFault_Handler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[e]">WDT_IRQHandler</a> from startup_lpc17xx.o(.text) referenced from startup_lpc17xx.o(RESET)
  <LI><a href="#[4b]">__main</a> from __main.o(!!!main) referenced from startup_lpc17xx.o(.text)
- <LI><a href="#[3d]">aProc</a> from k_sys_procs.o(i.aProc) referenced from k_process.o(i.process_init)
- <LI><a href="#[3e]">bProc</a> from k_sys_procs.o(i.bProc) referenced from k_process.o(i.process_init)
- <LI><a href="#[3f]">cProc</a> from k_sys_procs.o(i.cProc) referenced from k_process.o(i.process_init)
- <LI><a href="#[41]">clockProc</a> from k_sys_procs.o(i.clockProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[3e]">aProc</a> from k_sys_procs.o(i.aProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[3f]">bProc</a> from k_sys_procs.o(i.bProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[40]">cProc</a> from k_sys_procs.o(i.cProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[42]">clockProc</a> from k_sys_procs.o(i.clockProc) referenced from k_process.o(i.process_init)
  <LI><a href="#[38]">k_delayed_send</a> from k_msg.o(i.k_delayed_send) referenced from k_sys_procs.o(i.cProc)
  <LI><a href="#[38]">k_delayed_send</a> from k_msg.o(i.k_delayed_send) referenced from k_sys_procs.o(i.clockProc)
  <LI><a href="#[33]">k_receive_message</a> from k_msg.o(i.k_receive_message) referenced from k_sys_procs.o(i.CRTProc)
@@ -128,8 +128,9 @@ Function Pointers
  <LI><a href="#[34]">k_send_message</a> from k_msg.o(i.k_send_message) referenced from ae_proc_12.o(i.proc2)
  <LI><a href="#[34]">k_send_message</a> from k_msg.o(i.k_send_message) referenced from k_sys_procs.o(i.registerCommand)
  <LI><a href="#[34]">k_send_message</a> from k_msg.o(i.k_send_message) referenced from ae_util_1.o(i.sendUARTMsg)
- <LI><a href="#[44]">k_set_process_priority</a> from k_process.o(i.k_set_process_priority) referenced from k_sys_procs.o(i.setPrioProc)
- <LI><a href="#[3c]">nullProc</a> from k_sys_procs.o(i.nullProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[3c]">k_set_process_priority</a> from k_process.o(i.k_set_process_priority) referenced from ae_proc_12.o(i.proc1)
+ <LI><a href="#[3c]">k_set_process_priority</a> from k_process.o(i.k_set_process_priority) referenced from k_sys_procs.o(i.setPrioProc)
+ <LI><a href="#[3d]">nullProc</a> from k_sys_procs.o(i.nullProc) referenced from k_process.o(i.process_init)
  <LI><a href="#[3a]">pre_rtx_init</a> from main_svc.o(i.pre_rtx_init) referenced from main_svc.o(i.main)
  <LI><a href="#[45]">proc1</a> from ae_proc_12.o(i.proc1) referenced from ae_proc_12.o(i.set_test_procs)
  <LI><a href="#[46]">proc2</a> from ae_proc_12.o(i.proc2) referenced from ae_proc_12.o(i.set_test_procs)
@@ -138,7 +139,7 @@ Function Pointers
  <LI><a href="#[49]">proc5</a> from ae_proc_12.o(i.proc5) referenced from ae_proc_12.o(i.set_test_procs)
  <LI><a href="#[4a]">proc6</a> from ae_proc_12.o(i.proc6) referenced from ae_proc_12.o(i.set_test_procs)
  <LI><a href="#[39]">putc</a> from uart_polling.o(i.putc) referenced from main_svc.o(i.main)
- <LI><a href="#[40]">setPrioProc</a> from k_sys_procs.o(i.setPrioProc) referenced from k_process.o(i.process_init)
+ <LI><a href="#[41]">setPrioProc</a> from k_sys_procs.o(i.setPrioProc) referenced from k_process.o(i.process_init)
 </UL>
 <P>
 <H3>
@@ -520,10 +521,10 @@ Global Symbols
 
 <P><STRONG><a name="[c3]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[43]"></a>CRTProc</STRONG> (Thumb, 74 bytes, Stack size 0 bytes, k_sys_procs.o(i.CRTProc))
+<P><STRONG><a name="[44]"></a>CRTProc</STRONG> (Thumb, 74 bytes, Stack size 0 bytes, k_sys_procs.o(i.CRTProc))
 <BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
 </UL>
-<P><STRONG><a name="[42]"></a>KCDProc</STRONG> (Thumb, 312 bytes, Stack size 8 bytes, k_sys_proc_kcd.o(i.KCDProc))
+<P><STRONG><a name="[43]"></a>KCDProc</STRONG> (Thumb, 312 bytes, Stack size 8 bytes, k_sys_proc_kcd.o(i.KCDProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 132<LI>Call Chain = KCDProc &rArr; hotKeyDecoder &rArr; printMessageRecord &rArr; printStringEscaped &rArr; uart_put_string
 </UL>
 <BR>[Calls]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;hotKeyDecoder
@@ -538,7 +539,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_lpc17xx.o(.text)
 </UL>
-<P><STRONG><a name="[3d]"></a>aProc</STRONG> (Thumb, 100 bytes, Stack size 0 bytes, k_sys_procs.o(i.aProc))
+<P><STRONG><a name="[3e]"></a>aProc</STRONG> (Thumb, 100 bytes, Stack size 0 bytes, k_sys_procs.o(i.aProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = aProc &rArr; numToString
 </UL>
 <BR>[Calls]<UL><LI><a href="#[66]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;numToString
@@ -571,10 +572,10 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_init
 </UL>
 
-<P><STRONG><a name="[3e]"></a>bProc</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, k_sys_procs.o(i.bProc))
+<P><STRONG><a name="[3f]"></a>bProc</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, k_sys_procs.o(i.bProc))
 <BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
 </UL>
-<P><STRONG><a name="[3f]"></a>cProc</STRONG> (Thumb, 170 bytes, Stack size 8 bytes, k_sys_procs.o(i.cProc))
+<P><STRONG><a name="[40]"></a>cProc</STRONG> (Thumb, 178 bytes, Stack size 8 bytes, k_sys_procs.o(i.cProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = cProc &rArr; stringToNumAndCount &rArr; stringToNum
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNumAndCount
@@ -592,10 +593,10 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[62]"></a>charMap</STRONG> (Thumb, 36 bytes, Stack size 0 bytes, k_sys_proc_kcd.o(i.charMap))
-<BR><BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
+<BR><BR>[Called By]<UL><LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
 </UL>
 
-<P><STRONG><a name="[41]"></a>clockProc</STRONG> (Thumb, 666 bytes, Stack size 8 bytes, k_sys_procs.o(i.clockProc))
+<P><STRONG><a name="[42]"></a>clockProc</STRONG> (Thumb, 666 bytes, Stack size 8 bytes, k_sys_procs.o(i.clockProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = clockProc &rArr; sendUARTMsg
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNum
@@ -615,7 +616,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[78]"></a>get_pcb_by_pid</STRONG> (Thumb, 50 bytes, Stack size 0 bytes, k_process.o(i.get_pcb_by_pid))
-<BR><BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR><BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_send_message_actual
 <LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_delayed_send
 </UL>
@@ -630,7 +631,7 @@ Global Symbols
 <LI><a href="#[72]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_put_string
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_memcpy4
 </UL>
-<BR>[Called By]<UL><LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
+<BR>[Called By]<UL><LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
 </UL>
 
 <P><STRONG><a name="[8d]"></a>init_printf</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, printf.o(i.init_printf))
@@ -795,7 +796,7 @@ Global Symbols
 <LI><a href="#[38]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_delayed_send
 </UL>
 
-<P><STRONG><a name="[44]"></a>k_set_process_priority</STRONG> (Thumb, 186 bytes, Stack size 32 bytes, k_process.o(i.k_set_process_priority))
+<P><STRONG><a name="[3c]"></a>k_set_process_priority</STRONG> (Thumb, 186 bytes, Stack size 32 bytes, k_process.o(i.k_set_process_priority))
 <BR><BR>[Stack]<UL><LI>Max Depth = 56<LI>Call Chain = k_set_process_priority &rArr; process_switch &rArr; pq_remove_by_pid
 </UL>
 <BR>[Calls]<UL><LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;get_pcb_by_pid
@@ -808,7 +809,8 @@ Global Symbols
 <LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_remove_by_pid_blocked
 <LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert_blocked
 </UL>
-<BR>[Address Reference Count : 1]<UL><LI> k_sys_procs.o(i.setPrioProc)
+<BR>[Address Reference Count : 2]<UL><LI> k_sys_procs.o(i.setPrioProc)
+<LI> ae_proc_12.o(i.proc1)
 </UL>
 <P><STRONG><a name="[55]"></a>main</STRONG> (Thumb, 58 bytes, Stack size 104 bytes, main_svc.o(i.main))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = main &rArr; ae_init &rArr; ae_set_proc_info &rArr; set_test_procs
@@ -827,13 +829,13 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[3b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_rtx_init
 </UL>
 
-<P><STRONG><a name="[3c]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, k_sys_procs.o(i.nullProc))
+<P><STRONG><a name="[3d]"></a>nullProc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, k_sys_procs.o(i.nullProc))
 <BR>[Address Reference Count : 1]<UL><LI> k_process.o(i.process_init)
 </UL>
 <P><STRONG><a name="[66]"></a>numToString</STRONG> (Thumb, 78 bytes, Stack size 20 bytes, ae_util_1.o(i.numToString))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = numToString
 </UL>
-<BR>[Called By]<UL><LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aProc
+<BR>[Called By]<UL><LI><a href="#[3e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aProc
 </UL>
 
 <P><STRONG><a name="[84]"></a>pq_insert</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, k_priority_queue.o(i.pq_insert))
@@ -850,7 +852,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 </UL>
 
 <P><STRONG><a name="[8e]"></a>pq_insert_front</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, k_priority_queue.o(i.pq_insert_front))
@@ -864,7 +866,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert_front
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_send_message_actual
 <LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_memory_block
 </UL>
@@ -874,7 +876,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_insert
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_run_new_process
 <LI><a href="#[37]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_processor
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_send_message_actual
@@ -882,7 +884,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[7f]"></a>pq_remove</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, k_priority_queue.o(i.pq_remove))
-<BR><BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR><BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;scheduler
 <LI><a href="#[35]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_memory_block
 </UL>
@@ -890,7 +892,7 @@ Global Symbols
 <P><STRONG><a name="[89]"></a>pq_remove_by_pid</STRONG> (Thumb, 68 bytes, Stack size 8 bytes, k_priority_queue.o(i.pq_remove_by_pid))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = pq_remove_by_pid
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;process_switch
 <LI><a href="#[8a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_remove_by_pid_blocked
 </UL>
@@ -900,7 +902,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_remove_by_pid
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 </UL>
 
 <P><STRONG><a name="[3a]"></a>pre_rtx_init</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, main_svc.o(i.pre_rtx_init))
@@ -961,7 +963,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[77]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;printMessageRecord
 </UL>
 
-<P><STRONG><a name="[45]"></a>proc1</STRONG> (Thumb, 198 bytes, Stack size 0 bytes, ae_proc_12.o(i.proc1))
+<P><STRONG><a name="[45]"></a>proc1</STRONG> (Thumb, 228 bytes, Stack size 0 bytes, ae_proc_12.o(i.proc1))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = proc1 &rArr; sendUARTMsg
 </UL>
 <BR>[Calls]<UL><LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sendUARTMsg
@@ -1002,7 +1004,7 @@ Global Symbols
 <BR>[Calls]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_remove_by_pid
 <LI><a href="#[93]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rte
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_run_new_process
 <LI><a href="#[37]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_processor
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_send_message_actual
@@ -1021,7 +1023,7 @@ Global Symbols
 </UL>
 <P><STRONG><a name="[6c]"></a>q_insert</STRONG> (Thumb, 30 bytes, Stack size 0 bytes, k_queue.o(i.q_insert))
 <BR><BR>[Called By]<UL><LI><a href="#[6d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uartIProc
-<LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
+<LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_send_message_actual
 <LI><a href="#[7c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_receive_message_actual
 </UL>
@@ -1040,9 +1042,9 @@ Global Symbols
 <P><STRONG><a name="[65]"></a>registerCommand</STRONG> (Thumb, 42 bytes, Stack size 16 bytes, k_sys_procs.o(i.registerCommand))
 <BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = registerCommand
 </UL>
-<BR>[Called By]<UL><LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
-<LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
-<LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aProc
+<BR>[Called By]<UL><LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
+<LI><a href="#[3e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;aProc
 </UL>
 
 <P><STRONG><a name="[7a]"></a>scheduler</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, k_process.o(i.scheduler))
@@ -1050,7 +1052,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;pq_remove
 </UL>
-<BR>[Called By]<UL><LI><a href="#[44]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
+<BR>[Called By]<UL><LI><a href="#[3c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_set_process_priority
 <LI><a href="#[5d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_run_new_process
 <LI><a href="#[37]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_release_processor
 <LI><a href="#[33]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;k_receive_message
@@ -1062,14 +1064,14 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
 </UL>
-<BR>[Called By]<UL><LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
-<LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
+<BR>[Called By]<UL><LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
+<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
 <LI><a href="#[46]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proc2
 <LI><a href="#[45]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;proc1
 </UL>
 
-<P><STRONG><a name="[40]"></a>setPrioProc</STRONG> (Thumb, 216 bytes, Stack size 8 bytes, k_sys_procs.o(i.setPrioProc))
+<P><STRONG><a name="[41]"></a>setPrioProc</STRONG> (Thumb, 216 bytes, Stack size 8 bytes, k_sys_procs.o(i.setPrioProc))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = setPrioProc &rArr; sendUARTMsg
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNum
@@ -1086,22 +1088,22 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[6e]"></a>skipWhitespace</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, ae_util_1.o(i.skipWhitespace))
-<BR><BR>[Called By]<UL><LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
-<LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
+<BR><BR>[Called By]<UL><LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
 </UL>
 
 <P><STRONG><a name="[63]"></a>strcpy</STRONG> (Thumb, 22 bytes, Stack size 0 bytes, ae_util_1.o(i.strcpy))
 <BR><BR>[Called By]<UL><LI><a href="#[61]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;sendUARTMsg
-<LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
-<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
+<LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
+<LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;KCDProc
 </UL>
 
 <P><STRONG><a name="[6f]"></a>stringToNum</STRONG> (Thumb, 34 bytes, Stack size 12 bytes, ae_util_1.o(i.stringToNum))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = stringToNum
 </UL>
 <BR>[Called By]<UL><LI><a href="#[6b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNumAndCount
-<LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
-<LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
+<LI><a href="#[41]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;setPrioProc
+<LI><a href="#[42]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clockProc
 </UL>
 
 <P><STRONG><a name="[6b]"></a>stringToNumAndCount</STRONG> (Thumb, 36 bytes, Stack size 12 bytes, ae_util_1.o(i.stringToNumAndCount))
@@ -1109,7 +1111,7 @@ Global Symbols
 </UL>
 <BR>[Calls]<UL><LI><a href="#[6f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;stringToNum
 </UL>
-<BR>[Called By]<UL><LI><a href="#[3f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
+<BR>[Called By]<UL><LI><a href="#[40]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;cProc
 </UL>
 
 <P><STRONG><a name="[71]"></a>strncpy</STRONG> (Thumb, 40 bytes, Stack size 12 bytes, ae_util_1.o(i.strncpy))

@@ -137,7 +137,9 @@ void uartIProc(void) {
 
 		g_char_out = *msg_char_ptr;
 		#ifdef DEBUG_0
-			printf("Writing a char = '%c' \n\r", g_char_out);
+			printf("Writing a char = '");
+			printStringEscaped(&g_char_out, 1);
+			printf("' \n\r");
 		#endif /* DEBUG_0 */
 		pUart->THR = g_char_out;
 		msg_char_ptr++;
